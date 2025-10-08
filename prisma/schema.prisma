@@ -1,0 +1,158 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum ContactType {
+  EMAIL
+  PHONE
+}
+
+model User {
+  id              String             @id @default(uuid()) @db.Uuid
+  email           String             @unique
+  password        String
+  createdAt       DateTime           @default(now()) @map("created_at")
+  userType        UserRole           @map("user_type")
+  photoUrl        String?            @db.Text @map("photo_url")
+  
+  address         Address[]
+  individual      Individual?
+  company         Company?
+  serviceProvider ServiceProvider?
+  contacts        Contact[]
+  reviewsWritten  Review[]           @relation("ClientReviews")
+
+  @@map("users")
+}
+
+model Address {
+  id           String @id @default(uuid()) @db.Uuid
+  userId       String @db.Uuid @map("user_id")
+  country      String
+  state        String
+  city         String
+  neighborhood String
+  street       String
+  number       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("address")
+}
+
+model Individual {
+  userId     String   @id @db.Uuid @map("user_id")
+  fullName   String   @map("full_name")
+  cpf        String   @unique
+  birthDate  DateTime? @db.Date @map("birth_date")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("individuals")
+}
+
+model Company {
+  userId         String  @id @db.Uuid @map("user_id")
+  corporateName  String  @map("corporate_name")
+  cnpj           String  @unique
+  tradeName      String? @map("trade_name")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("companies")
+}
+
+model ServiceProvider {
+  userId              String    @id @db.Uuid @map("user_id")
+  serviceDescription  String?   @db.Text @map("service_description")
+  averageRating       Decimal   @default(0.00) @db.Decimal(3, 2) @map("average_rating")
+
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  servicesOffered ProviderService[]
+  reviewsReceived Review[]          @relation("ProviderReviews")
+
+  @@map("service_providers")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?  @db.Text
+
+  providerServices ProviderService[]
+
+  @@map("categories")
+}
+
+model Service {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?  @db.Text
+  price       Decimal  @default(0.00) @db.Decimal(10, 2)
+
+  photos    ServicePhoto[]
+  providers ProviderService[]
+
+  @@map("services")
+}
+
+model ServicePhoto {
+  id        String @id @default(uuid()) @db.Uuid
+  serviceId String @db.Uuid @map("service_id")
+  photoUrl  String @db.Text @map("photo_url")
+
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("service_photos")
+}
+
+model ProviderService {
+  providerId  String    @db.Uuid @map("provider_id")
+  serviceId   String    @db.Uuid @map("service_id")
+  categoryId  Int       @map("category_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  finishedAt  DateTime? @map("finished_at")
+
+  provider ServiceProvider @relation(fields: [providerId], references: [userId], onDelete: Cascade)
+  service  Service         @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  category Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([providerId, serviceId])
+  @@map("provider_services")
+}
+
+model Review {
+  id         String   @id @default(uuid()) @db.Uuid
+  providerId String   @db.Uuid @map("provider_id")
+  clientId   String   @db.Uuid @map("client_id")
+  rating     Decimal  @db.Decimal(2, 1)
+  comment    String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  provider ServiceProvider @relation("ProviderReviews", fields: [providerId], references: [userId], onDelete: Cascade)
+  client   User            @relation("ClientReviews", fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@map("review")
+}
+
+model Contact {
+  id      String      @id @default(uuid()) @db.Uuid
+  userId  String      @db.Uuid @map("user_id")
+  type    ContactType
+  value   String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("contacts")
+}

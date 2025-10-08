@@ -28,4 +28,9 @@ Autenticação:
 
 # 🚀 Como rodar o projeto
 
-Pré-requisitos
+Para iniciar tudo (banco, migrations e app):
+    npm run dev
+
+Para parar o banco de dados quando terminar de trabalhar:
+    npm run db:stop
+
