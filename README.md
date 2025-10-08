@@ -7,30 +7,15 @@ O objetivo é facilitar a contratação de serviços urbanos, garantindo visibil
 
 # DB Schema 
 
-## Físico: 
-
-<img width="4066" height="1946" alt="image" src="https://github.com/user-attachments/assets/a7e62cfd-09d7-4334-a739-24fc6a470722" />
-
-## Lógico/Visual:
-
-<img width="4642" height="2466" alt="image" src="https://github.com/user-attachments/assets/5e022c36-b02b-478f-9339-f74b79d43baa" />
-
-
-# 🛠️ Tecnologias Utilizadas
-
-Linguagem:
-
-Framework: 
-
-Banco de Dados: 
-
-Autenticação: 
+https://www.mermaidchart.com/d/64c71601-0d9a-4a98-9f90-d64229baa0c6
 
 # 🚀 Como rodar o projeto
 
 Para iniciar tudo (banco, migrations e app):
+
     npm run dev
 
 Para parar o banco de dados quando terminar de trabalhar:
+
     npm run db:stop
 
