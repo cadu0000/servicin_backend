@@ -2,20 +2,22 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-
     "db:up": "docker-compose up -d",
     "db:stop": "docker-compose down",
     "migrate:dev": "npx prisma migrate dev",
     "start:dev": "tsx watch src/index.ts",
-
     "dev": "npm run db:up && npm run migrate:dev && npm run start:dev"
   },
   "dependencies": {
     "@fastify/postgres": "^6.0.2",
+    "@fastify/swagger": "^9.5.2",
     "@prisma/client": "^6.17.0",
+    "@scalar/fastify-api-reference": "^1.38.0",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.1",
-    "pg": "^8.16.3"
+    "fastify-type-provider-zod": "^6.0.0",
+    "pg": "^8.16.3",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@tsconfig/node24": "^24.0.1",
