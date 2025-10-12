@@ -1,6 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { userController } from "../../container";
-import { signUpUserSchema } from "../../schemas/user.schema";
+import {
+  signUpIndividualUserSchema,
+  signUpUserSchema,
+} from "../../schemas/user.schema";
 import { z } from "zod";
 
 export async function userRoutes(server: FastifyInstance) {
@@ -14,11 +17,33 @@ export async function userRoutes(server: FastifyInstance) {
         body: signUpUserSchema,
         response: {
           201: z.object({
+            userId: z.uuid(),
+          }),
+        },
+      },
+    },
+    (request, reply) => userController.signup(request, reply)
+  );
+
+  server.post(
+    "/signup/individual",
+    {
+      schema: {
+        summary: "Create a new individual user",
+        description: "Endpoint to create a new individual user account",
+        tags: ["Authentication"],
+        body: signUpIndividualUserSchema,
+        response: {
+          201: z.object({
             token: z.string(),
             user: z.object({
               id: z.uuid(),
+              cpf: z.string(),
+              fullName: z.string(),
+              birthDate: z.string().nullable(),
               email: z.email(),
               photoUrl: z.url().nullable(),
+              userType: z.enum(["INDIVIDUAL", "COMPANY"]),
               address: z.array(
                 z.object({
                   number: z.string().nullable(),
@@ -41,6 +66,6 @@ export async function userRoutes(server: FastifyInstance) {
         },
       },
     },
-    (request, reply) => userController.signup(request, reply)
+    (request, reply) => userController.signupIndividual(request, reply)
   );
 }
