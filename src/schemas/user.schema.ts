@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-export const signUpUserSchema = z.object({
+/**
+ * Request schema for user signup.
+ * This schema is used to validate the data received when a user attempts to sign up.
+ */
+
+const signupDefaultUserSchema = z.object({
   email: z
     .email("Invalid email address")
     .describe("The user must register an email")
@@ -61,7 +66,7 @@ export const signUpUserSchema = z.object({
     )
     .min(1, "At least one address is required")
     .describe("The user must provide an address"),
-  contact: z
+  contacts: z
     .array(
       z.object({
         type: z
@@ -79,11 +84,9 @@ export const signUpUserSchema = z.object({
     .describe("The user must provide contacts"),
 });
 
-export const signUpIndividualUserSchema = z.object({
-  userId: z
-    .uuid("Invalid user ID")
-    .describe("The ID of the individual user")
-    .default("550e8400-e29b-41d4-a716-446655440000"),
+const signupIndividualUserSchema = z.object({
+  ...signupDefaultUserSchema.shape,
+  userType: z.literal("INDIVIDUAL"),
   fullName: z
     .string()
     .min(1, "Full name cannot be empty")
@@ -93,7 +96,7 @@ export const signUpIndividualUserSchema = z.object({
     .string()
     .min(11, "CPF must be at least 11 characters")
     .describe("The CPF of the individual user")
-    .default("123.456.789-00"),
+    .default("12345678900"),
   birthDate: z.coerce
     .date()
     .nullable()
@@ -101,11 +104,9 @@ export const signUpIndividualUserSchema = z.object({
     .default(new Date("1990-01-01")),
 });
 
-export const signUpCompanyUserSchema = z.object({
-  userId: z
-    .uuid("Invalid user ID")
-    .describe("The ID of the individual user")
-    .default("550e8400-e29b-41d4-a716-446655440000"),
+const signupCompanyUserSchema = z.object({
+  ...signupDefaultUserSchema.shape,
+  userType: z.literal("COMPANY"),
   corporateName: z
     .string()
     .min(1, "Corporate name cannot be empty")
@@ -115,16 +116,83 @@ export const signUpCompanyUserSchema = z.object({
     .string()
     .min(14, "CNPJ must be at least 14 characters")
     .describe("The CNPJ of the company user")
-    .default("12.345.678/0001-99"),
+    .default("12345678000199"),
   tradeName: z
     .string()
-    .min(1, "Trade name cannot be empty")
+    .nullable()
     .describe("The trade name of the company user")
     .default("Acme"),
 });
 
-export type SignUpUserDTO = z.infer<typeof signUpUserSchema>;
-export type SignUpIndividualUserDTO = z.infer<
-  typeof signUpIndividualUserSchema
+export const signupUserSchema = z.discriminatedUnion("userType", [
+  signupIndividualUserSchema,
+  signupCompanyUserSchema,
+]);
+
+/**
+ * Response schema for user signup.
+ * This schema is used to validate the response structure after a user signs up.
+ */
+
+const defaultSignupUserResponseSchema = z.object({
+  id: z.uuid().describe("The unique identifier of the user"),
+  email: z.email().describe("The email of the user"),
+  photoUrl: z.url().nullable().describe("The photo URL of the user"),
+  userType: z.enum(["INDIVIDUAL", "COMPANY"]).describe("The type of the user"),
+  address: z
+    .array(
+      z.object({
+        number: z.string().nullable().describe("The address number"),
+        street: z.string().describe("The street name"),
+        city: z.string().describe("The city name"),
+        state: z.string().describe("The state name"),
+        zipCode: z.string().describe("The zip code"),
+        neighborhood: z.string().describe("The neighborhood name"),
+        country: z.string().describe("The country name"),
+      })
+    )
+    .describe("List of user addresses"),
+  contacts: z
+    .array(
+      z.object({
+        type: z.string().describe("The contact type"),
+        value: z.string().describe("The contact value"),
+      })
+    )
+    .describe("List of user contacts"),
+});
+
+const signupIndividualUserResponseSchema =
+  defaultSignupUserResponseSchema.extend({
+    userType: z.literal("INDIVIDUAL"),
+    fullName: z.string().describe("The full name of the individual user"),
+    cpf: z.string().describe("The CPF of the individual user"),
+    birthDate: z
+      .string()
+      .nullable()
+      .describe("The birth date of the individual user"),
+  });
+
+const signupCompanyUserResponseSchema = defaultSignupUserResponseSchema.extend({
+  userType: z.literal("COMPANY"),
+  corporateName: z.string().describe("The corporate name of the company user"),
+  cnpj: z.string().describe("The CNPJ of the company user"),
+  tradeName: z
+    .string()
+    .nullable()
+    .describe("The trade name of the company user"),
+});
+
+export const signupUserResponseSchema = z.object({
+  token: z.string().describe("JWT token for authentication"),
+  user: z.discriminatedUnion("userType", [
+    signupIndividualUserResponseSchema,
+    signupCompanyUserResponseSchema,
+  ]),
+});
+
+export type SignupUserDTO = z.infer<typeof signupUserSchema>;
+export type SignupIndividualUserDTO = z.infer<
+  typeof signupIndividualUserSchema
 >;
-export type SignUpCompanyUserDTO = z.infer<typeof signUpCompanyUserSchema>;
+export type SignupCompanyUserDTO = z.infer<typeof signupCompanyUserSchema>;

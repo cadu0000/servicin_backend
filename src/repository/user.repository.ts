@@ -1,8 +1,4 @@
-import {
-  SignUpCompanyUserDTO,
-  SignUpIndividualUserDTO,
-  SignUpUserDTO,
-} from "../schemas/user.schema";
+import { SignupUserDTO } from "../schemas/user.schema";
 import { prisma } from "../lib/prisma";
 
 export class UserRepository {
@@ -46,13 +42,33 @@ export class UserRepository {
     return companyUserAlreadyExists;
   }
 
-  async signup(signUpUserDTO: SignUpUserDTO) {
-    const { email, password, photoUrl, userType, address, contact } =
-      signUpUserDTO;
+  async signup(signupUserDTO: SignupUserDTO) {
+    const { email, password, photoUrl, userType, address, contacts } =
+      signupUserDTO;
 
     const user = await prisma.user.create({
       select: {
         id: true,
+        email: true,
+        photoUrl: true,
+        userType: true,
+        address: {
+          select: {
+            street: true,
+            city: true,
+            state: true,
+            zipCode: true,
+            neighborhood: true,
+            number: true,
+            country: true,
+          },
+        },
+        contacts: {
+          select: {
+            type: true,
+            value: true,
+          },
+        },
       },
       data: {
         email,
@@ -66,102 +82,54 @@ export class UserRepository {
         },
         contacts: {
           createMany: {
-            data: contact,
+            data: contacts,
           },
         },
       },
     });
 
-    return user;
-  }
+    if (userType === "INDIVIDUAL") {
+      const { cpf, fullName, birthDate } = signupUserDTO;
 
-  async signupIndividual(signUpIndividualUserDTO: SignUpIndividualUserDTO) {
-    const { cpf, fullName, birthDate, userId } = signUpIndividualUserDTO;
-
-    const individualUser = await prisma.individual.create({
-      select: {
-        cpf: true,
-        fullName: true,
-        birthDate: true,
-        user: {
-          select: {
-            id: true,
-            email: true,
-            photoUrl: true,
-            userType: true,
-            address: {
-              select: {
-                street: true,
-                city: true,
-                state: true,
-                zipCode: true,
-                neighborhood: true,
-                number: true,
-                country: true,
-              },
-            },
-            contacts: {
-              select: {
-                type: true,
-                value: true,
-              },
-            },
-          },
+      const individualUser = await prisma.individual.create({
+        select: {
+          cpf: true,
+          fullName: true,
+          birthDate: true,
         },
-      },
-      data: {
-        cpf,
-        fullName,
-        birthDate,
-        userId,
-      },
-    });
+        data: {
+          cpf,
+          fullName,
+          birthDate,
+          userId: user.id,
+        },
+      });
 
-    return individualUser;
-  }
+      return {
+        user,
+        individualUser,
+      };
+    }
 
-  async signupCompany(signUpCompanyUserDTO: SignUpCompanyUserDTO) {
-    const { cnpj, corporateName, tradeName, userId } = signUpCompanyUserDTO;
+    const { cnpj, corporateName, tradeName } = signupUserDTO;
 
     const companyUser = await prisma.company.create({
       select: {
         cnpj: true,
         corporateName: true,
         tradeName: true,
-        user: {
-          select: {
-            id: true,
-            email: true,
-            photoUrl: true,
-            userType: true,
-            address: {
-              select: {
-                street: true,
-                city: true,
-                state: true,
-                zipCode: true,
-                neighborhood: true,
-                number: true,
-                country: true,
-              },
-            },
-            contacts: {
-              select: {
-                type: true,
-                value: true,
-              },
-            },
-          },
-        },
       },
       data: {
         cnpj,
         corporateName,
         tradeName,
-        userId,
+        userId: user.id,
       },
     });
 
-    return companyUser;
+    return {
+      user,
+      companyUser,
+    };
   }
 }
