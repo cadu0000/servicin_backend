@@ -1,4 +1,8 @@
-import { SignUpIndividualUserDTO, SignUpUserDTO } from "../schemas/user.schema";
+import {
+  SignUpCompanyUserDTO,
+  SignUpIndividualUserDTO,
+  SignUpUserDTO,
+} from "../schemas/user.schema";
 import { prisma } from "../lib/prisma";
 
 export class UserRepository {
@@ -30,6 +34,16 @@ export class UserRepository {
     });
 
     return individualUserAlreadyExists;
+  }
+
+  async findCompanyByCNPJ(cnpj: string) {
+    const companyUserAlreadyExists = await prisma.company.findUnique({
+      where: {
+        cnpj,
+      },
+    });
+
+    return companyUserAlreadyExists;
   }
 
   async signup(signUpUserDTO: SignUpUserDTO) {
@@ -104,5 +118,50 @@ export class UserRepository {
     });
 
     return individualUser;
+  }
+
+  async signupCompany(signUpCompanyUserDTO: SignUpCompanyUserDTO) {
+    const { cnpj, corporateName, tradeName, userId } = signUpCompanyUserDTO;
+
+    const companyUser = await prisma.company.create({
+      select: {
+        cnpj: true,
+        corporateName: true,
+        tradeName: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            photoUrl: true,
+            userType: true,
+            address: {
+              select: {
+                street: true,
+                city: true,
+                state: true,
+                zipCode: true,
+                neighborhood: true,
+                number: true,
+                country: true,
+              },
+            },
+            contacts: {
+              select: {
+                type: true,
+                value: true,
+              },
+            },
+          },
+        },
+      },
+      data: {
+        cnpj,
+        corporateName,
+        tradeName,
+        userId,
+      },
+    });
+
+    return companyUser;
   }
 }

@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { userController } from "../../container";
 import {
+  signUpCompanyUserSchema,
   signUpIndividualUserSchema,
   signUpUserSchema,
 } from "../../schemas/user.schema";
@@ -67,5 +68,49 @@ export async function userRoutes(server: FastifyInstance) {
       },
     },
     (request, reply) => userController.signupIndividual(request, reply)
+  );
+
+  server.post(
+    "/signup/company",
+    {
+      schema: {
+        summary: "Create a new company user",
+        description: "Endpoint to create a new company user account",
+        tags: ["Authentication"],
+        body: signUpCompanyUserSchema,
+        response: {
+          201: z.object({
+            token: z.string(),
+            user: z.object({
+              id: z.uuid(),
+              cnpj: z.string(),
+              corporateName: z.string(),
+              tradeName: z.string(),
+              email: z.email(),
+              photoUrl: z.url().nullable(),
+              userType: z.enum(["INDIVIDUAL", "COMPANY"]),
+              address: z.array(
+                z.object({
+                  number: z.string().nullable(),
+                  street: z.string(),
+                  city: z.string(),
+                  state: z.string(),
+                  zipCode: z.string(),
+                  neighborhood: z.string(),
+                  country: z.string(),
+                })
+              ),
+              contacts: z.array(
+                z.object({
+                  type: z.string(),
+                  value: z.string(),
+                })
+              ),
+            }),
+          }),
+        },
+      },
+    },
+    (request, reply) => userController.signupCompany(request, reply)
   );
 }

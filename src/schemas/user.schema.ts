@@ -101,7 +101,30 @@ export const signUpIndividualUserSchema = z.object({
     .default(new Date("1990-01-01")),
 });
 
+export const signUpCompanyUserSchema = z.object({
+  userId: z
+    .uuid("Invalid user ID")
+    .describe("The ID of the individual user")
+    .default("550e8400-e29b-41d4-a716-446655440000"),
+  corporateName: z
+    .string()
+    .min(1, "Corporate name cannot be empty")
+    .describe("The corporate name of the company user")
+    .default("Acme Corp"),
+  cnpj: z
+    .string()
+    .min(14, "CNPJ must be at least 14 characters")
+    .describe("The CNPJ of the company user")
+    .default("12.345.678/0001-99"),
+  tradeName: z
+    .string()
+    .min(1, "Trade name cannot be empty")
+    .describe("The trade name of the company user")
+    .default("Acme"),
+});
+
 export type SignUpUserDTO = z.infer<typeof signUpUserSchema>;
 export type SignUpIndividualUserDTO = z.infer<
   typeof signUpIndividualUserSchema
 >;
+export type SignUpCompanyUserDTO = z.infer<typeof signUpCompanyUserSchema>;

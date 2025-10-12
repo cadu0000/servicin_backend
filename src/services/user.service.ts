@@ -1,6 +1,10 @@
 import { generateToken, hashPassword } from "../lib";
 import { UserRepository } from "../repository/user.repository";
-import { SignUpIndividualUserDTO, SignUpUserDTO } from "../schemas/user.schema";
+import {
+  SignUpCompanyUserDTO,
+  SignUpIndividualUserDTO,
+  SignUpUserDTO,
+} from "../schemas/user.schema";
 
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
@@ -78,6 +82,65 @@ export class UserService {
           country: addr.country,
         })),
         contacts: individualUser.user.contacts.map((contact) => ({
+          type: contact.type,
+          value: contact.value,
+        })),
+      },
+    };
+  }
+
+  async signupCompany(signUpCompanyUserDTO: SignUpCompanyUserDTO) {
+    const { cnpj, userId } = signUpCompanyUserDTO;
+
+    const findUserById = await this.userRepository.findById(userId);
+
+    if (!findUserById) {
+      throw new Error("User not found");
+    }
+
+    const companyUserAlreadyExists =
+      await this.userRepository.findCompanyByCNPJ(cnpj);
+
+    if (companyUserAlreadyExists) {
+      throw new Error("CNPJ already in use");
+    }
+
+    const companyUser = await this.userRepository.signupCompany(
+      signUpCompanyUserDTO
+    );
+
+    const token = generateToken({
+      payload: {
+        sub: companyUser.user.id,
+        email: companyUser.user.email,
+      },
+      secret: process.env.JWT_SECRET!,
+    });
+
+    if (!token) {
+      throw new Error("Error generating authentication token");
+    }
+
+    return {
+      token,
+      user: {
+        id: companyUser.user.id,
+        cnpj: companyUser.cnpj,
+        corporateName: companyUser.corporateName,
+        tradeName: companyUser.tradeName,
+        email: companyUser.user.email,
+        photoUrl: companyUser.user.photoUrl,
+        userType: companyUser.user.userType,
+        address: companyUser.user.address.map((addr) => ({
+          number: addr.number,
+          street: addr.street,
+          city: addr.city,
+          state: addr.state,
+          zipCode: addr.zipCode,
+          neighborhood: addr.neighborhood,
+          country: addr.country,
+        })),
+        contacts: companyUser.user.contacts.map((contact) => ({
           type: contact.type,
           value: contact.value,
         })),
