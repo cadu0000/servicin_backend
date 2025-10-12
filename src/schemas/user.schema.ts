@@ -7,7 +7,7 @@ export const signUpUserSchema = z.object({
     .default("johndoe@email.com"),
   password: z
     .string()
-    .min(6)
+    .min(6, "Password must be at least 6 characters")
     .describe("The user must register a password")
     .default("123456"),
   userType: z
