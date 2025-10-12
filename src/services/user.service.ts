@@ -5,8 +5,8 @@ import { SignUpUserDTO } from "../schemas/user.schema";
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async signup(SignUpUserDTO: SignUpUserDTO) {
-    const { email, password } = SignUpUserDTO;
+  async signup(signUpUserDTO: SignUpUserDTO) {
+    const { email, password } = signUpUserDTO;
 
     const userAlreadyExists = await this.userRepository.findByEmail(email);
 
@@ -17,7 +17,7 @@ export class UserService {
     const hashedPassword = await hashPassword(password);
 
     const user = await this.userRepository.signup({
-      ...SignUpUserDTO,
+      ...signUpUserDTO,
       password: hashedPassword,
     });
 

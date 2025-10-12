@@ -12,9 +12,9 @@ export class UserRepository {
     return userAlreadyExists;
   }
 
-  async signup(SignUpUserDTO: SignUpUserDTO) {
+  async signup(signUpUserDTO: SignUpUserDTO) {
     const { email, password, photoUrl, userType, address, contact } =
-      SignUpUserDTO;
+      signUpUserDTO;
 
     const user = await prisma.user.create({
       select: {
