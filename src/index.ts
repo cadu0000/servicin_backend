@@ -6,8 +6,12 @@ import {
   jsonSchemaTransform,
 } from "fastify-type-provider-zod";
 import scalarFastify from "@scalar/fastify-api-reference";
+<<<<<<< HEAD
 import { cookiePlugin } from "./plugins/cookies";
 import { jwtPlugin } from "./utils/jwt";
+=======
+import { userRoutes } from "./api/routes/user.route";
+>>>>>>> origin/feat/#5-add-create-user-route
 
 const server = fastify();
 
@@ -37,6 +41,7 @@ server.register(scalarFastify, {
 
 server.register(cookiePlugin);
 server.register(jwtPlugin);
+server.register(userRoutes, { prefix: "/user" });
 
 server.listen({ port: 8080 }, (err, address) => {
   if (err) {

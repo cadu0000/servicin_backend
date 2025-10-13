@@ -18,31 +18,32 @@ enum ContactType {
 }
 
 model User {
-  id              String             @id @default(uuid()) @db.Uuid
-  email           String             @unique
-  password        String
-  createdAt       DateTime           @default(now()) @map("created_at")
-  userType        UserRole           @map("user_type")
-  photoUrl        String?            @db.Text @map("photo_url")
-  
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  userType  UserRole @map("user_type")
+  photoUrl  String?  @map("photo_url") @db.Text
+
   address         Address[]
   individual      Individual?
   company         Company?
   serviceProvider ServiceProvider?
   contacts        Contact[]
-  reviewsWritten  Review[]           @relation("ClientReviews")
+  reviewsWritten  Review[]         @relation("ClientReviews")
 
   @@map("users")
 }
 
 model Address {
-  id           String @id @default(uuid()) @db.Uuid
-  userId       String @db.Uuid @map("user_id")
+  id           String  @id @default(uuid()) @db.Uuid
+  userId       String  @map("user_id") @db.Uuid
   country      String
   state        String
   city         String
   neighborhood String
   street       String
+  zipCode      String  @map("zip_code")
   number       String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -51,10 +52,10 @@ model Address {
 }
 
 model Individual {
-  userId     String   @id @db.Uuid @map("user_id")
-  fullName   String   @map("full_name")
-  cpf        String   @unique
-  birthDate  DateTime? @db.Date @map("birth_date")
+  userId    String    @id @map("user_id") @db.Uuid
+  fullName  String    @map("full_name")
+  cpf       String    @unique
+  birthDate DateTime? @map("birth_date") @db.Date
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -62,10 +63,10 @@ model Individual {
 }
 
 model Company {
-  userId         String  @id @db.Uuid @map("user_id")
-  corporateName  String  @map("corporate_name")
-  cnpj           String  @unique
-  tradeName      String? @map("trade_name")
+  userId        String  @id @map("user_id") @db.Uuid
+  corporateName String  @map("corporate_name")
+  cnpj          String  @unique
+  tradeName     String? @map("trade_name")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -73,9 +74,9 @@ model Company {
 }
 
 model ServiceProvider {
-  userId              String    @id @db.Uuid @map("user_id")
-  serviceDescription  String?   @db.Text @map("service_description")
-  averageRating       Decimal   @default(0.00) @db.Decimal(3, 2) @map("average_rating")
+  userId             String  @id @map("user_id") @db.Uuid
+  serviceDescription String? @map("service_description") @db.Text
+  averageRating      Decimal @default(0.00) @map("average_rating") @db.Decimal(3, 2)
 
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   servicesOffered ProviderService[]
@@ -85,9 +86,9 @@ model ServiceProvider {
 }
 
 model Category {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String?  @db.Text
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String? @db.Text
 
   providerServices ProviderService[]
 
@@ -95,10 +96,10 @@ model Category {
 }
 
 model Service {
-  id          String   @id @default(uuid()) @db.Uuid
-  name        String   @unique
-  description String?  @db.Text
-  price       Decimal  @default(0.00) @db.Decimal(10, 2)
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String? @db.Text
+  price       Decimal @default(0.00) @db.Decimal(10, 2)
 
   photos    ServicePhoto[]
   providers ProviderService[]
@@ -108,8 +109,8 @@ model Service {
 
 model ServicePhoto {
   id        String @id @default(uuid()) @db.Uuid
-  serviceId String @db.Uuid @map("service_id")
-  photoUrl  String @db.Text @map("photo_url")
+  serviceId String @map("service_id") @db.Uuid
+  photoUrl  String @map("photo_url") @db.Text
 
   service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
@@ -117,12 +118,12 @@ model ServicePhoto {
 }
 
 model ProviderService {
-  providerId  String    @db.Uuid @map("provider_id")
-  serviceId   String    @db.Uuid @map("service_id")
-  categoryId  Int       @map("category_id")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime? @updatedAt @map("updated_at")
-  finishedAt  DateTime? @map("finished_at")
+  providerId String    @map("provider_id") @db.Uuid
+  serviceId  String    @map("service_id") @db.Uuid
+  categoryId Int       @map("category_id")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
+  finishedAt DateTime? @map("finished_at")
 
   provider ServiceProvider @relation(fields: [providerId], references: [userId], onDelete: Cascade)
   service  Service         @relation(fields: [serviceId], references: [id], onDelete: Cascade)
@@ -134,23 +135,23 @@ model ProviderService {
 
 model Review {
   id         String   @id @default(uuid()) @db.Uuid
-  providerId String   @db.Uuid @map("provider_id")
-  clientId   String   @db.Uuid @map("client_id")
+  providerId String   @map("provider_id") @db.Uuid
+  clientId   String   @map("client_id") @db.Uuid
   rating     Decimal  @db.Decimal(2, 1)
   comment    String?  @db.Text
   createdAt  DateTime @default(now()) @map("created_at")
 
   provider ServiceProvider @relation("ProviderReviews", fields: [providerId], references: [userId], onDelete: Cascade)
   client   User            @relation("ClientReviews", fields: [clientId], references: [id], onDelete: Cascade)
-  
+
   @@map("review")
 }
 
 model Contact {
-  id      String      @id @default(uuid()) @db.Uuid
-  userId  String      @db.Uuid @map("user_id")
-  type    ContactType
-  value   String
+  id     String      @id @default(uuid()) @db.Uuid
+  userId String      @map("user_id") @db.Uuid
+  type   ContactType
+  value  String
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
