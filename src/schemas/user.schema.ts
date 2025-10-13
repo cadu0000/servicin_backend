@@ -1,3 +1,4 @@
+import { cnpj, cpf } from "cpf-cnpj-validator";
 import { z } from "zod";
 
 /**
@@ -12,9 +13,13 @@ const signupDefaultUserSchema = z.object({
     .default("johndoe@email.com"),
   password: z
     .string()
-    .min(6, "Password must be at least 6 characters")
+    .min(8, "Password must be at least 8 characters")
+    .max(30, "Password must be at most 30 characters")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
     .describe("The user must register a password")
-    .default("123456"),
+    .default("JohnDoe123"),
   userType: z
     .enum(["INDIVIDUAL", "COMPANY"], "Unknown user type")
     .describe("The user must select a user type")
@@ -95,8 +100,10 @@ const signupIndividualUserSchema = z.object({
   cpf: z
     .string()
     .min(11, "CPF must be at least 11 characters")
+    .max(11, "CPF must be at most 11 characters")
+    .refine((val) => cpf.isValid(val), { message: "Invalid CPF" })
     .describe("The CPF of the individual user")
-    .default("12345678900"),
+    .default("37133126052"),
   birthDate: z.coerce
     .date()
     .nullable()
@@ -115,8 +122,10 @@ const signupCompanyUserSchema = z.object({
   cnpj: z
     .string()
     .min(14, "CNPJ must be at least 14 characters")
+    .max(14, "CNPJ must be at most 14 characters")
+    .refine((val) => cnpj.isValid(val), { message: "Invalid CNPJ" })
     .describe("The CNPJ of the company user")
-    .default("12345678000199"),
+    .default("15357397000140"),
   tradeName: z
     .string()
     .nullable()
