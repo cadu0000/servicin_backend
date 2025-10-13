@@ -6,6 +6,8 @@ import {
   jsonSchemaTransform,
 } from "fastify-type-provider-zod";
 import scalarFastify from "@scalar/fastify-api-reference";
+import { cookiePlugin } from "./plugins/cookies";
+import { jwtPlugin } from "./utils/jwt";
 
 const server = fastify();
 
@@ -32,6 +34,9 @@ server.register(scalarFastify, {
     },
   },
 });
+
+server.register(cookiePlugin);
+server.register(jwtPlugin);
 
 server.listen({ port: 8080 }, (err, address) => {
   if (err) {
