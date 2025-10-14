@@ -1,17 +1,15 @@
-import fastifySwagger from "@fastify/swagger";
 import fastify from "fastify";
+import fastifySwagger from "@fastify/swagger";
 import {
   validatorCompiler,
   serializerCompiler,
   jsonSchemaTransform,
 } from "fastify-type-provider-zod";
 import scalarFastify from "@scalar/fastify-api-reference";
-<<<<<<< HEAD
-import { cookiePlugin } from "./plugins/cookies";
-import { jwtPlugin } from "./utils/jwt";
-=======
+
 import { userRoutes } from "./api/routes/user.route";
->>>>>>> origin/feat/#5-add-create-user-route
+import { jwtPlugin } from "./lib/jwt";
+import cookieSetterPlugin from "./lib/cookies";
 
 const server = fastify();
 
@@ -39,14 +37,15 @@ server.register(scalarFastify, {
   },
 });
 
-server.register(cookiePlugin);
+server.register(cookieSetterPlugin);
 server.register(jwtPlugin);
+
 server.register(userRoutes, { prefix: "/user" });
 
-server.listen({ port: 8080 }, (err, address) => {
+server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);
   }
-  console.log(`Server listening at ${address}`);
+  console.log(`✅ Server listening at ${address}`);
 });

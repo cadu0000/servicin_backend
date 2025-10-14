@@ -1,10 +1,11 @@
-import { generateToken, hashPassword } from "../lib";
 import { UserRepository } from "../repository/user.repository";
 import {
   SignupCompanyUserDTO,
   SignupIndividualUserDTO,
   SignupUserDTO,
 } from "../schemas/user.schema";
+import { generateToken } from "../utils/jwt";
+import { hashPassword } from "../utils/password";
 
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
@@ -143,5 +144,23 @@ export class UserService {
         })),
       },
     };
+  }
+    async login(email: string, password: string) {
+      const user = await this.userRepository.findByEmail(email);
+      if (!user) {
+        throw new Error("Invalid email or password");
+      }
+
+      const isPasswordValid = await this.userRepository.verifyPassword(user.id, password);
+      if (!isPasswordValid) {
+        throw new Error("Invalid email or password");
+      }
+
+      const token = generateToken({
+        payload: { sub: user.id, email: user.email },
+        secret: process.env.JWT_SECRET!,
+      });
+
+      return token;
   }
 }

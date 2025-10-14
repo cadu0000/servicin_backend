@@ -1,13 +1,9 @@
 import { cnpj, cpf } from "cpf-cnpj-validator";
 import { z } from "zod";
 
-/**
- * Request schema for user signup.
- * This schema is used to validate the data received when a user attempts to sign up.
- */
-
 const signupDefaultUserSchema = z.object({
   email: z
+    .string()
     .email("Invalid email address")
     .describe("The user must register an email")
     .default("johndoe@email.com"),
@@ -21,10 +17,11 @@ const signupDefaultUserSchema = z.object({
     .describe("The user must register a password")
     .default("JohnDoe123"),
   userType: z
-    .enum(["INDIVIDUAL", "COMPANY"], "Unknown user type")
+    .enum(["INDIVIDUAL", "COMPANY"])
     .describe("The user must select a user type")
     .default("INDIVIDUAL"),
   photoUrl: z
+    .string()
     .url()
     .nullable()
     .describe("The user can provide a photo URL")
@@ -75,7 +72,7 @@ const signupDefaultUserSchema = z.object({
     .array(
       z.object({
         type: z
-          .enum(["PHONE", "EMAIL"], "Unknown contact type")
+          .enum(["PHONE", "EMAIL"])
           .describe("The contact type")
           .default("PHONE"),
         value: z
@@ -138,15 +135,10 @@ export const signupUserSchema = z.discriminatedUnion("userType", [
   signupCompanyUserSchema,
 ]);
 
-/**
- * Response schema for user signup.
- * This schema is used to validate the response structure after a user signs up.
- */
 
 const defaultSignupUserResponseSchema = z.object({
-  id: z.uuid().describe("The unique identifier of the user"),
-  email: z.email().describe("The email of the user"),
-  photoUrl: z.url().nullable().describe("The photo URL of the user"),
+  email: z.string().email().describe("The email of the user"),
+  photoUrl: z.string().url().nullable().describe("The photo URL of the user"),
   userType: z.enum(["INDIVIDUAL", "COMPANY"]).describe("The type of the user"),
   address: z
     .array(
@@ -191,6 +183,15 @@ const signupCompanyUserResponseSchema = defaultSignupUserResponseSchema.extend({
     .nullable()
     .describe("The trade name of the company user"),
 });
+
+
+export const loginUserSchema = z.object({
+  email: z.string().email().default("johndoe@email.com"),
+  password: z.string().min(8).default("JohnDoe123"),
+});
+
+export type LoginUserDTO = z.infer<typeof loginUserSchema>;
+export const LoginUserDTO = loginUserSchema;
 
 export const signupUserResponseSchema = z.object({
   token: z.string().describe("JWT token for authentication"),

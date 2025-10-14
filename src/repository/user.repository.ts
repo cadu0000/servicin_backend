@@ -1,5 +1,6 @@
 import { SignupUserDTO } from "../schemas/user.schema";
 import { prisma } from "../lib/prisma";
+import { verifyPassword } from "../utils/password";
 
 export class UserRepository {
   async findByEmail(email: string) {
@@ -131,5 +132,16 @@ export class UserRepository {
       user,
       companyUser,
     };
+  }
+
+  async verifyPassword(id: string, password: string): Promise<boolean> {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { password: true },
+    });
+
+    if (!user) return false;
+
+    return await verifyPassword(password, user.password);
   }
 }

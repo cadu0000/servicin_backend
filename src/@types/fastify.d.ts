@@ -1,5 +1,6 @@
 import "@fastify/jwt";
 import "fastify";
+import "@fastify/cookie";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
@@ -15,3 +16,4 @@ declare module "fastify" {
     user?: { sub: string; email: string };
   }
 }
+

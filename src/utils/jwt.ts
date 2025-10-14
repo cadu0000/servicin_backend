@@ -1,24 +1,30 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import fjwt from "@fastify/jwt";
-import { env } from "../env";
+import jwt, { SignOptions } from "jsonwebtoken";
 
-export async function jwtPlugin(server: FastifyInstance) {
-  server.register(fjwt, { secret: env.JWT_SECRET });
+interface Payload {
+  sub: string;
+  email: string;
+  iat?: number;
+  exp?: number;
+}
 
-  server.addHook("preHandler", (req, _res, next) => {
-    req.jwt = server.jwt;
-    next();
-  });
+interface IGenerateTokenOptions {
+  payload: Payload;
+  secret: string;
+  expiresIn?: SignOptions["expiresIn"];
+}
 
-  server.decorate(
-    "authenticate",
-    async (req: FastifyRequest, reply: FastifyReply) => {
-      const token = req.cookies.access_token;
-      if (!token) {
-        return reply.status(401).send({ message: "Authentication required" });
-      }
-      const decoded = req.jwt.verify<{ sub: string; email: string }>(token);
-      req.user = decoded;
-    }
-  );
+export function generateToken({
+  payload,
+  secret,
+  expiresIn = "7d",
+}: IGenerateTokenOptions): string {
+  if (!secret) {
+    throw new Error("JWT secret must be provided to generate token.");
+  }
+
+  return jwt.sign(payload, secret, { expiresIn });
+}
+
+export function verifyToken(token: string, secret: string) {
+  return jwt.verify(token, secret);
 }
