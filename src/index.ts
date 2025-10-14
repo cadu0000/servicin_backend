@@ -6,6 +6,7 @@ import {
   jsonSchemaTransform,
 } from "fastify-type-provider-zod";
 import scalarFastify from "@scalar/fastify-api-reference";
+import { userRoutes } from "./api/routes/user.route";
 
 const server = fastify();
 
@@ -32,6 +33,8 @@ server.register(scalarFastify, {
     },
   },
 });
+
+server.register(userRoutes, { prefix: "/user" });
 
 server.listen({ port: 8080 }, (err, address) => {
   if (err) {
