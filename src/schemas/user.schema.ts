@@ -101,11 +101,12 @@ const signupIndividualUserSchema = z.object({
     .refine((val) => cpf.isValid(val), { message: "Invalid CPF" })
     .describe("The CPF of the individual user")
     .default("37133126052"),
-  birthDate: z.coerce
-    .date()
+  birthDate: z
+    .string()
+    .datetime()
     .nullable()
     .describe("The birth date of the individual user")
-    .default(new Date("1990-01-01")),
+    .default("1990-01-01T00:00:00.000Z"),
 });
 
 const signupCompanyUserSchema = z.object({
@@ -135,56 +136,6 @@ export const signupUserSchema = z.discriminatedUnion("userType", [
   signupCompanyUserSchema,
 ]);
 
-
-const defaultSignupUserResponseSchema = z.object({
-  email: z.string().email().describe("The email of the user"),
-  photoUrl: z.string().url().nullable().describe("The photo URL of the user"),
-  userType: z.enum(["INDIVIDUAL", "COMPANY"]).describe("The type of the user"),
-  address: z
-    .array(
-      z.object({
-        number: z.string().nullable().describe("The address number"),
-        street: z.string().describe("The street name"),
-        city: z.string().describe("The city name"),
-        state: z.string().describe("The state name"),
-        zipCode: z.string().describe("The zip code"),
-        neighborhood: z.string().describe("The neighborhood name"),
-        country: z.string().describe("The country name"),
-      })
-    )
-    .describe("List of user addresses"),
-  contacts: z
-    .array(
-      z.object({
-        type: z.string().describe("The contact type"),
-        value: z.string().describe("The contact value"),
-      })
-    )
-    .describe("List of user contacts"),
-});
-
-const signupIndividualUserResponseSchema =
-  defaultSignupUserResponseSchema.extend({
-    userType: z.literal("INDIVIDUAL"),
-    fullName: z.string().describe("The full name of the individual user"),
-    cpf: z.string().describe("The CPF of the individual user"),
-    birthDate: z
-      .string()
-      .nullable()
-      .describe("The birth date of the individual user"),
-  });
-
-const signupCompanyUserResponseSchema = defaultSignupUserResponseSchema.extend({
-  userType: z.literal("COMPANY"),
-  corporateName: z.string().describe("The corporate name of the company user"),
-  cnpj: z.string().describe("The CNPJ of the company user"),
-  tradeName: z
-    .string()
-    .nullable()
-    .describe("The trade name of the company user"),
-});
-
-
 export const loginUserSchema = z.object({
   email: z.string().email().default("johndoe@email.com"),
   password: z.string().min(8).default("JohnDoe123"),
@@ -192,14 +143,6 @@ export const loginUserSchema = z.object({
 
 export type LoginUserDTO = z.infer<typeof loginUserSchema>;
 export const LoginUserDTO = loginUserSchema;
-
-export const signupUserResponseSchema = z.object({
-  token: z.string().describe("JWT token for authentication"),
-  user: z.discriminatedUnion("userType", [
-    signupIndividualUserResponseSchema,
-    signupCompanyUserResponseSchema,
-  ]),
-});
 
 export type SignupUserDTO = z.infer<typeof signupUserSchema>;
 export type SignupIndividualUserDTO = z.infer<

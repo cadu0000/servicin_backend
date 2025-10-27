@@ -1,10 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { userController } from "../../container";
-import {
-  signupUserResponseSchema,
-  signupUserSchema,
-  LoginUserDTO,
-} from "../../schemas/user.schema";
+import { signupUserSchema, LoginUserDTO } from "../../schemas/user.schema";
 import z from "zod";
 
 export async function userRoutes(server: FastifyInstance) {
@@ -17,7 +13,9 @@ export async function userRoutes(server: FastifyInstance) {
         tags: ["Authentication"],
         body: signupUserSchema,
         response: {
-          201: signupUserResponseSchema,
+          201: z.object({
+            token: z.string().describe("JWT token for authentication"),
+          }),
         },
       },
     },
@@ -32,7 +30,6 @@ export async function userRoutes(server: FastifyInstance) {
         description: "Endpoint to authenticate a user and return a JWT token",
         tags: ["Authentication"],
         body: LoginUserDTO,
-        
         response: {
           200: z.object({
             token: z.string().describe("JWT token for authentication"),
