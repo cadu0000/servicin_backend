@@ -10,6 +10,7 @@ import scalarFastify from "@scalar/fastify-api-reference";
 import { userRoutes } from "./api/routes/user.route";
 import { jwtPlugin } from "./lib/jwt";
 import cookieSetterPlugin from "./lib/cookies";
+import { serviceProviderRoutes } from "./api/routes/service-provider.route";
 
 const server = fastify();
 
@@ -41,6 +42,7 @@ server.register(cookieSetterPlugin);
 server.register(jwtPlugin);
 
 server.register(userRoutes, { prefix: "/user" });
+server.register(serviceProviderRoutes, { prefix: "/service-provider" });
 
 server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
   if (err) {
