@@ -40,7 +40,7 @@ export class UserService {
 
     const hashedPassword = await hashPassword(password);
 
-    const { user, individualUser } = await this.userRepository.signup({
+    const individualUser = await this.userRepository.signup({
       ...signupIndividualUserDTO,
       password: hashedPassword,
     });
@@ -51,8 +51,8 @@ export class UserService {
 
     const token = generateToken({
       payload: {
-        sub: user.id,
-        email: user.email,
+        sub: individualUser.id,
+        email: individualUser.email,
       },
       secret: process.env.JWT_SECRET!,
     });
@@ -61,31 +61,7 @@ export class UserService {
       throw new Error("Error generating authentication token");
     }
 
-    return {
-      token,
-      user: {
-        id: user.id,
-        cpf: individualUser.cpf,
-        fullName: individualUser.fullName,
-        birthDate: individualUser.birthDate?.toISOString() ?? null,
-        email: user.email,
-        photoUrl: user.photoUrl,
-        userType: user.userType,
-        address: user.address.map((addr) => ({
-          number: addr.number,
-          street: addr.street,
-          city: addr.city,
-          state: addr.state,
-          neighborhood: addr.neighborhood,
-          zipCode: addr.zipCode,
-          country: addr.country,
-        })),
-        contacts: user.contacts.map((contact) => ({
-          type: contact.type,
-          value: contact.value,
-        })),
-      },
-    };
+    return token;
   }
 
   private async signupCompany(signupCompanyUserDTO: SignupCompanyUserDTO) {
@@ -99,7 +75,7 @@ export class UserService {
 
     const hashedPassword = await hashPassword(password);
 
-    const { user, companyUser } = await this.userRepository.signup({
+    const companyUser = await this.userRepository.signup({
       ...signupCompanyUserDTO,
       password: hashedPassword,
     });
@@ -110,8 +86,8 @@ export class UserService {
 
     const token = generateToken({
       payload: {
-        sub: user.id,
-        email: user.email,
+        sub: companyUser.id,
+        email: companyUser.email,
       },
       secret: process.env.JWT_SECRET!,
     });
@@ -120,31 +96,7 @@ export class UserService {
       throw new Error("Error generating authentication token");
     }
 
-    return {
-      token,
-      user: {
-        id: user.id,
-        cnpj: companyUser.cnpj,
-        corporateName: companyUser.corporateName,
-        tradeName: companyUser.tradeName,
-        email: user.email,
-        photoUrl: user.photoUrl,
-        userType: user.userType,
-        address: user.address.map((addr) => ({
-          number: addr.number,
-          street: addr.street,
-          city: addr.city,
-          state: addr.state,
-          neighborhood: addr.neighborhood,
-          zipCode: addr.zipCode,
-          country: addr.country,
-        })),
-        contacts: user.contacts.map((contact) => ({
-          type: contact.type,
-          value: contact.value,
-        })),
-      },
-    };
+    return token;
   }
 
   async login(email: string, password: string) {

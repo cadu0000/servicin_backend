@@ -10,8 +10,9 @@ export class UserController {
 
   async signup(request: FastifyRequest, reply: FastifyReply) {
     const params = signupUserSchema.parse(request.body);
-    const user = await this.userService.signup(params);
-    return reply.status(201).send(user);
+    const token = await this.userService.signup(params);
+    reply.setTokenCookie(token);
+    return reply.status(201).send({ token });
   }
 
   async login(request: FastifyRequest, reply: FastifyReply) {
