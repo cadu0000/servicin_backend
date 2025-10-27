@@ -23,7 +23,7 @@ export class PublicSearchService {
         const rawTerm = filters.q;
         const term = rawTerm && typeof rawTerm === 'string' ? rawTerm.trim() : '';
         
-        if (term.length > 0 && term.length < 2) {
+        if (term.length > 0 && term.length <= 2) {
             throw new InvalidInputError("O termo de busca deve ter pelo menos 2 caracteres.");
         }
 
