@@ -1,5 +1,6 @@
 import { UserRepository } from "../repository/user.repository";
 import {
+  CreateServiceProviderDTO,
   SignupCompanyUserDTO,
   SignupIndividualUserDTO,
   SignupUserDTO,
@@ -145,22 +146,45 @@ export class UserService {
       },
     };
   }
-    async login(email: string, password: string) {
-      const user = await this.userRepository.findByEmail(email);
-      if (!user) {
-        throw new Error("Invalid email or password");
-      }
 
-      const isPasswordValid = await this.userRepository.verifyPassword(user.id, password);
-      if (!isPasswordValid) {
-        throw new Error("Invalid email or password");
-      }
+  async login(email: string, password: string) {
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      throw new Error("Invalid email or password");
+    }
 
-      const token = generateToken({
-        payload: { sub: user.id, email: user.email },
-        secret: process.env.JWT_SECRET!,
-      });
+    const isPasswordValid = await this.userRepository.verifyPassword(
+      user.id,
+      password
+    );
+    if (!isPasswordValid) {
+      throw new Error("Invalid email or password");
+    }
 
-      return token;
+    const token = generateToken({
+      payload: { sub: user.id, email: user.email },
+      secret: process.env.JWT_SECRET!,
+    });
+
+    return token;
+  }
+
+  async createServiceProvider(params: CreateServiceProviderDTO) {
+    const { userId } = params;
+
+    const userAlreadyExists = await this.userRepository.findById(userId);
+
+    if (!userAlreadyExists) {
+      throw new Error("User not found");
+    }
+
+    const serviceProviderAlreadyExists =
+      await this.userRepository.findServiceProviderByUserId(userId);
+
+    if (serviceProviderAlreadyExists) {
+      throw new Error("Service provider already exists for this user");
+    }
+
+    return await this.userRepository.createServiceProvider(params);
   }
 }

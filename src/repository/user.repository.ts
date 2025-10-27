@@ -1,4 +1,7 @@
-import { SignupUserDTO } from "../schemas/user.schema";
+import {
+  CreateServiceProviderDTO,
+  SignupUserDTO,
+} from "../schemas/user.schema";
 import { prisma } from "../lib/prisma";
 import { verifyPassword } from "../utils/password";
 
@@ -143,5 +146,35 @@ export class UserRepository {
     if (!user) return false;
 
     return await verifyPassword(password, user.password);
+  }
+
+  async createServiceProvider(
+    createServiceProviderDTO: CreateServiceProviderDTO
+  ) {
+    const { userId, serviceDescription, averageRating } =
+      createServiceProviderDTO;
+
+    const serviceProvider = await prisma.serviceProvider.create({
+      select: {
+        userId: true,
+      },
+      data: {
+        userId,
+        serviceDescription,
+        averageRating,
+      },
+    });
+
+    return serviceProvider;
+  }
+
+  async findServiceProviderByUserId(userId: string) {
+    const serviceProvider = await prisma.serviceProvider.findUnique({
+      where: {
+        userId,
+      },
+    });
+
+    return serviceProvider;
   }
 }
