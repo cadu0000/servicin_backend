@@ -151,7 +151,7 @@ export class UserRepository {
   async createServiceProvider(
     createServiceProviderDTO: CreateServiceProviderDTO
   ) {
-    const { userId, serviceDescription, averageRating } =
+    const { userId, serviceDescription } =
       createServiceProviderDTO;
 
     const serviceProvider = await prisma.serviceProvider.create({
@@ -161,7 +161,6 @@ export class UserRepository {
       data: {
         userId,
         serviceDescription,
-        averageRating,
       },
     });
 
