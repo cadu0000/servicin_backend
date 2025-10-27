@@ -1,5 +1,6 @@
 import { UserRepository } from "../repository/user.repository";
 import {
+  CreateServiceProviderDTO,
   SignupCompanyUserDTO,
   SignupIndividualUserDTO,
   SignupUserDTO,
@@ -118,5 +119,24 @@ export class UserService {
     });
 
     return token;
+  }
+
+  async createServiceProvider(params: CreateServiceProviderDTO) {
+    const { userId } = params;
+
+    const userAlreadyExists = await this.userRepository.findById(userId);
+
+    if (!userAlreadyExists) {
+      throw new Error("User not found");
+    }
+
+    const serviceProviderAlreadyExists =
+      await this.userRepository.findServiceProviderByUserId(userId);
+
+    if (serviceProviderAlreadyExists) {
+      throw new Error("Service provider already exists for this user");
+    }
+
+    return await this.userRepository.createServiceProvider(params);
   }
 }
