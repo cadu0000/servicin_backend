@@ -1,20 +1,59 @@
-import MOCK_SERVICES from '../data/service.mock';; 
+import MOCK_SERVICES from '../data/service.mock';
+import { ServiceFiltersDTO } from '../core/dtos/ServiceFiltersDTO';
+
+interface FilterParams extends ServiceFiltersDTO {
+    searchTerm?: string; 
+}
 
 export class ServiceRepository {
-    async search(searchTerm: string) {
-        if (!searchTerm || searchTerm.trim().length < 2) {
-            return [];
+    async filterServices(filters: FilterParams) {
+        let results = MOCK_SERVICES;
+
+        if (filters.searchTerm && filters.searchTerm.trim().length >= 2) {
+            const term = filters.searchTerm.toLowerCase().trim();
+
+            results = results.filter(service => {
+                const nameMatch = service.name.toLowerCase().includes(term);
+                const axisMatch = service.axis.toLowerCase().includes(term);
+                return nameMatch || axisMatch;
+            });
+            
         }
 
-        const term = searchTerm.toLowerCase().trim();
+        if (filters.minRating !== undefined) {
+            results = results.filter(service => 
+                service.averageRating >= filters.minRating!
+            );
+        }
 
-        const results = MOCK_SERVICES.filter(service => {
-            const nameMatch = service.name.toLowerCase().includes(term);
-            const axisMatch = service.axis.toLowerCase().includes(term);
+        if (filters.providerName) {
+            const name = filters.providerName.toLowerCase();
+            results = results.filter(service => 
+                service.providerName && service.providerName.toLowerCase().includes(name)
+            );
+        }
 
-            return nameMatch || axisMatch;
-        });
+        if (filters.axis) {
+            const axisTerm = filters.axis.toLowerCase();
+            results = results.filter(service => 
+                service.axis.toLowerCase() === axisTerm
+            );
+        }
+        
+        if (filters.minPrice !== undefined) {
+            results = results.filter(service => service.price >= filters.minPrice!);
+        }
+        if (filters.maxPrice !== undefined) {
+            results = results.filter(service => service.price <= filters.maxPrice!);
+        }
+        
+        if (filters.chargeType) {
+            const type = filters.chargeType.toLowerCase();
+            results = results.filter(service => 
+                service.chargeType.toLowerCase() === type
+            );
+        }
 
-        return results;
+        return Promise.resolve(results); 
     }
 }
