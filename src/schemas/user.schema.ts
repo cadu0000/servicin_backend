@@ -135,7 +135,6 @@ export const signupUserSchema = z.discriminatedUnion("userType", [
   signupCompanyUserSchema,
 ]);
 
-
 const defaultSignupUserResponseSchema = z.object({
   email: z.string().email().describe("The email of the user"),
   photoUrl: z.string().url().nullable().describe("The photo URL of the user"),
@@ -184,10 +183,21 @@ const signupCompanyUserResponseSchema = defaultSignupUserResponseSchema.extend({
     .describe("The trade name of the company user"),
 });
 
-
 export const loginUserSchema = z.object({
   email: z.string().email().default("johndoe@email.com"),
   password: z.string().min(8).default("JohnDoe123"),
+});
+
+export const createServiceProviderSchema = z.object({
+  userId: z
+    .string()
+    .uuid()
+    .describe("The ID of the user to be promoted")
+    .default("550e8400-e29b-41d4-a716-446655440000"),
+  serviceDescription: z
+    .string()
+    .nullable()
+    .describe("Description of the service provided"),
 });
 
 export type LoginUserDTO = z.infer<typeof loginUserSchema>;
@@ -206,3 +216,7 @@ export type SignupIndividualUserDTO = z.infer<
   typeof signupIndividualUserSchema
 >;
 export type SignupCompanyUserDTO = z.infer<typeof signupCompanyUserSchema>;
+
+export type CreateServiceProviderDTO = z.infer<
+  typeof createServiceProviderSchema
+>;
