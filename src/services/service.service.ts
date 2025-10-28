@@ -1,6 +1,9 @@
 import { UserRepository } from "./../repository/user.repository";
 import { ServiceRepository } from "../repository/service.repository";
-import { CreateServiceSchemaDTO } from "../schemas/service.schema";
+import {
+  CreateServiceSchemaDTO,
+  FetchServicesQueryParamsDTO,
+} from "../schemas/service.schema";
 
 export class ServiceService {
   constructor(
@@ -8,8 +11,10 @@ export class ServiceService {
     private readonly userRepository: UserRepository
   ) {}
 
-  async fetch() {
-    const services = await this.serviceRepository.fetch();
+  async fetch(fetchServicesQueryParamsDTO: FetchServicesQueryParamsDTO) {
+    const services = await this.serviceRepository.fetch(
+      fetchServicesQueryParamsDTO
+    );
 
     if (!services) {
       throw new Error("No services found");
