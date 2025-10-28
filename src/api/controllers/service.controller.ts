@@ -5,6 +5,11 @@ import { createServiceSchema } from "../../schemas/service.schema";
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
+  async fetch(_: FastifyRequest, reply: FastifyReply) {
+    const services = await this.serviceService.fetch();
+    return reply.send(services);
+  }
+
   async create(request: FastifyRequest, reply: FastifyReply) {
     const params = createServiceSchema.parse(request.body);
     const service = await this.serviceService.create(params);

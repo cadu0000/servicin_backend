@@ -8,6 +8,16 @@ export class ServiceService {
     private readonly userRepository: UserRepository
   ) {}
 
+  async fetch() {
+    const services = await this.serviceRepository.fetch();
+
+    if (!services) {
+      throw new Error("No services found");
+    }
+
+    return services;
+  }
+
   async create(createServiceSchemaDTO: CreateServiceSchemaDTO) {
     const { categoryId, providerId } = createServiceSchemaDTO;
 
