@@ -1,10 +1,25 @@
-import { PublicSearchService } from '../public.service';
+import { ServiceService, InputFilters } from '../service.service';
 import { InvalidInputError } from '../../core/errors/InvalidInputError';
 import { ServiceRepository } from '../../repository/service.repository'; 
-import { InputFilters } from '../public.service';
+import { UserRepository } from '../../repository/user.repository';
 
 const mockServiceRepository: jest.Mocked<ServiceRepository> = {
-    filterServices: jest.fn(), 
+    filterServices: jest.fn(),
+    fetch: jest.fn(),
+    fetchById: jest.fn(),
+    create: jest.fn(),
+    findCategoryById: jest.fn(),
+};
+
+const mockUserRepository: jest.Mocked<UserRepository> = {
+    findById: jest.fn(), 
+    findServiceProviderByUserId: jest.fn(),
+    findByEmail: jest.fn(),
+    findIndividualByCPF: jest.fn(),
+    findCompanyByCNPJ: jest.fn(),
+    signup: jest.fn(),
+    verifyPassword: jest.fn(),
+    createServiceProvider: jest.fn(),
 };
 
 const MOCK_SERVICE_RESULT = {
@@ -21,11 +36,11 @@ const MOCK_SERVICE_RESULT = {
 };
 
 describe('PublicSearchService', () => {
-    let publicSearchService: PublicSearchService;
+    let publicSearchService: ServiceService;
 
     beforeEach(() => {
         jest.clearAllMocks(); 
-        publicSearchService = new PublicSearchService(mockServiceRepository);
+        publicSearchService = new ServiceService(mockServiceRepository, mockUserRepository);
     });
 
     describe('Validation and Exceptions', () => {
@@ -33,9 +48,9 @@ describe('PublicSearchService', () => {
         it('should throw InvalidInputError for search terms less than 2 characters', async () => {
             const invalidTermFilters = { q: 'a' };
 
-            await expect(publicSearchService.execute(invalidTermFilters)).rejects.toThrow(InvalidInputError);
+            await expect(publicSearchService.searchService(invalidTermFilters)).rejects.toThrow(InvalidInputError);
             
-            await expect(publicSearchService.execute(invalidTermFilters)).rejects.toThrow('O termo de busca deve ter pelo menos 2 caracteres.');
+            await expect(publicSearchService.searchService(invalidTermFilters)).rejects.toThrow('O termo de busca deve ter pelo menos 2 caracteres.');
             
             expect(mockServiceRepository.filterServices).not.toHaveBeenCalled();
         });
@@ -45,7 +60,7 @@ describe('PublicSearchService', () => {
             
             mockServiceRepository.filterServices.mockResolvedValue([]); 
 
-            await expect(publicSearchService.execute(emptyFilters)).resolves.not.toThrow();
+            await expect(publicSearchService.searchService(emptyFilters)).resolves.not.toThrow();
             expect(mockServiceRepository.filterServices).toHaveBeenCalled();
         });
     });
@@ -60,7 +75,7 @@ describe('PublicSearchService', () => {
 
         it('should correctly map the "q" parameter to "searchTerm" in the repository call', async () => {
             const inputFilters = { q: 'Limpeza' };
-            await publicSearchService.execute(inputFilters);
+            await publicSearchService.searchService(inputFilters);
 
             expect(mockServiceRepository.filterServices).toHaveBeenCalledWith({
                 searchTerm: 'Limpeza', 
@@ -69,12 +84,12 @@ describe('PublicSearchService', () => {
 
         it('should pass all valid DTO filters to the repository when q is NOT present', async () => {
             const inputFilters: InputFilters = { minRating: 4.5, providerName: 'João' };
-            await publicSearchService.execute(inputFilters);
+            await publicSearchService.searchService(inputFilters);
         });
 
         it('should prevent the specific "axis" filter from being passed when "q" is present (Conflict resolution)', async () => {
             const inputFilters = { q: 'Limpeza', axis: 'Serviços' };
-            await publicSearchService.execute(inputFilters);
+            await publicSearchService.searchService(inputFilters);
 
             expect(mockServiceRepository.filterServices).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -91,7 +106,7 @@ describe('PublicSearchService', () => {
 
         it('should trim the search term before sending to the repository', async () => {
             const inputFilters = { q: '  termo com espaços  ' };
-            await publicSearchService.execute(inputFilters);
+            await publicSearchService.searchService(inputFilters);
 
             expect(mockServiceRepository.filterServices).toHaveBeenCalledWith({
                 searchTerm: 'termo com espaços',

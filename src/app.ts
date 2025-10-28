@@ -8,7 +8,7 @@ import {
 import scalarFastify from "@scalar/fastify-api-reference";
 
 import { userRoutes } from "./api/routes/user.route";
-import { publicRoutes } from "./api/routes/service.route";
+import { serviceRoutes } from "./api/routes/service.route";
 import { jwtPlugin } from "./lib/jwt";
 import cookieSetterPlugin from "./lib/cookies";
 
@@ -37,7 +37,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   server.register(jwtPlugin);
 
   server.register(userRoutes, { prefix: "/user" });
-  server.register(publicRoutes, { prefix: "/public" });
+  server.register(serviceRoutes, { prefix: "/service" });
+  server.register(serviceRoutes, { prefix: "/public" });
 
   return server;
 }
