@@ -21,7 +21,7 @@ export const createServiceSchema = z.object({
   price: z
     .number()
     .min(0)
-    .describe("Price of the service in USD")
+    .describe("Price of the service in BRL")
     .default(99.99),
 });
 
