@@ -20,11 +20,11 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   server.register(fastifySwagger, {
     openapi: {
-        info: {
-            title: "Servicin API",
-            description: "API documentation for Servicin application",
-            version: "1.0.0",
-        },
+      info: {
+        title: "Servicin API",
+        description: "API documentation for Servicin application",
+        version: "1.0.0",
+      },
     },
     transform: jsonSchemaTransform,
   });

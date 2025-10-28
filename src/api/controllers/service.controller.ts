@@ -6,12 +6,6 @@ import {
 import { InvalidInputError } from "../../core/errors/InvalidInputError";
 import { ServiceService } from "../../services/service.service";
 
-interface SearchQuery {
-  q?: string;
-}
-
-type SearchRequest = FastifyRequest<{ Querystring: PublicSearchQueryType }>;
-
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
@@ -33,10 +27,10 @@ export class ServiceController {
   }
 
   async searchServicesHandler(
-    req: SearchRequest,
+    req: FastifyRequest,
     res: FastifyReply
   ): Promise<void> {
-    const filters = req.query;
+    const filters = req.query as PublicSearchQueryType;
 
     try {
       const results = await this.serviceService.searchService(filters);

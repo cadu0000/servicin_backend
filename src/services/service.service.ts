@@ -99,6 +99,7 @@ export class ServiceService {
     const services = await this.serviceRepository.filterServices(
       repositoryFilters
     );
+
     return services;
   }
 }

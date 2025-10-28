@@ -197,6 +197,8 @@ export async function serviceRoutes(server: FastifyInstance) {
         querystring: PublicSearchQuerySchema,
       },
     },
-    serviceController.searchServicesHandler
+    //serviceController.searchServicesHandler
+    async (request, reply) =>
+      serviceController.searchServicesHandler(request, reply)
   );
 }

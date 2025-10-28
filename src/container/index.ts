@@ -17,4 +17,4 @@ const serviceService = new ServiceService(serviceRepository, userRepository);
 const userController = new UserController(userService);
 const serviceController = new ServiceController(serviceService);
 
-export { userController, serviceController};
+export { userController, serviceController };
