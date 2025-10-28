@@ -2,8 +2,8 @@ import { ServiceRepository } from '../repository/service.repository';
 import { ServiceFiltersDTO } from '../core/dtos/ServiceFiltersDTO';
 import { InvalidInputError } from '../core/errors/InvalidInputError';
 
-interface InputFilters {
-    q?: string;
+export interface InputFilters extends ServiceFiltersDTO { 
+    q?: string; 
 }
 
 interface RepositoryFilters extends ServiceFiltersDTO { 
