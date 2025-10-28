@@ -1,11 +1,9 @@
+import { ServiceController } from "../api/controllers/service.controller";
 import { UserController } from "../api/controllers/user.controller";
-import { PublicController } from "../api/controllers/service.controller";
-
+import { ServiceRepository } from "../repository/service.repository";
 import { UserRepository } from "../repository/user.repository";
-import { ServiceRepository } from '../repository/service.repository';
-
+import { ServiceService } from "../services/service.service";
 import { UserService } from "../services/user.service";
-import { PublicSearchService } from '../services/public.service';
 
 // Repositories
 const userRepository = new UserRepository();
@@ -13,14 +11,10 @@ const serviceRepository = new ServiceRepository();
 
 // Services
 const userService = new UserService(userRepository);
-const publicSearchService = new PublicSearchService(serviceRepository);
+const serviceService = new ServiceService(serviceRepository, userRepository);
 
 // Controllers
 const userController = new UserController(userService);
-const publicController = new PublicController();
+const serviceController = new ServiceController(serviceService);
 
-export { 
-    userController,
-    publicController, 
-    publicSearchService
-};
+export { userController, serviceController};

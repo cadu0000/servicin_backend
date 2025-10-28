@@ -1,12 +1,136 @@
 import MOCK_SERVICES from '../data/service.mock';
 import { ServiceFiltersDTO } from '../core/dtos/ServiceFiltersDTO';
+import { prisma } from "../lib/prisma";
+import { CreateServiceSchemaDTO } from "../schemas/service.schema";
 
 interface FilterParams extends ServiceFiltersDTO {
     searchTerm?: string; 
 }
-
 export class ServiceRepository {
-    async filterServices(filters: FilterParams) {
+  async fetch() {
+    const services = await prisma.service.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        photos: {
+          select: {
+            id: true,
+            photoUrl: true,
+          },
+        },
+        providers: {
+          select: {
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            provider: {
+              select: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+            createdAt: true,
+            updatedAt: true,
+            finishedAt: true,
+          },
+        },
+      },
+    });
+
+    return services;
+  }
+
+  async fetchById(id: string) {
+    const service = await prisma.service.findUnique({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        photos: {
+          select: {
+            id: true,
+            photoUrl: true,
+          },
+        },
+        providers: {
+          select: {
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            provider: {
+              select: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+            createdAt: true,
+            updatedAt: true,
+            finishedAt: true,
+          },
+        },
+      },
+      where: {
+        id,
+      },
+    });
+
+    return service;
+  }
+
+  async create(createServiceSchemaDTO: CreateServiceSchemaDTO) {
+    const { name, description, price, providerId, categoryId } =
+      createServiceSchemaDTO;
+
+    const service = await prisma.service.create({
+      select: {
+        id: true,
+      },
+      data: {
+        name,
+        description,
+        price,
+      },
+    });
+
+    await prisma.providerService.create({
+      data: {
+        serviceId: service.id,
+        providerId,
+        categoryId,
+      },
+    });
+
+    return service;
+  }
+
+  async findCategoryById(categoryId: number) {
+    const category = await prisma.category.findUnique({
+      where: {
+        id: categoryId,
+      },
+    });
+
+    return category;
+  }
+
+  async filterServices(filters: FilterParams) {
         let results = MOCK_SERVICES;
 
         if (filters.searchTerm && filters.searchTerm.trim().length >= 2) {
@@ -55,5 +179,5 @@ export class ServiceRepository {
         }
 
         return Promise.resolve(results); 
-    }
+  }
 }

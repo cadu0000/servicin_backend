@@ -1,4 +1,7 @@
-import { SignupUserDTO } from "../schemas/user.schema";
+import {
+  CreateServiceProviderDTO,
+  SignupUserDTO,
+} from "../schemas/user.schema";
 import { prisma } from "../lib/prisma";
 import { verifyPassword } from "../utils/password";
 
@@ -51,25 +54,6 @@ export class UserRepository {
       select: {
         id: true,
         email: true,
-        photoUrl: true,
-        userType: true,
-        address: {
-          select: {
-            street: true,
-            city: true,
-            state: true,
-            zipCode: true,
-            neighborhood: true,
-            number: true,
-            country: true,
-          },
-        },
-        contacts: {
-          select: {
-            type: true,
-            value: true,
-          },
-        },
       },
       data: {
         email,
@@ -92,12 +76,7 @@ export class UserRepository {
     if (userType === "INDIVIDUAL") {
       const { cpf, fullName, birthDate } = signupUserDTO;
 
-      const individualUser = await prisma.individual.create({
-        select: {
-          cpf: true,
-          fullName: true,
-          birthDate: true,
-        },
+      await prisma.individual.create({
         data: {
           cpf,
           fullName,
@@ -105,33 +84,20 @@ export class UserRepository {
           userId: user.id,
         },
       });
+    } else {
+      const { cnpj, corporateName, tradeName } = signupUserDTO;
 
-      return {
-        user,
-        individualUser,
-      };
+      await prisma.company.create({
+        data: {
+          cnpj,
+          corporateName,
+          tradeName,
+          userId: user.id,
+        },
+      });
     }
 
-    const { cnpj, corporateName, tradeName } = signupUserDTO;
-
-    const companyUser = await prisma.company.create({
-      select: {
-        cnpj: true,
-        corporateName: true,
-        tradeName: true,
-      },
-      data: {
-        cnpj,
-        corporateName,
-        tradeName,
-        userId: user.id,
-      },
-    });
-
-    return {
-      user,
-      companyUser,
-    };
+    return user;
   }
 
   async verifyPassword(id: string, password: string): Promise<boolean> {
@@ -143,5 +109,34 @@ export class UserRepository {
     if (!user) return false;
 
     return await verifyPassword(password, user.password);
+  }
+
+  async createServiceProvider(
+    createServiceProviderDTO: CreateServiceProviderDTO
+  ) {
+    const { userId, serviceDescription } =
+      createServiceProviderDTO;
+
+    const serviceProvider = await prisma.serviceProvider.create({
+      select: {
+        userId: true,
+      },
+      data: {
+        userId,
+        serviceDescription,
+      },
+    });
+
+    return serviceProvider;
+  }
+
+  async findServiceProviderByUserId(userId: string) {
+    const serviceProvider = await prisma.serviceProvider.findUnique({
+      where: {
+        userId,
+      },
+    });
+
+    return serviceProvider;
   }
 }
