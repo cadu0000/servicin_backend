@@ -1,5 +1,13 @@
 import z from "zod";
 
+export const fetchServicesQueryParamsSchema = z.object({
+  page: z.coerce.number().default(1).describe("Page number for pagination"),
+  pageSize: z.coerce
+    .number()
+    .default(12)
+    .describe("Number of items per page for pagination"),
+});
+
 export const createServiceSchema = z.object({
   providerId: z
     .string()
@@ -25,4 +33,7 @@ export const createServiceSchema = z.object({
     .default(99.99),
 });
 
+export type FetchServicesQueryParamsDTO = z.infer<
+  typeof fetchServicesQueryParamsSchema
+>;
 export type CreateServiceSchemaDTO = z.infer<typeof createServiceSchema>;

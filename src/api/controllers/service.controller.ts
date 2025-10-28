@@ -1,12 +1,16 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ServiceService } from "../../services/service.service";
-import { createServiceSchema } from "../../schemas/service.schema";
+import {
+  createServiceSchema,
+  fetchServicesQueryParamsSchema,
+} from "../../schemas/service.schema";
 
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
-  async fetch(_: FastifyRequest, reply: FastifyReply) {
-    const services = await this.serviceService.fetch();
+  async fetch(request: FastifyRequest, reply: FastifyReply) {
+    const params = fetchServicesQueryParamsSchema.parse(request.query);
+    const services = await this.serviceService.fetch(params);
     return reply.send(services);
   }
 
