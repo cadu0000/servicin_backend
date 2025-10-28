@@ -11,11 +11,17 @@ export class ServiceService {
   async create(createServiceSchemaDTO: CreateServiceSchemaDTO) {
     const { categoryId, providerId } = createServiceSchemaDTO;
 
+    const userAlreadyExists = await this.userRepository.findById(providerId);
+
+    if (!userAlreadyExists) {
+      throw new Error("User does not exist");
+    }
+
     const serviceProviderExists =
       await this.userRepository.findServiceProviderByUserId(providerId);
 
     if (!serviceProviderExists) {
-      throw new Error("Service provider does not exist");
+      throw new Error("User is not a service provider");
     }
 
     const categoryExists = await this.serviceRepository.findCategoryById(
