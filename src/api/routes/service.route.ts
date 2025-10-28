@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { publicController } from '../controllers/service.controller';
-import { PublicSearchQuerySchema } from '../..//schemas/service.schema';
+import { PublicSearchQuerySchema} from '../../schemas/service.schema';
 
 export const publicRoutes = (
     fastify: FastifyInstance, 
@@ -10,6 +10,9 @@ export const publicRoutes = (
 
     fastify.get('/search', {
         schema: {
+            summary: "Search for services",
+            description: "Endpoint to search for services",
+            tags: ["Search and Catalog"],
             querystring: PublicSearchQuerySchema, 
         },
     }, publicController.searchServicesHandler);
