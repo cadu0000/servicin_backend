@@ -46,6 +46,9 @@ export class ServiceRepository {
       },
       skip: (page - 1) * pageSize,
       take: pageSize,
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
     const totalServices = await prisma.service.count();
