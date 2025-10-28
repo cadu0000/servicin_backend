@@ -18,6 +18,16 @@ export class ServiceService {
     return services;
   }
 
+  async fetchById(id: string) {
+    const service = await this.serviceRepository.fetchById(id);
+
+    if (!service) {
+      throw new Error("No service found");
+    }
+
+    return service;
+  }
+
   async create(createServiceSchemaDTO: CreateServiceSchemaDTO) {
     const { categoryId, providerId } = createServiceSchemaDTO;
 

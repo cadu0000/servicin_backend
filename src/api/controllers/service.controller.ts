@@ -10,6 +10,12 @@ export class ServiceController {
     return reply.send(services);
   }
 
+  async fetchById(request: FastifyRequest, reply: FastifyReply) {
+    const { id } = request.params as { id: string };
+    const service = await this.serviceService.fetchById(id);
+    return reply.send(service);
+  }
+
   async create(request: FastifyRequest, reply: FastifyReply) {
     const params = createServiceSchema.parse(request.body);
     const service = await this.serviceService.create(params);

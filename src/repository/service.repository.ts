@@ -44,6 +44,51 @@ export class ServiceRepository {
     return services;
   }
 
+  async fetchById(id: string) {
+    const service = await prisma.service.findUnique({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        photos: {
+          select: {
+            id: true,
+            photoUrl: true,
+          },
+        },
+        providers: {
+          select: {
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            provider: {
+              select: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+            createdAt: true,
+            updatedAt: true,
+            finishedAt: true,
+          },
+        },
+      },
+      where: {
+        id,
+      },
+    });
+
+    return service;
+  }
+
   async create(createServiceSchemaDTO: CreateServiceSchemaDTO) {
     const { name, description, price, providerId, categoryId } =
       createServiceSchemaDTO;
