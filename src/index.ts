@@ -42,7 +42,7 @@ server.register(cookieSetterPlugin);
 server.register(jwtPlugin);
 
 server.register(userRoutes, { prefix: "/user" });
-server.register(serviceRoutes, { prefix: "/service" });
+server.register(serviceRoutes, { prefix: "/services" });
 
 server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
   if (err) {
