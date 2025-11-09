@@ -114,7 +114,7 @@ export class UserRepository {
   async createServiceProvider(
     createServiceProviderDTO: CreateServiceProviderDTO
   ) {
-    const { userId, serviceDescription } =
+    const { userId, serviceDescription, availability } =
       createServiceProviderDTO;
 
     const serviceProvider = await prisma.serviceProvider.create({
@@ -125,6 +125,13 @@ export class UserRepository {
         userId,
         serviceDescription,
       },
+    });
+
+    await prisma.serviceProviderAvailability.createMany({
+      data: availability.map((slot) => ({
+        providerId: serviceProvider.userId,
+        ...slot,
+      })),
     });
 
     return serviceProvider;

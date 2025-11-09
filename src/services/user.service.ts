@@ -137,6 +137,9 @@ export class UserService {
       throw new Error("Service provider already exists for this user");
     }
 
-    return await this.userRepository.createServiceProvider(params);
+    const serviceProviderWasCreated =
+      await this.userRepository.createServiceProvider(params);
+
+    return { providerId: serviceProviderWasCreated.userId };
   }
 }

@@ -55,7 +55,7 @@ export async function userRoutes(server: FastifyInstance) {
         response: {
           201: z
             .object({
-              userId: z
+              providerId: z
                 .string()
                 .uuid()
                 .describe("ID of the user promoted to service provider"),
