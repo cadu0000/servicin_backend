@@ -1,4 +1,4 @@
-import { UserRepository } from "./../repository/user.repository";
+import { AuthRepository } from "../repository/auth.repository";
 import { ServiceRepository } from "../repository/service.repository";
 import {
   CreateServiceSchemaDTO,
@@ -8,7 +8,7 @@ import {
 export class ServiceService {
   constructor(
     private readonly serviceRepository: ServiceRepository,
-    private readonly userRepository: UserRepository
+    private readonly userRepository: AuthRepository
   ) {}
 
   async fetch(fetchServicesQueryParamsDTO: FetchServicesQueryParamsDTO) {
@@ -42,8 +42,9 @@ export class ServiceService {
       throw new Error("User does not exist");
     }
 
-    const serviceProviderExists =
-      await this.userRepository.findServiceProviderByUserId(providerId);
+    const serviceProviderExists = await this.userRepository.findById(
+      providerId
+    );
 
     if (!serviceProviderExists) {
       throw new Error("User is not a service provider");

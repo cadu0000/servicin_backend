@@ -87,11 +87,14 @@ model ServiceProvider {
 }
 
 model ServiceProviderAvailability {
-  id         String @id @default(uuid()) @db.Uuid
-  providerId String @map("provider_id") @db.Uuid
-  dayOfWeek  Int    @map("day_of_week")
-  startTime  String @map("start_time")
-  endTime    String @map("end_time")
+  id           String  @id @default(uuid()) @db.Uuid
+  providerId   String  @map("provider_id") @db.Uuid
+  dayOfWeek    Int     @map("day_of_week")
+  startTime    String  @map("start_time")
+  endTime      String  @map("end_time")
+  breakStart   String? @map("break_start")
+  breakEnd     String? @map("break_end")
+  slotDuration Int     @default(30) @map("slot_duration")
 
   provider ServiceProvider @relation(fields: [providerId], references: [userId], onDelete: Cascade)
 
