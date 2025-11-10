@@ -1,15 +1,14 @@
-import { UserRepository } from "../repository/user.repository";
+import { AuthRepository } from "../repository/auth.repository";
 import {
-  CreateServiceProviderDTO,
   SignupCompanyUserDTO,
   SignupIndividualUserDTO,
   SignupUserDTO,
-} from "../schemas/user.schema";
+} from "../schemas/auth.schema";
 import { generateToken } from "../utils/jwt";
 import { hashPassword } from "../utils/password";
 
-export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+export class AuthService {
+  constructor(private readonly userRepository: AuthRepository) {}
 
   async signup(signupUserDTO: SignupUserDTO) {
     const { email, userType } = signupUserDTO;
@@ -119,27 +118,5 @@ export class UserService {
     });
 
     return token;
-  }
-
-  async createServiceProvider(params: CreateServiceProviderDTO) {
-    const { userId } = params;
-
-    const userAlreadyExists = await this.userRepository.findById(userId);
-
-    if (!userAlreadyExists) {
-      throw new Error("User not found");
-    }
-
-    const serviceProviderAlreadyExists =
-      await this.userRepository.findServiceProviderByUserId(userId);
-
-    if (serviceProviderAlreadyExists) {
-      throw new Error("Service provider already exists for this user");
-    }
-
-    const serviceProviderWasCreated =
-      await this.userRepository.createServiceProvider(params);
-
-    return { providerId: serviceProviderWasCreated.userId };
   }
 }

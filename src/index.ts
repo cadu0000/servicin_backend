@@ -7,7 +7,7 @@ import {
 } from "fastify-type-provider-zod";
 import scalarFastify from "@scalar/fastify-api-reference";
 
-import { userRoutes } from "./api/routes/user.route";
+import { userRoutes } from "./api/routes/auth.route";
 import { jwtPlugin } from "./lib/jwt";
 import cookieSetterPlugin from "./lib/cookies";
 import { serviceRoutes } from "./api/routes/service.route";

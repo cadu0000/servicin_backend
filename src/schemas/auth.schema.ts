@@ -141,75 +141,6 @@ export const loginUserSchema = z.object({
   password: z.string().min(8).default("JohnDoe123"),
 });
 
-export const createServiceProviderSchema = z.object({
-  userId: z
-    .string()
-    .uuid()
-    .describe("The ID of the user to be promoted")
-    .default("550e8400-e29b-41d4-a716-446655440000"),
-  serviceDescription: z
-    .string()
-    .nullable()
-    .describe("Description of the service provided"),
-  availability: z
-    .array(
-      z
-        .object({
-          dayOfWeek: z
-            .number()
-            .min(0)
-            .max(6)
-            .default(1)
-            .describe("Day of the week (0 - Sunday, 6 - Saturday)"),
-          startTime: z
-            .string()
-            .regex(
-              /^([0-1]\d|2[0-3]):([0-5]\d)$/,
-              "Invalid start time format (HH:MM)"
-            )
-            .default("08:00")
-            .describe("Start time in HH:MM format"),
-          endTime: z
-            .string()
-            .regex(
-              /^([0-1]\d|2[0-3]):([0-5]\d)$/,
-              "Invalid end time format (HH:MM)"
-            )
-            .default("18:00")
-            .describe("End time in HH:MM format"),
-        })
-        .refine(
-          (data) => {
-            const start = data.startTime.split(":").map(Number);
-            const end = data.endTime.split(":").map(Number);
-
-            return (
-              end[0] > start[0] || (end[0] === start[0] && end[1] > start[1])
-            );
-          },
-          { message: "endTime must be later than startTime" }
-        )
-    )
-    .min(1, "At least one availability entry is required")
-    .superRefine((slots, ctx) => {
-      const seenDays = new Set<number>();
-      for (let i = 0; i < slots.length; i++) {
-        const { dayOfWeek } = slots[i];
-        if (seenDays.has(dayOfWeek)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "It is not allowed to repeat the same day of the week.",
-            path: [i, "dayOfWeek"],
-          });
-          return;
-        }
-
-        seenDays.add(dayOfWeek);
-      }
-    })
-    .describe("Availability schedule of the service provider"),
-});
-
 export type LoginUserDTO = z.infer<typeof loginUserSchema>;
 export const LoginUserDTO = loginUserSchema;
 
@@ -218,7 +149,3 @@ export type SignupIndividualUserDTO = z.infer<
   typeof signupIndividualUserSchema
 >;
 export type SignupCompanyUserDTO = z.infer<typeof signupCompanyUserSchema>;
-
-export type CreateServiceProviderDTO = z.infer<
-  typeof createServiceProviderSchema
->;
