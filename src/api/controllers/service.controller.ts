@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import {
   PublicSearchQueryType,
   createServiceSchema,
+  fetchServicesQueryParamsSchema,
 } from "../../schemas/service.schema";
 import { InvalidInputError } from "../../core/errors/InvalidInputError";
 import { ServiceService } from "../../services/service.service";
@@ -9,8 +10,9 @@ import { ServiceService } from "../../services/service.service";
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
-  async fetch(_: FastifyRequest, reply: FastifyReply) {
-    const services = await this.serviceService.fetch();
+  async fetch(request: FastifyRequest, reply: FastifyReply) {
+    const params = fetchServicesQueryParamsSchema.parse(request.query);
+    const services = await this.serviceService.fetch(params);
     return reply.send(services);
   }
 

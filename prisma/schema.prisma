@@ -78,11 +78,28 @@ model ServiceProvider {
   serviceDescription String? @map("service_description") @db.Text
   averageRating      Decimal @default(0.00) @map("average_rating") @db.Decimal(3, 2)
 
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  servicesOffered ProviderService[]
-  reviewsReceived Review[]          @relation("ProviderReviews")
+  user                          User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  servicesOffered               ProviderService[]
+  reviewsReceived               Review[]                      @relation("ProviderReviews")
+  serviceProviderAvailabilities ServiceProviderAvailability[]
 
   @@map("service_providers")
+}
+
+model ServiceProviderAvailability {
+  id           String  @id @default(uuid()) @db.Uuid
+  providerId   String  @map("provider_id") @db.Uuid
+  dayOfWeek    Int     @map("day_of_week")
+  startTime    String  @map("start_time")
+  endTime      String  @map("end_time")
+  breakStart   String? @map("break_start")
+  breakEnd     String? @map("break_end")
+  slotDuration Int     @default(30) @map("slot_duration")
+
+  provider ServiceProvider @relation(fields: [providerId], references: [userId], onDelete: Cascade)
+
+  @@unique([providerId, dayOfWeek])
+  @@map("service_provider_availabilities")
 }
 
 model Category {
@@ -96,10 +113,11 @@ model Category {
 }
 
 model Service {
-  id          String  @id @default(uuid()) @db.Uuid
-  name        String  @unique
-  description String? @db.Text
-  price       Decimal @default(0.00) @db.Decimal(10, 2)
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?  @db.Text
+  price       Decimal  @default(0.00) @db.Decimal(10, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
 
   photos    ServicePhoto[]
   providers ProviderService[]

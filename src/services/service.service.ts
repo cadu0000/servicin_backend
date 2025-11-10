@@ -1,8 +1,12 @@
-import { UserRepository } from "./../repository/user.repository";
+import { AuthRepository } from "../repository/auth.repository";
 import { ServiceRepository } from "../repository/service.repository";
-import { CreateServiceSchemaDTO } from "../schemas/service.schema";
+import {
+  CreateServiceSchemaDTO,
+  FetchServicesQueryParamsDTO,
+} from "../schemas/service.schema";
 import { ServiceFiltersDTO } from "../core/dtos/ServiceFiltersDTO";
 import { InvalidInputError } from "../core/errors/InvalidInputError";
+
 export interface InputFilters extends ServiceFiltersDTO {
   q?: string;
 }
@@ -14,11 +18,13 @@ interface RepositoryFilters extends ServiceFiltersDTO {
 export class ServiceService {
   constructor(
     private readonly serviceRepository: ServiceRepository,
-    private readonly userRepository: UserRepository
+    private readonly authRepository: AuthRepository
   ) {}
 
-  async fetch() {
-    const services = await this.serviceRepository.fetch();
+  async fetch(fetchServicesQueryParamsDTO: FetchServicesQueryParamsDTO) {
+    const services = await this.serviceRepository.fetch(
+      fetchServicesQueryParamsDTO
+    );
 
     if (!services) {
       throw new Error("No services found");
@@ -40,14 +46,15 @@ export class ServiceService {
   async create(createServiceSchemaDTO: CreateServiceSchemaDTO) {
     const { categoryId, providerId } = createServiceSchemaDTO;
 
-    const userAlreadyExists = await this.userRepository.findById(providerId);
+    const userAlreadyExists = await this.authRepository.findById(providerId);
 
     if (!userAlreadyExists) {
       throw new Error("User does not exist");
     }
 
-    const serviceProviderExists =
-      await this.userRepository.findServiceProviderByUserId(providerId);
+    const serviceProviderExists = await this.authRepository.findById(
+      providerId
+    );
 
     if (!serviceProviderExists) {
       throw new Error("User is not a service provider");

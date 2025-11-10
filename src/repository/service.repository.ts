@@ -1,13 +1,18 @@
 import MOCK_SERVICES from "../data/service.mock";
 import { ServiceFiltersDTO } from "../core/dtos/ServiceFiltersDTO";
 import { prisma } from "../lib/prisma";
-import { CreateServiceSchemaDTO } from "../schemas/service.schema";
+import {
+  CreateServiceSchemaDTO,
+  FetchServicesQueryParamsDTO,
+} from "../schemas/service.schema";
 
 interface FilterParams extends ServiceFiltersDTO {
   searchTerm?: string;
 }
 export class ServiceRepository {
-  async fetch() {
+  async fetch(fetchServicesQueryParamsDTO: FetchServicesQueryParamsDTO) {
+    const { page, pageSize } = fetchServicesQueryParamsDTO;
+
     const services = await prisma.service.findMany({
       select: {
         id: true,
@@ -44,9 +49,23 @@ export class ServiceRepository {
           },
         },
       },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
-    return services;
+    const totalServices = await prisma.service.count();
+    const totalPages = Math.ceil(totalServices / pageSize);
+
+    return {
+      data: services,
+      total: totalServices,
+      page,
+      pageSize,
+      totalPages,
+    };
   }
 
   async fetchById(id: string) {
