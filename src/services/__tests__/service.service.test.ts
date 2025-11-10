@@ -1,7 +1,7 @@
 import { ServiceService, InputFilters } from '../service.service';
 import { InvalidInputError } from '../../core/errors/InvalidInputError';
-import { ServiceRepository } from '../../repository/service.repository'; 
-import { UserRepository } from '../../repository/user.repository';
+import { ServiceRepository } from '../../repository/service.repository';
+import { AuthRepository } from '../../repository/auth.repository';
 
 const mockServiceRepository: jest.Mocked<ServiceRepository> = {
     filterServices: jest.fn(),
@@ -11,15 +11,13 @@ const mockServiceRepository: jest.Mocked<ServiceRepository> = {
     findCategoryById: jest.fn(),
 };
 
-const mockUserRepository: jest.Mocked<UserRepository> = {
+const mockUserRepository: jest.Mocked<AuthRepository> = {
     findById: jest.fn(), 
-    findServiceProviderByUserId: jest.fn(),
     findByEmail: jest.fn(),
     findIndividualByCPF: jest.fn(),
     findCompanyByCNPJ: jest.fn(),
     signup: jest.fn(),
     verifyPassword: jest.fn(),
-    createServiceProvider: jest.fn(),
 };
 
 const MOCK_SERVICE_RESULT = {
