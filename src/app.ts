@@ -7,11 +7,10 @@ import {
 } from "fastify-type-provider-zod";
 import scalarFastify from "@scalar/fastify-api-reference";
 import { authRoutes } from "./api/routes/auth.route";
-import { servicePublicRoutes } from "./api/routes/service/service.public.routes";
-import { servicePrivateRoutes } from "./api/routes/service/service.private.routes";
 import { jwtPlugin } from "./lib/jwt";
 import cookieSetterPlugin from "./lib/cookies";
 import { serviceProviderRoutes } from "./api/routes/service-provider.route";
+import { serviceRoutes } from "./api/routes/service.route";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const server = fastify();
@@ -38,8 +37,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   server.register(jwtPlugin);
 
   server.register(authRoutes, { prefix: "/auth" });
-  server.register(servicePrivateRoutes, { prefix: "/services" });
-  server.register(servicePublicRoutes, { prefix: "/public" });
+  server.register(serviceRoutes, { prefix: "/services" });
   server.register(serviceProviderRoutes, { prefix: "/service-providers" });
 
   return server;
