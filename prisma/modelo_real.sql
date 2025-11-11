@@ -99,3 +99,22 @@ CREATE TABLE IF NOT EXISTS contacts (
     value VARCHAR(255) NOT NULL,
     CONSTRAINT fk_contact_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TYPE appointment_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELED', 'COMPLETED');
+
+CREATE TYPE payment_method AS ENUM ('CREDIT_CARD', 'DEBIT_CARD', 'CASH', 'PIX');
+
+CREATE TABLE IF NOT EXISTS appointments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    service_id UUID NOT NULL,
+    client_id UUID NOT NULL,
+    scheduled_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    description VARCHAR(1000) NOT NULL,
+    status appointment_status NOT NULL DEFAULT 'PENDING',
+    payment_method payment_method NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_appointment_service FOREIGN KEY (service_id) REFERENCES services(id),
+    CONSTRAINT fk_appointment_client FOREIGN KEY (client_id) REFERENCES users(id)
+);
