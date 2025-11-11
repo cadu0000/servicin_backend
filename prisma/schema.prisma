@@ -17,6 +17,21 @@ enum ContactType {
   PHONE
 }
 
+enum AppointmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELED
+  COMPLETED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  CASH
+  PIX
+}
+
 model User {
   id        String   @id @default(uuid()) @db.Uuid
   email     String   @unique
@@ -31,6 +46,7 @@ model User {
   serviceProvider ServiceProvider?
   contacts        Contact[]
   reviewsWritten  Review[]         @relation("ClientReviews")
+  appointmentsAsClient Appointment[] @relation("ClientAppointments")
 
   @@map("users")
 }
@@ -121,6 +137,7 @@ model Service {
 
   photos    ServicePhoto[]
   providers ProviderService[]
+  appointments Appointment[]
 
   @@map("services")
 }
@@ -136,7 +153,7 @@ model ServicePhoto {
 }
 
 model ProviderService {
-  providerId String    @map("provider_id") @db.Uuid
+  providerId String    @map("provider_id") @db.Uuid
   serviceId  String    @map("service_id") @db.Uuid
   categoryId Int       @map("category_id")
   createdAt  DateTime  @default(now()) @map("created_at")
@@ -174,4 +191,23 @@ model Contact {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("contacts")
+}
+
+model Appointment {
+  id              String             @id @default(uuid()) @db.Uuid
+  description     String             @db.VarChar(1000)
+  scheduledAt     DateTime
+  status          AppointmentStatus  @default(PENDING) 
+  paymentMethod   PaymentMethod
+  
+  serviceId       String             @db.Uuid
+  service         Service            @relation(fields: [serviceId], references: [id]) 
+  
+  clientId        String             @db.Uuid 
+  client          User               @relation("ClientAppointments", fields: [clientId], references: [id])  
+  
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  
+  @@map("appointments") 
 }
