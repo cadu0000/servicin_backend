@@ -4,9 +4,10 @@
     "start": "node dist/index.js",
     "db:up": "docker-compose up -d",
     "db:stop": "docker-compose down",
+    "db:seed": "npx prisma db seed",
     "migrate:dev": "npx prisma migrate dev",
     "start:dev": "tsx watch src/index.ts",
-    "dev": "npm run db:up && npm run migrate:dev && npm run start:dev"
+    "dev": "npm run db:up && npm run migrate:dev && npm run db:seed && npm run start:dev"
   },
   "dependencies": {
     "@fastify/cookie": "^9.3.1",
@@ -35,5 +36,8 @@
     "prisma": "^6.17.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
