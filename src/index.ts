@@ -12,6 +12,7 @@ import { jwtPlugin } from "./lib/jwt";
 import cookieSetterPlugin from "./lib/cookies";
 import { serviceRoutes } from "./api/routes/service.route";
 import { serviceProviderRoutes } from "./api/routes/service-provider.route";
+import { categoryRoutes } from "./api/routes/category.route";
 
 const server = fastify();
 
@@ -45,6 +46,7 @@ server.register(jwtPlugin);
 server.register(userRoutes, { prefix: "/user" });
 server.register(serviceProviderRoutes, { prefix: "/service-providers" });
 server.register(serviceRoutes, { prefix: "/services" });
+server.register(categoryRoutes, { prefix: "/categories" });
 
 server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
   if (err) {
