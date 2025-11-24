@@ -4,12 +4,6 @@ CREATE TYPE "UserRole" AS ENUM ('INDIVIDUAL', 'COMPANY');
 -- CreateEnum
 CREATE TYPE "ContactType" AS ENUM ('EMAIL', 'PHONE');
 
--- CreateEnum
-CREATE TYPE "AppointmentStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELED', 'COMPLETED');
-
--- CreateEnum
-CREATE TYPE "PaymentMethod" AS ENUM ('CREDIT_CARD', 'DEBIT_CARD', 'CASH', 'PIX');
-
 -- CreateTable
 CREATE TABLE "users" (
     "id" UUID NOT NULL,
@@ -31,7 +25,6 @@ CREATE TABLE "address" (
     "city" TEXT NOT NULL,
     "neighborhood" TEXT NOT NULL,
     "street" TEXT NOT NULL,
-    "zip_code" TEXT NOT NULL,
     "number" TEXT,
 
     CONSTRAINT "address_pkey" PRIMARY KEY ("id")
@@ -67,20 +60,6 @@ CREATE TABLE "service_providers" (
 );
 
 -- CreateTable
-CREATE TABLE "service_provider_availabilities" (
-    "id" UUID NOT NULL,
-    "provider_id" UUID NOT NULL,
-    "day_of_week" INTEGER NOT NULL,
-    "start_time" TEXT NOT NULL,
-    "end_time" TEXT NOT NULL,
-    "break_start" TEXT,
-    "break_end" TEXT,
-    "slot_duration" INTEGER NOT NULL DEFAULT 30,
-
-    CONSTRAINT "service_provider_availabilities_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "categories" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
@@ -95,7 +74,6 @@ CREATE TABLE "services" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "price" DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "services_pkey" PRIMARY KEY ("id")
 );
@@ -143,21 +121,6 @@ CREATE TABLE "contacts" (
     CONSTRAINT "contacts_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "appointments" (
-    "id" UUID NOT NULL,
-    "description" VARCHAR(1000) NOT NULL,
-    "scheduledAt" TIMESTAMP(3) NOT NULL,
-    "status" "AppointmentStatus" NOT NULL DEFAULT 'PENDING',
-    "paymentMethod" "PaymentMethod" NOT NULL,
-    "serviceId" UUID NOT NULL,
-    "clientId" UUID NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "appointments_pkey" PRIMARY KEY ("id")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -166,9 +129,6 @@ CREATE UNIQUE INDEX "individuals_cpf_key" ON "individuals"("cpf");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "companies_cnpj_key" ON "companies"("cnpj");
-
--- CreateIndex
-CREATE UNIQUE INDEX "service_provider_availabilities_provider_id_day_of_week_key" ON "service_provider_availabilities"("provider_id", "day_of_week");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "categories_name_key" ON "categories"("name");
@@ -187,9 +147,6 @@ ALTER TABLE "companies" ADD CONSTRAINT "companies_user_id_fkey" FOREIGN KEY ("us
 
 -- AddForeignKey
 ALTER TABLE "service_providers" ADD CONSTRAINT "service_providers_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "service_provider_availabilities" ADD CONSTRAINT "service_provider_availabilities_provider_id_fkey" FOREIGN KEY ("provider_id") REFERENCES "service_providers"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "service_photos" ADD CONSTRAINT "service_photos_service_id_fkey" FOREIGN KEY ("service_id") REFERENCES "services"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -211,9 +168,3 @@ ALTER TABLE "review" ADD CONSTRAINT "review_client_id_fkey" FOREIGN KEY ("client
 
 -- AddForeignKey
 ALTER TABLE "contacts" ADD CONSTRAINT "contacts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "appointments" ADD CONSTRAINT "appointments_serviceId_fkey" FOREIGN KEY ("serviceId") REFERENCES "services"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "appointments" ADD CONSTRAINT "appointments_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
