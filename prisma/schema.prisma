@@ -17,6 +17,21 @@ enum ContactType {
   PHONE
 }
 
+enum AppointmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELED
+  COMPLETED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  CASH
+  PIX
+}
+
 model User {
   id        String   @id @default(uuid()) @db.Uuid
   email     String   @unique
@@ -25,12 +40,13 @@ model User {
   userType  UserRole @map("user_type")
   photoUrl  String?  @map("photo_url") @db.Text
 
-  address         Address[]
-  individual      Individual?
-  company         Company?
-  serviceProvider ServiceProvider?
-  contacts        Contact[]
-  reviewsWritten  Review[]         @relation("ClientReviews")
+  address              Address[]
+  individual           Individual?
+  company              Company?
+  serviceProvider      ServiceProvider?
+  contacts             Contact[]
+  reviewsWritten       Review[]         @relation("ClientReviews")
+  appointmentsAsClient Appointment[]    @relation("ClientAppointments")
 
   @@map("users")
 }
@@ -119,8 +135,9 @@ model Service {
   price       Decimal  @default(0.00) @db.Decimal(10, 2)
   createdAt   DateTime @default(now()) @map("created_at")
 
-  photos    ServicePhoto[]
-  providers ProviderService[]
+  photos       ServicePhoto[]
+  providers    ProviderService[]
+  appointments Appointment[]
 
   @@map("services")
 }
@@ -174,4 +191,23 @@ model Contact {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("contacts")
+}
+
+model Appointment {
+  id            String            @id @default(uuid()) @db.Uuid
+  description   String            @db.VarChar(1000)
+  scheduledAt   DateTime
+  status        AppointmentStatus @default(PENDING)
+  paymentMethod PaymentMethod
+
+  serviceId String  @db.Uuid
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  clientId String @db.Uuid
+  client   User   @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("appointments")
 }
