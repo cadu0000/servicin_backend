@@ -31,6 +31,7 @@ model User {
   serviceProvider ServiceProvider?
   contacts        Contact[]
   reviewsWritten  Review[]         @relation("ClientReviews")
+  bookings        Booking[]        @relation("UserBookings")
 
   @@map("users")
 }
@@ -82,6 +83,7 @@ model ServiceProvider {
   servicesOffered               ProviderService[]
   reviewsReceived               Review[]                      @relation("ProviderReviews")
   serviceProviderAvailabilities ServiceProviderAvailability[]
+  bookings                      Booking[]                     @relation("ProviderBookings")
 
   @@map("service_providers")
 }
@@ -121,6 +123,7 @@ model Service {
 
   photos    ServicePhoto[]
   providers ProviderService[]
+  bookings  Booking[]         @relation("ServiceBookings")
 
   @@map("services")
 }
@@ -174,4 +177,29 @@ model Contact {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("contacts")
+}
+
+model Booking {
+  id         String        @id @default(uuid())
+  clientId   String        @db.Uuid
+  providerId String        @db.Uuid
+  serviceId  String        @db.Uuid
+  dateTime   DateTime
+  status     BookingStatus @default(PENDING)
+  notes      String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  client   User            @relation("UserBookings", fields: [clientId], references: [id])
+  provider ServiceProvider @relation("ProviderBookings", fields: [providerId], references: [userId])
+  service  Service         @relation("ServiceBookings", fields: [serviceId], references: [id])
+
+  @@unique([providerId, dateTime])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELED
 }
