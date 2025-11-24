@@ -1,59 +1,15 @@
-import fastify from "fastify";
-import fastifySwagger from "@fastify/swagger";
-import {
-  validatorCompiler,
-  serializerCompiler,
-  jsonSchemaTransform,
-} from "fastify-type-provider-zod";
-import scalarFastify from "@scalar/fastify-api-reference";
+import { buildApp } from "./app";
 
-import { userRoutes } from "./api/routes/auth.route";
-import { jwtPlugin } from "./lib/jwt";
-import cookieSetterPlugin from "./lib/cookies";
-import { serviceRoutes } from "./api/routes/service.route";
-import { serviceProviderRoutes } from "./api/routes/service-provider.route";
-import { categoryRoutes } from "./api/routes/category.route";
-import { appointmentRoutes } from "./api/routes/appointment.route";
+async function start() {
+  const server = await buildApp();
 
-const server = fastify();
+  server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+    console.log(`✅ Server listening at ${address}`);
+  });
+}
 
-server.setValidatorCompiler(validatorCompiler);
-server.setSerializerCompiler(serializerCompiler);
-
-server.register(fastifySwagger, {
-  openapi: {
-    info: {
-      title: "Servicin API",
-      description: "API documentation for Servicin application",
-      version: "1.0.0",
-    },
-  },
-  transform: jsonSchemaTransform,
-});
-
-server.register(scalarFastify, {
-  routePrefix: "/docs",
-  configuration: {
-    metaData: {
-      title: "Servicin API",
-      description: "API documentation for Servicin application",
-    },
-  },
-});
-
-server.register(cookieSetterPlugin);
-server.register(jwtPlugin);
-
-server.register(userRoutes, { prefix: "/user" });
-server.register(serviceProviderRoutes, { prefix: "/service-providers" });
-server.register(serviceRoutes, { prefix: "/services" });
-server.register(categoryRoutes, { prefix: "/categories" });
-server.register(appointmentRoutes, { prefix: "/appointments" });
-
-server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log(`✅ Server listening at ${address}`);
-});
+start();

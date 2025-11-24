@@ -3,7 +3,7 @@ import { z } from "zod";
 import { signupUserSchema, LoginUserDTO } from "../../schemas/auth.schema";
 import { authController } from "../../container";
 
-export async function userRoutes(server: FastifyInstance) {
+export async function authRoutes(server: FastifyInstance) {
   server.post(
     "/signup",
     {
