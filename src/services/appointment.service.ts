@@ -23,6 +23,12 @@ export class AppointmentService {
       throw new Error("Service ID not found.");
     }
 
+    const serviceProviderId = serviceExists.providers[0].provider.user.id;
+
+    if (serviceProviderId === clientId) {
+      throw new Error("O cliente não pode agendar um serviço para si mesmo.");
+    }
+
     if (scheduledAt.getDay() === 0) {
       throw new Error("Não é possível agendar serviços aos domingos.");
     }
