@@ -13,6 +13,7 @@ import cookieSetterPlugin from "./lib/cookies";
 import { serviceRoutes } from "./api/routes/service.route";
 import { serviceProviderRoutes } from "./api/routes/service-provider.route";
 import { categoryRoutes } from "./api/routes/category.route";
+import { appointmentRoutes } from "./api/routes/appointment.route";
 
 const server = fastify();
 
@@ -47,6 +48,7 @@ server.register(userRoutes, { prefix: "/user" });
 server.register(serviceProviderRoutes, { prefix: "/service-providers" });
 server.register(serviceRoutes, { prefix: "/services" });
 server.register(categoryRoutes, { prefix: "/categories" });
+server.register(appointmentRoutes, { prefix: "/appointments" });
 
 server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
   if (err) {
