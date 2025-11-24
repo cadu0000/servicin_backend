@@ -195,6 +195,7 @@ model Booking {
   service  Service         @relation("ServiceBookings", fields: [serviceId], references: [id])
 
   @@unique([providerId, dateTime])
+  @@map("booking")
 }
 
 enum BookingStatus {
