@@ -10,12 +10,16 @@ import { AuthService } from "../services/auth.service";
 import { CategoryRepository } from "../repository/category.repository";
 import { CategoryController } from "../api/controllers/category.controller";
 import { CategoryService } from "../services/category.service";
+import { BookingController } from "../api/controllers/booking.controller";
+import { BookingService } from "../services/booking.service";
+import { BookingRepository } from "../repository/booking.repository";
 
 // Repositories
 const authRepository = new AuthRepository();
 const serviceRepository = new ServiceRepository();
 const serviceProviderRepository = new ServiceProviderRepository();
 const categoryRepository = new CategoryRepository();
+const bookingRepository = new BookingRepository();
 
 // Services
 const authService = new AuthService(authRepository);
@@ -25,6 +29,12 @@ const serviceProviderService = new ServiceProviderService(
   authRepository
 );
 const categoryService = new CategoryService(categoryRepository);
+const bookingService = new BookingService(
+  serviceRepository,
+  authRepository,
+  serviceProviderRepository,
+  bookingRepository
+);
 
 // Controllers
 const authController = new AuthController(authService);
@@ -33,5 +43,6 @@ const serviceProviderController = new ServiceProviderController(
   serviceProviderService
 );
 const categoryController = new CategoryController(categoryService);
+const bookingController = new BookingController(bookingService);
 
-export { authController, serviceController, serviceProviderController, categoryController };
+export { authController, serviceController, serviceProviderController, categoryController, bookingController };
