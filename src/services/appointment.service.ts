@@ -2,6 +2,7 @@ import { AppointmentRepository } from "../repository/appointment.repository";
 import { ServiceRepository } from "../repository/service.repository";
 import { AuthRepository } from "../repository/auth.repository";
 import { AppointmentStatus, CreateAppointmentSchemaDTO } from "../schemas/appointment.shema";
+import { Prisma } from "@prisma/client";
 
 export class AppointmentService {
   constructor(
@@ -50,11 +51,22 @@ export class AppointmentService {
       throw new Error("Status inválido.");
     }
 
-    const updatedAppointment = await this.appointmentRepository.updateStatus(
-      appointmentId,
-      status
-    );
+    try {
+      const updatedAppointment =
+        await this.appointmentRepository.updateStatus(appointmentId, status);
 
-    return updatedAppointment;
+      return updatedAppointment;
+
+    } catch (error) {
+      console.error("Erro no updateAppointmentStatus:", error);
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new Error("Agendamento não encontrado.");
+        }
+      }
+
+      throw error;
+    }
   }
 }
