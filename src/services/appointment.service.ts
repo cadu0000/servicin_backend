@@ -1,7 +1,7 @@
 import { AppointmentRepository } from "../repository/appointment.repository";
 import { ServiceRepository } from "../repository/service.repository";
 import { AuthRepository } from "../repository/auth.repository";
-import { CreateAppointmentSchemaDTO } from "../schemas/appointment.shema";
+import { AppointmentStatus, CreateAppointmentSchemaDTO } from "../schemas/appointment.shema";
 
 export class AppointmentService {
   constructor(
@@ -38,5 +38,23 @@ export class AppointmentService {
     );
 
     return appointment;
+  }
+
+  async updateAppointmentStatus(
+    appointmentId: string,
+    status: AppointmentStatus
+  ) {
+
+    const validStatuses = ["PENDING", "APPROVED", "CANCELED", "COMPLETED", "REJECTED"];
+    if (!validStatuses.includes(status)) {
+      throw new Error("Status inválido.");
+    }
+
+    const updatedAppointment = await this.appointmentRepository.updateStatus(
+      appointmentId,
+      status
+    );
+
+    return updatedAppointment;
   }
 }

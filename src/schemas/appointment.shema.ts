@@ -48,6 +48,23 @@ export const createAppointmentSchema = z.object({
     .default(PaymentMethod.CREDIT_CARD),
 });
 
+export const updateAppointmentStatusRequestSchema = z.object({
+  appointmentId: z
+    .string()
+    .uuid()
+    .describe("ID do agendamento a ser atualizado.")
+    .min(1, "O ID do agendamento não pode ser vazio.")
+    .default("660e8400-e29b-41d4-a716-446655440000"),
+  status: z
+    .nativeEnum(AppointmentStatus)
+    .describe("Novo status do agendamento.")
+    .default(AppointmentStatus.APPROVED),
+});
+
+export type UpdateAppointmentStatusDTO = z.infer<
+  typeof updateAppointmentStatusRequestSchema
+>;
+
 export type CreateAppointmentSchemaDTO = z.infer<
   typeof createAppointmentSchema
 >;
