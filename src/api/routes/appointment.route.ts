@@ -53,8 +53,8 @@ export async function appointmentRoutes(server: FastifyInstance) {
         }),
         response: {
           200: z.object({
-            id: z.string().uuid(),
-            status: z.string(), 
+            id: updateAppointmentStatusRequestSchema.shape.appointmentId,
+            status: updateAppointmentStatusRequestSchema.shape.status,
           }),
         },
       },
