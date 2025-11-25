@@ -33,4 +33,24 @@ export class AppointmentRepository {
 
     return newAppointment as AppointmentResponse;
   }
+
+  async updateStatus(
+    appointmentId: string,
+    status: AppointmentStatus
+  ): Promise<AppointmentResponse> {
+    const updatedAppointment = await prisma.appointment.update({
+      where: {
+        id: appointmentId,
+      },
+      data: {
+        status: status,
+      },
+      select: {
+        id: true,
+        status: true,
+      },
+    });
+
+    return updatedAppointment as AppointmentResponse;
+  }
 }
