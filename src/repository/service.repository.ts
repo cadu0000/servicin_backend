@@ -39,6 +39,12 @@ export class ServiceRepository {
                   select: {
                     id: true,
                     email: true,
+                    contacts: {
+                      select: {
+                        type: true,
+                        value: true,
+                      },
+                    },
                   },
                 },
               },
@@ -95,6 +101,12 @@ export class ServiceRepository {
                   select: {
                     id: true,
                     email: true,
+                    contacts: {
+                      select: {
+                        type: true,
+                        value: true,
+                      },
+                    },
                   },
                 },
               },
