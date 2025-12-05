@@ -109,7 +109,7 @@ model ServiceAvailability {
   breakStart   String?  @map("break_start")
   breakEnd     String?  @map("break_end")
   slotDuration Int      @default(30) @map("slot_duration")
-  service      Service? @relation(fields: [serviceId], references: [id])
+  service      Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   serviceId    String?  @db.Uuid
 
   @@unique([serviceId, dayOfWeek])
@@ -135,10 +135,10 @@ model Service {
 
   photos         ServicePhoto[]
   availabilities ServiceAvailability[]
-  provider       ServiceProvider       @relation(fields: [providerId], references: [userId])
+  provider       ServiceProvider       @relation(fields: [providerId], references: [userId], onDelete: Cascade)
   providerId     String                @db.Uuid
   appointments   Appointment[]
-  category       Category              @relation(fields: [categoryId], references: [id])
+  category       Category              @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId     Int
 
   @@map("services")

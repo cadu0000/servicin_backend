@@ -37,6 +37,7 @@
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
+    "@faker-js/faker": "^10.1.0",
     "@tsconfig/node24": "^24.0.1",
     "@types/bcrypt": "^6.0.0",
     "@types/jest": "^30.0.0",

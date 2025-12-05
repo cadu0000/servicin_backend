@@ -1,0 +1,164 @@
+[
+  {
+    "email": "joao.silva@email.com",
+    "password": "12345",
+    "userType": "INDIVIDUAL",
+    "photoUrl": null,
+    "individual": {
+      "cpf": "12345678900",
+      "fullName": "João Silva",
+      "birthDate": "1990-05-15"
+    },
+    "address": [
+      {
+        "country": "Brasil",
+        "state": "São Paulo",
+        "city": "São Paulo",
+        "neighborhood": "Centro",
+        "street": "Rua das Flores",
+        "zipCode": "01310-100",
+        "number": "123"
+      }
+    ],
+    "contacts": [
+      {
+        "type": "EMAIL",
+        "value": "joao.silva@email.com"
+      },
+      {
+        "type": "PHONE",
+        "value": "(11) 98765-4321"
+      }
+    ]
+  },
+  {
+    "email": "empresa.tech@email.com",
+    "password": "12345",
+    "userType": "COMPANY",
+    "photoUrl": null,
+    "company": {
+      "cnpj": "12345678000190",
+      "corporateName": "Tech Solutions LTDA",
+      "tradeName": "Tech Solutions"
+    },
+    "address": [
+      {
+        "country": "Brasil",
+        "state": "Rio de Janeiro",
+        "city": "Rio de Janeiro",
+        "neighborhood": "Copacabana",
+        "street": "Avenida Atlântica",
+        "zipCode": "22021-000",
+        "number": "456"
+      }
+    ],
+    "contacts": [
+      {
+        "type": "EMAIL",
+        "value": "contato@techsolutions.com.br"
+      },
+      {
+        "type": "PHONE",
+        "value": "(21) 3456-7890"
+      }
+    ]
+  },
+  {
+    "email": "maria.santos@email.com",
+    "password": "12345",
+    "userType": "INDIVIDUAL",
+    "photoUrl": null,
+    "individual": {
+      "cpf": "98765432100",
+      "fullName": "Maria Santos",
+      "birthDate": "1985-08-20"
+    },
+    "address": [
+      {
+        "country": "Brasil",
+        "state": "Minas Gerais",
+        "city": "Belo Horizonte",
+        "neighborhood": "Savassi",
+        "street": "Rua da Bahia",
+        "zipCode": "30160-012",
+        "number": "789"
+      }
+    ],
+    "contacts": [
+      {
+        "type": "EMAIL",
+        "value": "maria.santos@email.com"
+      },
+      {
+        "type": "PHONE",
+        "value": "(31) 99876-5432"
+      }
+    ]
+  },
+  {
+    "email": "carlos.provedor@email.com",
+    "password": "12345",
+    "userType": "INDIVIDUAL",
+    "photoUrl": null,
+    "isServiceProvider": true,
+    "individual": {
+      "cpf": "11122233344",
+      "fullName": "Carlos Provedor",
+      "birthDate": "1988-03-10"
+    },
+    "address": [
+      {
+        "country": "Brasil",
+        "state": "São Paulo",
+        "city": "Campinas",
+        "neighborhood": "Cambuí",
+        "street": "Rua Barão de Jaguara",
+        "zipCode": "13015-001",
+        "number": "500"
+      }
+    ],
+    "contacts": [
+      {
+        "type": "EMAIL",
+        "value": "carlos.provedor@email.com"
+      },
+      {
+        "type": "PHONE",
+        "value": "(19) 91234-5678"
+      }
+    ]
+  },
+  {
+    "email": "ana.profissional@email.com",
+    "password": "12345",
+    "userType": "INDIVIDUAL",
+    "photoUrl": null,
+    "isServiceProvider": true,
+    "individual": {
+      "cpf": "55566677788",
+      "fullName": "Ana Profissional",
+      "birthDate": "1992-11-25"
+    },
+    "address": [
+      {
+        "country": "Brasil",
+        "state": "Rio de Janeiro",
+        "city": "Niterói",
+        "neighborhood": "Icaraí",
+        "street": "Rua da Praia",
+        "zipCode": "24220-000",
+        "number": "200"
+      }
+    ],
+    "contacts": [
+      {
+        "type": "EMAIL",
+        "value": "ana.profissional@email.com"
+      },
+      {
+        "type": "PHONE",
+        "value": "(21) 98888-7777"
+      }
+    ]
+  }
+]
