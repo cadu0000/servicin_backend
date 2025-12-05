@@ -15,5 +15,11 @@ declare module "fastify" {
     jwt: import("@fastify/jwt").FastifyJWT;
     user?: { sub: string; email: string };
   }
-}
 
+  interface FastifyInstance {
+    authenticate: (
+      req: FastifyRequest,
+      reply: import("fastify").FastifyReply
+    ) => Promise<void>;
+  }
+}

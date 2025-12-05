@@ -8,7 +8,7 @@ import {
 import scalarFastify from "@scalar/fastify-api-reference";
 import fastifyCookie from "@fastify/cookie";
 import { authRoutes } from "./api/routes/auth.route";
-import { jwtPlugin } from "./lib/jwt";
+import jwtPlugin from "./lib/jwt";
 import cookieSetterPlugin from "./lib/cookies";
 import { serviceProviderRoutes } from "./api/routes/service-provider.route";
 import { serviceRoutes } from "./api/routes/service.route";
