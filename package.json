@@ -10,7 +10,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "dev": "npm run db:up && npm run migrate:dev && npm run db:seed && npm run start:dev"
+    "dev": "npm run db:up && npm run migrate:dev && npm run db:seed && npm run start:dev",
+    "check:types": "tsc --noEmit"
   },
   "dependencies": {
     "@fastify/cookie": "^9.3.1",
