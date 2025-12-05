@@ -39,4 +39,22 @@ export async function authRoutes(server: FastifyInstance) {
     },
     (request, reply) => authController.login(request, reply)
   );
+
+  server.post(
+    "/logout",
+    {
+      schema: {
+        summary: "Logout a user",
+        description:
+          "Endpoint to logout a user and clear the authentication cookie",
+        tags: ["Authentication"],
+        response: {
+          200: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    (request, reply) => authController.logout(request, reply)
+  );
 }

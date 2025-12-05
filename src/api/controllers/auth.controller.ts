@@ -22,4 +22,15 @@ export class AuthController {
     reply.setTokenCookie(token);
     return reply.status(200).send({ token });
   }
+
+  async logout(request: FastifyRequest, reply: FastifyReply) {
+    if (!request.cookies.token) {
+      return reply
+        .status(400)
+        .send({ message: "Unable to logout: No active session" });
+    }
+
+    reply.clearTokenCookie();
+    return reply.status(200).send({ message: "Logged out successfully" });
+  }
 }
