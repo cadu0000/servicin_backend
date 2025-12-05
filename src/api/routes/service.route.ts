@@ -52,69 +52,59 @@ export async function serviceRoutes(server: FastifyInstance) {
                           .string()
                           .uuid()
                           .describe("Unique identifier for the photo"),
-                        photoUrl: z.string().url().describe("URL of the photo"),
+                        photoUrl: z.string().describe("URL of the photo"),
                       })
                     )
                     .describe("List of photos associated with the service"),
-                  providers: z
-                    .array(
-                      z.object({
-                        category: z
-                          .object({
-                            id: z
-                              .number()
-                              .describe("Unique identifier for the category"),
-                            name: z.string().describe("Name of the category"),
-                          })
-                          .describe("Category details"),
-                        provider: z
-                          .object({
-                            user: z
-                              .object({
-                                id: z
-                                  .string()
-                                  .uuid()
-                                  .describe("Unique identifier for the user"),
-                                email: z
-                                  .string()
-                                  .email()
-                                  .describe("Email of the user"),
-                                contacts: z
-                                  .array(
-                                    z.object({
-                                      type: z
-                                        .string()
-                                        .describe(
-                                          "Type of contact (e.g., phone, email)"
-                                        ),
-                                      value: z
-                                        .string()
-                                        .describe("Contact value"),
-                                    })
-                                  )
-                                  .describe("List of user contacts"),
+                  provider: z
+                    .object({
+                      userId: z
+                        .string()
+                        .uuid()
+                        .describe("Unique identifier for the service provider"),
+                      averageRating: z.coerce
+                        .string()
+                        .describe("Average rating of the service provider"),
+                      user: z
+                        .object({
+                          photoUrl: z
+                            .string()
+                            .nullable()
+                            .describe("URL of the user's profile photo"),
+                          individual: z
+                            .object({
+                              fullName: z
+                                .string()
+                                .describe("Full name of the individual user"),
+                            })
+                            .nullable()
+                            .describe("Individual user details"),
+                          contacts: z
+                            .array(
+                              z.object({
+                                type: z
+                                  .enum(["EMAIL", "PHONE"])
+                                  .describe("Type of contact (EMAIL or PHONE)"),
+                                value: z.string().describe("Contact value"),
                               })
-                              .describe("User details"),
-                          })
-                          .describe("Provider details"),
-                        createdAt: z
-                          .date()
-                          .describe("Timestamp when the service was created"),
-                        updatedAt: z
-                          .date()
-                          .nullable()
-                          .describe(
-                            "Timestamp when the service was last updated"
-                          ),
-                        finishedAt: z
-                          .date()
-                          .nullable()
-                          .describe(
-                            "Timestamp when the service was finished, null if not finished"
-                          ),
-                      })
-                    )
-                    .describe("List of providers associated with the service"),
+                            )
+                            .describe("List of user contacts"),
+                        })
+                        .describe("User details"),
+                    })
+                    .describe("Service provider details"),
+                  category: z
+                    .object({
+                      id: z
+                        .number()
+                        .describe("Unique identifier for the category"),
+                      name: z.string().describe("Name of the category"),
+                      description: z
+                        .string()
+                        .nullable()
+                        .describe("Description of the category"),
+                    })
+                    .describe("Category details"),
                 })
               )
               .describe("Array of service objects"),
@@ -165,63 +155,57 @@ export async function serviceRoutes(server: FastifyInstance) {
                     .string()
                     .uuid()
                     .describe("Unique identifier for the photo"),
-                  photoUrl: z.string().url().describe("URL of the photo"),
+                  photoUrl: z.string().describe("URL of the photo"),
                 })
               )
               .describe("List of photos associated with the service"),
-            providers: z
-              .array(
-                z.object({
-                  category: z
-                    .object({
-                      id: z
-                        .number()
-                        .describe("Unique identifier for the category"),
-                      name: z.string().describe("Name of the category"),
-                    })
-                    .describe("Category details"),
-                  provider: z
-                    .object({
-                      user: z
-                        .object({
-                          id: z
-                            .string()
-                            .uuid()
-                            .describe("Unique identifier for the user"),
-                          email: z
-                            .string()
-                            .email()
-                            .describe("Email of the user"),
-                          contacts: z.array(
-                            z.object({
-                              type: z
-                                .string()
-                                .describe(
-                                  "Type of contact (e.g., phone, email)"
-                                ),
-                              value: z.string().describe("Contact value"),
-                            })
-                          ),
+            provider: z
+              .object({
+                userId: z
+                  .string()
+                  .uuid()
+                  .describe("Unique identifier for the service provider"),
+                averageRating: z.coerce
+                  .string()
+                  .describe("Average rating of the service provider"),
+                user: z
+                  .object({
+                    photoUrl: z
+                      .string()
+                      .nullable()
+                      .describe("URL of the user's profile photo"),
+                    individual: z
+                      .object({
+                        fullName: z
+                          .string()
+                          .describe("Full name of the individual user"),
+                      })
+                      .nullable()
+                      .describe("Individual user details"),
+                    contacts: z
+                      .array(
+                        z.object({
+                          type: z
+                            .enum(["EMAIL", "PHONE"])
+                            .describe("Type of contact (EMAIL or PHONE)"),
+                          value: z.string().describe("Contact value"),
                         })
-                        .describe("User details"),
-                    })
-                    .describe("Provider details"),
-                  createdAt: z
-                    .date()
-                    .describe("Timestamp when the service was created"),
-                  updatedAt: z
-                    .date()
-                    .nullable()
-                    .describe("Timestamp when the service was last updated"),
-                  finishedAt: z
-                    .date()
-                    .nullable()
-                    .describe(
-                      "Timestamp when the service was finished, null if not finished"
-                    ),
-                })
-              )
-              .describe("List of providers associated with the service"),
+                      )
+                      .describe("List of user contacts"),
+                  })
+                  .describe("User details"),
+              })
+              .describe("Service provider details"),
+            category: z
+              .object({
+                id: z.number().describe("Unique identifier for the category"),
+                name: z.string().describe("Name of the category"),
+                description: z
+                  .string()
+                  .nullable()
+                  .describe("Description of the category"),
+              })
+              .describe("Category details"),
           }),
         },
       },
