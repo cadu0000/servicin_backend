@@ -107,4 +107,52 @@ export class AuthRepository {
 
     return await verifyPassword(password, user.password);
   }
+
+  async findUserWithDetails(id: string) {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        userType: true,
+        photoUrl: true,
+        createdAt: true,
+        address: {
+          select: {
+            id: true,
+            country: true,
+            state: true,
+            city: true,
+            neighborhood: true,
+            street: true,
+            zipCode: true,
+            number: true,
+          },
+        },
+        contacts: {
+          select: {
+            id: true,
+            type: true,
+            value: true,
+          },
+        },
+        individual: {
+          select: {
+            fullName: true,
+            cpf: true,
+            birthDate: true,
+          },
+        },
+        company: {
+          select: {
+            corporateName: true,
+            cnpj: true,
+            tradeName: true,
+          },
+        },
+      },
+    });
+
+    return user;
+  }
 }

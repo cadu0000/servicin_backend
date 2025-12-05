@@ -58,4 +58,59 @@ export async function authRoutes(server: FastifyInstance) {
     },
     (request, reply) => authController.logout(request, reply)
   );
+
+  server.get(
+    "/me",
+    {
+      preHandler: [server.authenticate],
+      schema: {
+        summary: "Get current user information",
+        description: "Endpoint to get the authenticated user's information",
+        tags: ["Authentication"],
+        response: {
+          200: z.object({
+            id: z.string().uuid(),
+            email: z.string().email(),
+            userType: z.enum(["INDIVIDUAL", "COMPANY"]),
+            photoUrl: z.string().nullable(),
+            createdAt: z.date(),
+            address: z.array(
+              z.object({
+                id: z.string().uuid(),
+                country: z.string(),
+                state: z.string(),
+                city: z.string(),
+                neighborhood: z.string(),
+                street: z.string(),
+                zipCode: z.string(),
+                number: z.string().nullable(),
+              })
+            ),
+            contacts: z.array(
+              z.object({
+                id: z.string().uuid(),
+                type: z.enum(["EMAIL", "PHONE"]),
+                value: z.string(),
+              })
+            ),
+            individual: z
+              .object({
+                fullName: z.string(),
+                cpf: z.string(),
+                birthDate: z.date().nullable(),
+              })
+              .nullable(),
+            company: z
+              .object({
+                corporateName: z.string(),
+                cnpj: z.string(),
+                tradeName: z.string().nullable(),
+              })
+              .nullable(),
+          }),
+        },
+      },
+    },
+    (request, reply) => authController.getMe(request, reply)
+  );
 }
