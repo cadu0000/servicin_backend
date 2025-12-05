@@ -3,7 +3,7 @@ import { serviceController } from "../../container";
 import { z } from "zod";
 import {
   createServiceSchema,
-  PublicSearchQuerySchema,
+  fetchServicesQueryParamsSchema,
 } from "../../schemas/service.schema";
 
 export async function serviceRoutes(server: FastifyInstance) {
@@ -12,18 +12,10 @@ export async function serviceRoutes(server: FastifyInstance) {
     {
       schema: {
         summary: "Fetch all services",
-        description: "Endpoint to fetch all available services",
+        description:
+          "Endpoint to fetch all available services with optional filters",
         tags: ["Service"],
-        querystring: z.object({
-          page: z.coerce
-            .number()
-            .default(1)
-            .describe("Page number for pagination"),
-          pageSize: z.coerce
-            .number()
-            .default(12)
-            .describe("Number of items per page for pagination"),
-        }),
+        querystring: fetchServicesQueryParamsSchema,
         response: {
           200: z.object({
             total: z.number().describe("Total number of services"),
@@ -152,20 +144,6 @@ export async function serviceRoutes(server: FastifyInstance) {
       },
     },
     async (request, reply) => serviceController.fetch(request, reply)
-  );
-
-  server.get(
-    "/search",
-    {
-      schema: {
-        summary: "Search for services",
-        description:
-          "Endpoint to search for services based on various criteria",
-        tags: ["Service"],
-        querystring: PublicSearchQuerySchema,
-      },
-    },
-    (request, reply) => serviceController.searchServicesHandler(request, reply)
   );
 
   server.get(

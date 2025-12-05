@@ -1,10 +1,9 @@
-import { ServiceService, InputFilters } from "../service.service";
-import { InvalidInputError } from "../../core/errors/InvalidInputError";
+import { ServiceService } from "../service.service";
 import { ServiceRepository } from "../../repository/service.repository";
 import { AuthRepository } from "../../repository/auth.repository";
+import { FetchServicesQueryParamsDTO } from "../../schemas/service.schema";
 
 const mockServiceRepository: jest.Mocked<ServiceRepository> = {
-  filterServices: jest.fn(),
   fetch: jest.fn(),
   fetchById: jest.fn(),
   create: jest.fn(),
@@ -23,105 +22,222 @@ const mockUserRepository: jest.Mocked<AuthRepository> = {
   isServiceProvider: jest.fn(),
 };
 
-const MOCK_SERVICE_RESULT = {
-  id: "s1",
-  name: "Serviço de Teste",
-  axis: "Teste",
-  description: "Teste",
-  price: 100,
-  providerName: "Provider Teste",
-  chargeType: "Fixo",
-  averageRating: 5.0,
-  latitude: 0,
-  longitude: 0,
-};
+const MOCK_FETCH_RESULT = {
+  data: [
+    {
+      id: "s1",
+      name: "Serviço de Teste",
+      description: "Teste",
+      price: 100,
+      photos: [],
+      availabilities: [],
+      provider: {
+        userId: "provider-1",
+        averageRating: 5.0,
+        user: {
+          photoUrl: null,
+          individual: {
+            fullName: "Provider Teste",
+          },
+          contacts: [],
+        },
+      },
+      category: {
+        id: 1,
+        name: "Limpeza",
+        description: "Teste",
+      },
+    },
+  ],
+  total: 1,
+  page: 1,
+  pageSize: 12,
+  totalPages: 1,
+} as any;
 
-describe("PublicSearchService", () => {
-  let publicSearchService: ServiceService;
+describe("ServiceService", () => {
+  let serviceService: ServiceService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    publicSearchService = new ServiceService(
+    serviceService = new ServiceService(
       mockServiceRepository,
       mockUserRepository
     );
   });
 
-  describe("Validation and Exceptions", () => {
-    it("should throw InvalidInputError for search terms less than 2 characters", async () => {
-      const invalidTermFilters = { q: "a" };
+  describe("fetch", () => {
+    it("should call repository.fetch with correct parameters", async () => {
+      const filters: FetchServicesQueryParamsDTO = {
+        page: 1,
+        pageSize: 12,
+      };
 
-      await expect(
-        publicSearchService.searchService(invalidTermFilters)
-      ).rejects.toThrow(InvalidInputError);
+      mockServiceRepository.fetch.mockResolvedValue(MOCK_FETCH_RESULT as any);
 
-      await expect(
-        publicSearchService.searchService(invalidTermFilters)
-      ).rejects.toThrow("O termo de busca deve ter pelo menos 2 caracteres.");
+      const result = await serviceService.fetch(filters);
 
-      expect(mockServiceRepository.filterServices).not.toHaveBeenCalled();
+      expect(mockServiceRepository.fetch).toHaveBeenCalledWith(filters);
+      expect(result).toEqual(MOCK_FETCH_RESULT);
     });
 
-    it("should NOT throw an error for empty search term (q is undefined)", async () => {
-      const emptyFilters = {};
+    it("should pass search term (q) to repository", async () => {
+      const filters: FetchServicesQueryParamsDTO = {
+        q: "Limpeza",
+        page: 1,
+        pageSize: 12,
+      };
 
-      mockServiceRepository.filterServices.mockResolvedValue([]);
+      mockServiceRepository.fetch.mockResolvedValue(MOCK_FETCH_RESULT as any);
 
-      await expect(
-        publicSearchService.searchService(emptyFilters)
-      ).resolves.not.toThrow();
-      expect(mockServiceRepository.filterServices).toHaveBeenCalled();
+      await serviceService.fetch(filters);
+
+      expect(mockServiceRepository.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          q: "Limpeza",
+        })
+      );
+    });
+
+    it("should pass all filter parameters to repository", async () => {
+      const filters: FetchServicesQueryParamsDTO = {
+        q: "Limpeza",
+        category: "Limpeza",
+        minPrice: 50,
+        maxPrice: 500,
+        minRating: 4.0,
+        providerName: "João",
+        page: 1,
+        pageSize: 12,
+      };
+
+      mockServiceRepository.fetch.mockResolvedValue(MOCK_FETCH_RESULT as any);
+
+      await serviceService.fetch(filters);
+
+      expect(mockServiceRepository.fetch).toHaveBeenCalledWith(filters);
+    });
+
+    it("should throw error when repository returns null", async () => {
+      const filters: FetchServicesQueryParamsDTO = {
+        page: 1,
+        pageSize: 12,
+      };
+
+      mockServiceRepository.fetch.mockResolvedValue(null as any);
+
+      await expect(serviceService.fetch(filters)).rejects.toThrow(
+        "No services found"
+      );
+    });
+
+    it("should return paginated results with correct structure", async () => {
+      const filters: FetchServicesQueryParamsDTO = {
+        page: 1,
+        pageSize: 12,
+      };
+
+      mockServiceRepository.fetch.mockResolvedValue(MOCK_FETCH_RESULT as any);
+
+      const result = await serviceService.fetch(filters);
+
+      expect(result).toHaveProperty("data");
+      expect(result).toHaveProperty("total");
+      expect(result).toHaveProperty("page");
+      expect(result).toHaveProperty("pageSize");
+      expect(result).toHaveProperty("totalPages");
+      expect(Array.isArray(result.data)).toBe(true);
     });
   });
 
-  describe("Mapping and Repository Interaction", () => {
-    const mockResults = [MOCK_SERVICE_RESULT];
+  describe("fetchById", () => {
+    it("should call repository.fetchById with correct id", async () => {
+      const serviceId = "service-123";
+      const mockService = MOCK_FETCH_RESULT.data[0];
 
-    beforeEach(() => {
-      mockServiceRepository.filterServices.mockResolvedValue(mockResults);
+      mockServiceRepository.fetchById.mockResolvedValue(mockService as any);
+
+      const result = await serviceService.fetchById(serviceId);
+
+      expect(mockServiceRepository.fetchById).toHaveBeenCalledWith(serviceId);
+      expect(result).toEqual(mockService);
     });
 
-    it('should correctly map the "q" parameter to "searchTerm" in the repository call', async () => {
-      const inputFilters = { q: "Limpeza" };
-      await publicSearchService.searchService(inputFilters);
+    it("should throw error when service is not found", async () => {
+      const serviceId = "non-existent-id";
 
-      expect(mockServiceRepository.filterServices).toHaveBeenCalledWith({
-        searchTerm: "Limpeza",
-      });
+      mockServiceRepository.fetchById.mockResolvedValue(null);
+
+      await expect(serviceService.fetchById(serviceId)).rejects.toThrow(
+        "No service found"
+      );
     });
+  });
 
-    it("should pass all valid DTO filters to the repository when q is NOT present", async () => {
-      const inputFilters: InputFilters = {
-        minRating: 4.5,
-        providerName: "João",
+  describe("create", () => {
+    it("should create service when all validations pass", async () => {
+      const createData = {
+        providerId: "provider-1",
+        categoryId: 1,
+        name: "Novo Serviço",
+        description: "Descrição",
+        price: 100,
+        availability: [],
       };
-      await publicSearchService.searchService(inputFilters);
+
+      const mockUser = { id: "provider-1" };
+      const mockCategory = { id: 1, name: "Limpeza" };
+      const mockCreatedService = { id: "new-service-id" };
+
+      mockUserRepository.findById.mockResolvedValue(mockUser as any);
+      mockServiceRepository.findCategoryById.mockResolvedValue(
+        mockCategory as any
+      );
+      mockServiceRepository.create.mockResolvedValue(mockCreatedService as any);
+
+      const result = await serviceService.create(createData);
+
+      expect(mockUserRepository.findById).toHaveBeenCalledWith("provider-1");
+      expect(mockServiceRepository.findCategoryById).toHaveBeenCalledWith(1);
+      expect(mockServiceRepository.create).toHaveBeenCalledWith(createData);
+      expect(result).toEqual(mockCreatedService);
     });
 
-    it('should prevent the specific "axis" filter from being passed when "q" is present (Conflict resolution)', async () => {
-      const inputFilters = { q: "Limpeza", axis: "Serviços" };
-      await publicSearchService.searchService(inputFilters);
+    it("should throw error when user does not exist", async () => {
+      const createData = {
+        providerId: "non-existent",
+        categoryId: 1,
+        name: "Novo Serviço",
+        description: "Descrição",
+        price: 100,
+        availability: [],
+      };
 
-      expect(mockServiceRepository.filterServices).toHaveBeenCalledWith(
-        expect.objectContaining({
-          searchTerm: "Limpeza",
-        })
-      );
+      mockUserRepository.findById.mockResolvedValue(null);
 
-      expect(mockServiceRepository.filterServices).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          axis: "Serviços",
-        })
+      await expect(serviceService.create(createData)).rejects.toThrow(
+        "User does not exist"
       );
     });
 
-    it("should trim the search term before sending to the repository", async () => {
-      const inputFilters = { q: "  termo com espaços  " };
-      await publicSearchService.searchService(inputFilters);
+    it("should throw error when category does not exist", async () => {
+      const createData = {
+        providerId: "provider-1",
+        categoryId: 999,
+        name: "Novo Serviço",
+        description: "Descrição",
+        price: 100,
+        availability: [],
+      };
 
-      expect(mockServiceRepository.filterServices).toHaveBeenCalledWith({
-        searchTerm: "termo com espaços",
-      });
+      const mockUser = { id: "provider-1" };
+
+      mockUserRepository.findById.mockResolvedValue(mockUser as any);
+      mockServiceRepository.findCategoryById.mockResolvedValue(null);
+
+      await expect(serviceService.create(createData)).rejects.toThrow(
+        "Category does not exist"
+      );
     });
   });
 });
