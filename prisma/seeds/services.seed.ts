@@ -32,9 +32,15 @@ export async function seedServices() {
         continue;
       }
 
-      const photoUrl = faker.helpers.maybe(() => faker.image.url(), {
-        probability: 0.7,
-      });
+      const photoUrl = faker.helpers.maybe(
+        () => {
+          const size = faker.number.int({ min: 720, max: 1080 });
+          return `https://picsum.photos/${size}/${size}`;
+        },
+        {
+          probability: 0.7,
+        }
+      );
 
       const service = await prisma.service.create({
         data: {
