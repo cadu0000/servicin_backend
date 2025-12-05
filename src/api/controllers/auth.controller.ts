@@ -23,13 +23,7 @@ export class AuthController {
     return reply.status(200).send({ token });
   }
 
-  async logout(request: FastifyRequest, reply: FastifyReply) {
-    if (!request.cookies.token) {
-      return reply
-        .status(400)
-        .send({ message: "Unable to logout: No active session" });
-    }
-
+  async logout(_: FastifyRequest, reply: FastifyReply) {
     reply.clearTokenCookie();
     return reply.status(200).send({ message: "Logged out successfully" });
   }

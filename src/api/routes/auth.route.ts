@@ -43,6 +43,7 @@ export async function authRoutes(server: FastifyInstance) {
   server.post(
     "/logout",
     {
+      preHandler: [server.authenticate],
       schema: {
         summary: "Logout a user",
         description:
