@@ -56,6 +56,45 @@ export async function serviceRoutes(server: FastifyInstance) {
                       })
                     )
                     .describe("List of photos associated with the service"),
+                  availabilities: z
+                    .array(
+                      z.object({
+                        id: z
+                          .string()
+                          .uuid()
+                          .describe("Unique identifier for the availability"),
+                        dayOfWeek: z
+                          .number()
+                          .min(0)
+                          .max(6)
+                          .describe(
+                            "Day of the week (0 - Sunday, 6 - Saturday)"
+                          ),
+                        startTime: z
+                          .string()
+                          .describe("Start time in HH:MM format"),
+                        endTime: z
+                          .string()
+                          .describe("End time in HH:MM format"),
+                        breakStart: z
+                          .string()
+                          .nullable()
+                          .describe("Break start time in HH:MM format"),
+                        breakEnd: z
+                          .string()
+                          .nullable()
+                          .describe("Break end time in HH:MM format"),
+                        slotDuration: z
+                          .number()
+                          .describe("Duration of each service slot in minutes"),
+                        serviceId: z
+                          .string()
+                          .uuid()
+                          .nullable()
+                          .describe("ID of the service"),
+                      })
+                    )
+                    .describe("List of availability schedules"),
                   provider: z
                     .object({
                       userId: z
@@ -159,6 +198,39 @@ export async function serviceRoutes(server: FastifyInstance) {
                 })
               )
               .describe("List of photos associated with the service"),
+            availabilities: z
+              .array(
+                z.object({
+                  id: z
+                    .string()
+                    .uuid()
+                    .describe("Unique identifier for the availability"),
+                  dayOfWeek: z
+                    .number()
+                    .min(0)
+                    .max(6)
+                    .describe("Day of the week (0 - Sunday, 6 - Saturday)"),
+                  startTime: z.string().describe("Start time in HH:MM format"),
+                  endTime: z.string().describe("End time in HH:MM format"),
+                  breakStart: z
+                    .string()
+                    .nullable()
+                    .describe("Break start time in HH:MM format"),
+                  breakEnd: z
+                    .string()
+                    .nullable()
+                    .describe("Break end time in HH:MM format"),
+                  slotDuration: z
+                    .number()
+                    .describe("Duration of each service slot in minutes"),
+                  serviceId: z
+                    .string()
+                    .uuid()
+                    .nullable()
+                    .describe("ID of the service"),
+                })
+              )
+              .describe("List of availability schedules"),
             provider: z
               .object({
                 userId: z

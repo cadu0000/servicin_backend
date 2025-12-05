@@ -21,28 +21,88 @@ export async function serviceProviderRoutes(server: FastifyInstance) {
                 .string()
                 .uuid()
                 .describe("ID of the service provider user"),
-              serviceDescription: z
-                .string()
-                .nullable()
-                .describe("Description of the service provided"),
-              schedule: z
+              services: z
                 .array(
                   z.object({
-                    dayOfWeek: z
-                      .number()
-                      .min(0)
-                      .max(6)
-                      .describe("Day of the week (0 - Sunday, 6 - Saturday)"),
-                    timeIntervals: z
+                    id: z
+                      .string()
+                      .uuid()
+                      .describe("Unique identifier for the service"),
+                    name: z.string().describe("Name of the service"),
+                    description: z
+                      .string()
+                      .nullable()
+                      .describe("Description of the service"),
+                    price: z.coerce
+                      .string()
+                      .describe("Price of the service in BRL"),
+                    photos: z
                       .array(
-                        z
-                          .string()
-                          .describe("Available time slot in HH:MM format")
+                        z.object({
+                          id: z
+                            .string()
+                            .uuid()
+                            .describe("Unique identifier for the photo"),
+                          photoUrl: z.string().describe("URL of the photo"),
+                        })
                       )
-                      .describe("List of available time slots for the day"),
+                      .describe("List of photos associated with the service"),
+                    availabilities: z
+                      .array(
+                        z.object({
+                          id: z
+                            .string()
+                            .uuid()
+                            .describe("Unique identifier for the availability"),
+                          dayOfWeek: z
+                            .number()
+                            .min(0)
+                            .max(6)
+                            .describe(
+                              "Day of the week (0 - Sunday, 6 - Saturday)"
+                            ),
+                          startTime: z
+                            .string()
+                            .describe("Start time in HH:MM format"),
+                          endTime: z
+                            .string()
+                            .describe("End time in HH:MM format"),
+                          breakStart: z
+                            .string()
+                            .nullable()
+                            .describe("Break start time in HH:MM format"),
+                          breakEnd: z
+                            .string()
+                            .nullable()
+                            .describe("Break end time in HH:MM format"),
+                          slotDuration: z
+                            .number()
+                            .describe(
+                              "Duration of each service slot in minutes"
+                            ),
+                          serviceId: z
+                            .string()
+                            .uuid()
+                            .nullable()
+                            .describe("ID of the service"),
+                        })
+                      )
+                      .describe("List of availability schedules"),
+                    category: z
+                      .object({
+                        id: z
+                          .number()
+                          .describe("Unique identifier for the category"),
+                        name: z.string().describe("Name of the category"),
+                        description: z
+                          .string()
+                          .nullable()
+                          .describe("Description of the category"),
+                      })
+                      .describe("Category details"),
                   })
                 )
-                .describe("Weekly availability schedule"),
+                .describe("List of services provided"),
             })
             .describe("Service provider details"),
         },

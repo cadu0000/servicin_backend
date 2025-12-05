@@ -25,6 +25,7 @@ export class ServiceRepository {
             photoUrl: true,
           },
         },
+        availabilities: true,
         provider: {
           select: {
             userId: true,
@@ -81,6 +82,7 @@ export class ServiceRepository {
             photoUrl: true,
           },
         },
+        availabilities: true,
         provider: {
           select: {
             userId: true,
