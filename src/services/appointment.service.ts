@@ -1,7 +1,10 @@
 import { AppointmentRepository } from "../repository/appointment.repository";
 import { ServiceRepository } from "../repository/service.repository";
 import { AuthRepository } from "../repository/auth.repository";
-import { AppointmentStatus, CreateAppointmentSchemaDTO } from "../schemas/appointment.shema";
+import {
+  AppointmentStatus,
+  CreateAppointmentSchemaDTO,
+} from "../schemas/appointment.shema";
 import { Prisma } from "@prisma/client";
 
 export class AppointmentService {
@@ -24,7 +27,7 @@ export class AppointmentService {
       throw new Error("Service ID not found.");
     }
 
-    const serviceProviderId = serviceExists.providers[0].provider.user.id;
+    const serviceProviderId = serviceExists.provider.userId;
 
     if (serviceProviderId === clientId) {
       throw new Error("O cliente não pode agendar um serviço para si mesmo.");
@@ -45,18 +48,24 @@ export class AppointmentService {
     appointmentId: string,
     status: AppointmentStatus
   ) {
-
-    const validStatuses = ["PENDING", "APPROVED", "CANCELED", "COMPLETED", "REJECTED"];
+    const validStatuses = [
+      "PENDING",
+      "APPROVED",
+      "CANCELED",
+      "COMPLETED",
+      "REJECTED",
+    ];
     if (!validStatuses.includes(status)) {
       throw new Error("Status inválido.");
     }
 
     try {
-      const updatedAppointment =
-        await this.appointmentRepository.updateStatus(appointmentId, status);
+      const updatedAppointment = await this.appointmentRepository.updateStatus(
+        appointmentId,
+        status
+      );
 
       return updatedAppointment;
-
     } catch (error) {
       console.error("Erro no updateAppointmentStatus:", error);
 

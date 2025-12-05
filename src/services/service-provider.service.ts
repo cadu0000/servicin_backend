@@ -15,28 +15,7 @@ export class ServiceProviderService {
       throw new Error("Service provider not found");
     }
 
-    const schedule = serviceProvider.serviceProviderAvailabilities.map(
-      (slot) => {
-        const timeIntervals = generateSlotTimeIntervals(
-          slot.startTime,
-          slot.endTime,
-          slot.slotDuration,
-          slot.breakStart,
-          slot.breakEnd
-        );
-
-        return {
-          dayOfWeek: slot.dayOfWeek,
-          timeIntervals,
-        };
-      }
-    );
-
-    return {
-      userId: serviceProvider.userId,
-      serviceDescription: serviceProvider.serviceDescription,
-      schedule,
-    };
+    return serviceProvider;
   }
 
   async create(params: CreateServiceProviderDTO) {

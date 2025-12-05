@@ -25,35 +25,29 @@ export class ServiceRepository {
             photoUrl: true,
           },
         },
-        providers: {
+        provider: {
           select: {
-            category: {
+            userId: true,
+            averageRating: true,
+            user: {
               select: {
-                id: true,
-                name: true,
-              },
-            },
-            provider: {
-              select: {
-                user: {
+                photoUrl: true,
+                individual: {
                   select: {
-                    id: true,
-                    email: true,
-                    contacts: {
-                      select: {
-                        type: true,
-                        value: true,
-                      },
-                    },
+                    fullName: true,
+                  },
+                },
+                contacts: {
+                  select: {
+                    type: true,
+                    value: true,
                   },
                 },
               },
             },
-            createdAt: true,
-            updatedAt: true,
-            finishedAt: true,
           },
         },
+        category: true,
       },
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -87,35 +81,29 @@ export class ServiceRepository {
             photoUrl: true,
           },
         },
-        providers: {
+        provider: {
           select: {
-            category: {
+            userId: true,
+            averageRating: true,
+            user: {
               select: {
-                id: true,
-                name: true,
-              },
-            },
-            provider: {
-              select: {
-                user: {
+                photoUrl: true,
+                individual: {
                   select: {
-                    id: true,
-                    email: true,
-                    contacts: {
-                      select: {
-                        type: true,
-                        value: true,
-                      },
-                    },
+                    fullName: true,
+                  },
+                },
+                contacts: {
+                  select: {
+                    type: true,
+                    value: true,
                   },
                 },
               },
             },
-            createdAt: true,
-            updatedAt: true,
-            finishedAt: true,
           },
         },
+        category: true,
       },
       where: {
         id,
@@ -126,25 +114,21 @@ export class ServiceRepository {
   }
 
   async create(createServiceSchemaDTO: CreateServiceSchemaDTO) {
-    const { name, description, price, providerId, categoryId } =
+    const { name, description, price, providerId, categoryId, availability } =
       createServiceSchemaDTO;
 
     const service = await prisma.service.create({
-      select: {
-        id: true,
-      },
       data: {
         name,
         description,
         price,
-      },
-    });
-
-    await prisma.providerService.create({
-      data: {
-        serviceId: service.id,
-        providerId,
         categoryId,
+        providerId,
+        availabilities: {
+          createMany: {
+            data: availability,
+          },
+        },
       },
     });
 

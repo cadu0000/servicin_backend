@@ -59,12 +59,12 @@ export class AppointmentRepository {
   ): Promise<number> {
     const now = new Date();
 
-    const providerServices = await prisma.providerService.findMany({
+    const providerServices = await prisma.service.findMany({
       where: { providerId },
-      select: { serviceId: true },
+      select: { id: true },
     });
 
-    const serviceIds = providerServices.map((ps) => ps.serviceId);
+    const serviceIds = providerServices.map((ps) => ps.id);
 
     if (serviceIds.length === 0) {
       return 0;

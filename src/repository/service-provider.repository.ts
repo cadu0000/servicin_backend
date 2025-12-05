@@ -6,15 +6,20 @@ export class ServiceProviderRepository {
     const serviceProvider = await prisma.serviceProvider.findUnique({
       select: {
         userId: true,
-        serviceDescription: true,
-        serviceProviderAvailabilities: {
+        services: {
           select: {
-            dayOfWeek: true,
-            startTime: true,
-            endTime: true,
-            breakStart: true,
-            breakEnd: true,
-            slotDuration: true,
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            photos: {
+              select: {
+                id: true,
+                photoUrl: true,
+              },
+            },
+            availabilities: true,
+            category: true,
           },
         },
       },
@@ -27,24 +32,12 @@ export class ServiceProviderRepository {
   }
 
   async create(createServiceProviderDTO: CreateServiceProviderDTO) {
-    const { userId, serviceDescription, availability } =
-      createServiceProviderDTO;
+    const { userId } = createServiceProviderDTO;
 
-    const serviceProvider = await prisma.serviceProvider.create({
-      select: {
-        userId: true,
-      },
+    await prisma.serviceProvider.create({
       data: {
         userId,
-        serviceDescription,
       },
-    });
-
-    await prisma.serviceProviderAvailability.createMany({
-      data: availability.map((slot) => ({
-        providerId: serviceProvider.userId,
-        ...slot,
-      })),
     });
   }
 }

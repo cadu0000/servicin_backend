@@ -33,12 +33,12 @@ enum PaymentMethod {
 }
 
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String   @unique
+  id        String    @id @default(uuid()) @db.Uuid
+  email     String    @unique
   password  String
-  createdAt DateTime @default(now()) @map("created_at")
-  userType  UserRole @map("user_type")
-  photoUrl  String?  @map("photo_url") @db.Text
+  createdAt DateTime  @default(now()) @map("created_at")
+  userType  UserRole  @map("user_type")
+  photoUrl  String?   @map("photo_url") @db.Text
   deletedAt DateTime? @map("deleted_at")
 
   address              Address[]
@@ -91,32 +91,29 @@ model Company {
 }
 
 model ServiceProvider {
-  userId             String  @id @map("user_id") @db.Uuid
-  serviceDescription String? @map("service_description") @db.Text
-  averageRating      Decimal @default(0.00) @map("average_rating") @db.Decimal(3, 2)
+  userId        String  @id @map("user_id") @db.Uuid
+  averageRating Decimal @default(0.00) @map("average_rating") @db.Decimal(3, 2)
 
-  user                          User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  servicesOffered               ProviderService[]
-  reviewsReceived               Review[]                      @relation("ProviderReviews")
-  serviceProviderAvailabilities ServiceProviderAvailability[]
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewsReceived Review[]  @relation("ProviderReviews")
+  services        Service[]
 
   @@map("service_providers")
 }
 
-model ServiceProviderAvailability {
-  id           String  @id @default(uuid()) @db.Uuid
-  providerId   String  @map("provider_id") @db.Uuid
-  dayOfWeek    Int     @map("day_of_week")
-  startTime    String  @map("start_time")
-  endTime      String  @map("end_time")
-  breakStart   String? @map("break_start")
-  breakEnd     String? @map("break_end")
-  slotDuration Int     @default(30) @map("slot_duration")
+model ServiceAvailability {
+  id           String   @id @default(uuid()) @db.Uuid
+  dayOfWeek    Int      @map("day_of_week")
+  startTime    String   @map("start_time")
+  endTime      String   @map("end_time")
+  breakStart   String?  @map("break_start")
+  breakEnd     String?  @map("break_end")
+  slotDuration Int      @default(30) @map("slot_duration")
+  service      Service? @relation(fields: [serviceId], references: [id])
+  serviceId    String?  @db.Uuid
 
-  provider ServiceProvider @relation(fields: [providerId], references: [userId], onDelete: Cascade)
-
-  @@unique([providerId, dayOfWeek])
-  @@map("service_provider_availabilities")
+  @@unique([serviceId, dayOfWeek])
+  @@map("service_availabilities")
 }
 
 model Category {
@@ -124,7 +121,7 @@ model Category {
   name        String  @unique
   description String? @db.Text
 
-  providerServices ProviderService[]
+  services Service[]
 
   @@map("categories")
 }
@@ -136,9 +133,13 @@ model Service {
   price       Decimal  @default(0.00) @db.Decimal(10, 2)
   createdAt   DateTime @default(now()) @map("created_at")
 
-  photos       ServicePhoto[]
-  providers    ProviderService[]
-  appointments Appointment[]
+  photos         ServicePhoto[]
+  availabilities ServiceAvailability[]
+  provider       ServiceProvider       @relation(fields: [providerId], references: [userId])
+  providerId     String                @db.Uuid
+  appointments   Appointment[]
+  category       Category              @relation(fields: [categoryId], references: [id])
+  categoryId     Int
 
   @@map("services")
 }
@@ -151,22 +152,6 @@ model ServicePhoto {
   service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@map("service_photos")
-}
-
-model ProviderService {
-  providerId String    @map("provider_id") @db.Uuid
-  serviceId  String    @map("service_id") @db.Uuid
-  categoryId Int       @map("category_id")
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime? @updatedAt @map("updated_at")
-  finishedAt DateTime? @map("finished_at")
-
-  provider ServiceProvider @relation(fields: [providerId], references: [userId], onDelete: Cascade)
-  service  Service         @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  category Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  @@id([providerId, serviceId])
-  @@map("provider_services")
 }
 
 model Review {
