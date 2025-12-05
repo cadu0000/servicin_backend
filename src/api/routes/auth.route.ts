@@ -113,4 +113,23 @@ export async function authRoutes(server: FastifyInstance) {
     },
     (request, reply) => authController.getMe(request, reply)
   );
+
+  server.delete(
+    "/me",
+    {
+      preHandler: [server.authenticate],
+      schema: {
+        summary: "Delete current user account",
+        description:
+          "Endpoint to delete the authenticated user's account. This performs a soft delete and cancels future appointments if the user is a service provider.",
+        tags: ["Authentication"],
+        response: {
+          200: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    (request, reply) => authController.deleteMe(request, reply)
+  );
 }

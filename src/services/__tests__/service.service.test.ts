@@ -19,6 +19,8 @@ const mockUserRepository: jest.Mocked<AuthRepository> = {
   signup: jest.fn(),
   verifyPassword: jest.fn(),
   findUserWithDetails: jest.fn(),
+  deleteAccount: jest.fn(),
+  isServiceProvider: jest.fn(),
 };
 
 const MOCK_SERVICE_RESULT = {

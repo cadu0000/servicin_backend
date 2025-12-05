@@ -39,6 +39,7 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   userType  UserRole @map("user_type")
   photoUrl  String?  @map("photo_url") @db.Text
+  deletedAt DateTime? @map("deleted_at")
 
   address              Address[]
   individual           Individual?

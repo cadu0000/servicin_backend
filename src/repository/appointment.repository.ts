@@ -53,4 +53,36 @@ export class AppointmentRepository {
 
     return updatedAppointment as AppointmentResponse;
   }
+
+  async cancelFutureAppointmentsForProvider(
+    providerId: string
+  ): Promise<number> {
+    const now = new Date();
+
+    const providerServices = await prisma.providerService.findMany({
+      where: { providerId },
+      select: { serviceId: true },
+    });
+
+    const serviceIds = providerServices.map((ps) => ps.serviceId);
+
+    if (serviceIds.length === 0) {
+      return 0;
+    }
+
+    const result = await prisma.appointment.updateMany({
+      where: {
+        serviceId: { in: serviceIds },
+        scheduledAt: { gt: now },
+        status: {
+          in: [AppointmentStatus.PENDING, AppointmentStatus.APPROVED],
+        },
+      },
+      data: {
+        status: AppointmentStatus.CANCELED,
+      },
+    });
+
+    return result.count;
+  }
 }

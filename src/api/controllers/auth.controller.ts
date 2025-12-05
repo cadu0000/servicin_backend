@@ -34,4 +34,10 @@ export class AuthController {
     const user = await this.authService.getCurrentUser(userId);
     return reply.status(200).send(user);
   }
+
+  async deleteMe(request: FastifyRequest, reply: FastifyReply) {
+    const { sub: userId } = request.user as UserPayload;
+    await this.authService.deleteAccount(userId);
+    return reply.status(200).send({ message: "Account deleted successfully" });
+  }
 }

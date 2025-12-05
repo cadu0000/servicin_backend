@@ -4,9 +4,10 @@ import { verifyPassword } from "../utils/password";
 
 export class AuthRepository {
   async findByEmail(email: string) {
-    const userAlreadyExists = await prisma.user.findUnique({
+    const userAlreadyExists = await prisma.user.findFirst({
       where: {
         email,
+        deletedAt: null,
       },
     });
 
@@ -14,9 +15,10 @@ export class AuthRepository {
   }
 
   async findById(id: string) {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
         id,
+        deletedAt: null,
       },
     });
 
@@ -98,8 +100,11 @@ export class AuthRepository {
   }
 
   async verifyPassword(id: string, password: string): Promise<boolean> {
-    const user = await prisma.user.findUnique({
-      where: { id },
+    const user = await prisma.user.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
       select: { password: true },
     });
 
@@ -109,8 +114,11 @@ export class AuthRepository {
   }
 
   async findUserWithDetails(id: string) {
-    const user = await prisma.user.findUnique({
-      where: { id },
+    const user = await prisma.user.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
       select: {
         id: true,
         email: true,
@@ -154,5 +162,22 @@ export class AuthRepository {
     });
 
     return user;
+  }
+
+  async deleteAccount(userId: string): Promise<void> {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+  }
+
+  async isServiceProvider(userId: string): Promise<boolean> {
+    const serviceProvider = await prisma.serviceProvider.findUnique({
+      where: { userId },
+      select: { userId: true },
+    });
+    return !!serviceProvider;
   }
 }
