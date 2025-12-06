@@ -1,6 +1,9 @@
 import { FastifyInstance } from "fastify";
 import z from "zod";
-import { categorySchema } from "../../schemas/category.schema";
+import {
+  categorySchema,
+  createCategorySchema,
+} from "../../schemas/category.schema";
 import { categoryController } from "../../container";
 
 export async function categoryRoutes(server: FastifyInstance) {
@@ -18,8 +21,8 @@ export async function categoryRoutes(server: FastifyInstance) {
         },
       },
     },
-        async (request, reply) => categoryController.getAllCategories(reply)
-    );
+    async (request, reply) => categoryController.getAllCategories(reply)
+  );
 
   server.get(
     "/:id",
@@ -29,11 +32,11 @@ export async function categoryRoutes(server: FastifyInstance) {
         description: "Endpoint to fetch a specific category by its unique ID",
         tags: ["Categories"],
         params: z.object({
-        id: z.coerce
-          .number()
-          .int()
-          .describe("Unique identifier for the category. Example: 1"),
-      }),
+          id: z.coerce
+            .number()
+            .int()
+            .describe("Unique identifier for the category. Example: 1"),
+        }),
         response: {
           200: categorySchema,
           404: z.object({
@@ -43,5 +46,38 @@ export async function categoryRoutes(server: FastifyInstance) {
       },
     },
     async (request, reply) => categoryController.getCategoryById(request, reply)
+  );
+
+  server.post(
+    "/",
+    {
+      preHandler: [server.authenticate],
+      schema: {
+        summary: "Create a new category",
+        description:
+          "Endpoint to create a new service category. Requires authentication and service provider role.",
+        tags: ["Categories"],
+        body: createCategorySchema,
+        response: {
+          201: categorySchema,
+          403: z.object({
+            statusCode: z.number(),
+            error: z.string(),
+            message: z.string(),
+          }),
+          409: z.object({
+            statusCode: z.number(),
+            error: z.string(),
+            message: z.string(),
+          }),
+          500: z.object({
+            statusCode: z.number(),
+            error: z.string(),
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => categoryController.create(request, reply)
   );
 }

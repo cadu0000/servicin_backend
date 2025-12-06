@@ -32,7 +32,7 @@ const serviceProviderService = new ServiceProviderService(
   serviceProviderRepository,
   authRepository
 );
-const categoryService = new CategoryService(categoryRepository);
+const categoryService = new CategoryService(categoryRepository, authRepository);
 const appointmentService = new AppointmentService(
   appointmentRepository,
   serviceRepository,
