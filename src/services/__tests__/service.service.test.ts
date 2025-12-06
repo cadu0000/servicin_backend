@@ -40,6 +40,7 @@ const MOCK_FETCH_RESULT = {
       price: 100,
       photos: [],
       availabilities: [],
+      appointments: [],
       provider: {
         userId: "provider-1",
         averageRating: 5.0,
@@ -87,7 +88,17 @@ describe("ServiceService", () => {
       const result = await serviceService.fetch(filters);
 
       expect(mockServiceRepository.fetch).toHaveBeenCalledWith(filters);
-      expect(result).toEqual(MOCK_FETCH_RESULT);
+      const expectedResult = {
+        ...MOCK_FETCH_RESULT,
+        data: MOCK_FETCH_RESULT.data.map((service: any) => {
+          const { appointments, ...serviceWithoutAppointments } = service;
+          return {
+            ...serviceWithoutAppointments,
+            unavailableTimeSlots: [],
+          };
+        }),
+      };
+      expect(result).toEqual(expectedResult);
     });
 
     it("should pass search term (q) to repository", async () => {
@@ -169,7 +180,13 @@ describe("ServiceService", () => {
       const result = await serviceService.fetchById(serviceId);
 
       expect(mockServiceRepository.fetchById).toHaveBeenCalledWith(serviceId);
-      expect(result).toEqual(mockService);
+      const { appointments, ...serviceWithoutAppointments } =
+        mockService as any;
+      const expectedResult = {
+        ...serviceWithoutAppointments,
+        unavailableTimeSlots: [],
+      };
+      expect(result).toEqual(expectedResult);
     });
 
     it("should throw error when service is not found", async () => {

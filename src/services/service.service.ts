@@ -21,7 +21,47 @@ export class ServiceService {
       throw new Error("No services found");
     }
 
-    return services;
+    const servicesWithUnavailableSlots = services.data.map((service) => {
+      const unavailableTimeSlots = (service.appointments || []).map(
+        (appointment) => {
+          const startDate = new Date(appointment.scheduledStartTime);
+          const endDate = new Date(appointment.scheduledEndTime);
+
+          const startTime = `${startDate
+            .getHours()
+            .toString()
+            .padStart(2, "0")}:${startDate
+            .getMinutes()
+            .toString()
+            .padStart(2, "0")}`;
+
+          const endTime = `${endDate
+            .getHours()
+            .toString()
+            .padStart(2, "0")}:${endDate
+            .getMinutes()
+            .toString()
+            .padStart(2, "0")}`;
+
+          return {
+            start: startTime,
+            end: endTime,
+            date: startDate.toISOString().split("T")[0],
+          };
+        }
+      );
+
+      const { appointments, ...serviceWithoutAppointments } = service;
+      return {
+        ...serviceWithoutAppointments,
+        unavailableTimeSlots,
+      };
+    });
+
+    return {
+      ...services,
+      data: servicesWithUnavailableSlots,
+    };
   }
 
   async fetchById(id: string) {
@@ -31,7 +71,42 @@ export class ServiceService {
       throw new Error("No service found");
     }
 
-    return service;
+    const unavailableTimeSlots = (service.appointments || []).map(
+      (appointment) => {
+        const startDate = new Date(appointment.scheduledStartTime);
+        const endDate = new Date(appointment.scheduledEndTime);
+
+        const startTime = `${startDate
+          .getHours()
+          .toString()
+          .padStart(2, "0")}:${startDate
+          .getMinutes()
+          .toString()
+          .padStart(2, "0")}`;
+
+        const endTime = `${endDate
+          .getHours()
+          .toString()
+          .padStart(2, "0")}:${endDate
+          .getMinutes()
+          .toString()
+          .padStart(2, "0")}`;
+
+        return {
+          start: startTime,
+          end: endTime,
+          date: startDate.toISOString().split("T")[0],
+          appointmentId: appointment.id,
+          status: appointment.status,
+        };
+      }
+    );
+
+    const { appointments, ...serviceWithoutAppointments } = service;
+    return {
+      ...serviceWithoutAppointments,
+      unavailableTimeSlots,
+    };
   }
 
   async create(createServiceSchemaDTO: CreateServiceSchemaDTO) {

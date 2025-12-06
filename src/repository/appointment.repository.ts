@@ -1,28 +1,45 @@
 import { prisma } from "../lib/prisma";
-import {
-  CreateAppointmentSchemaDTO,
-  AppointmentStatus,
-} from "../schemas/appointment.shema";
+import { AppointmentStatus } from "../schemas/appointment.shema";
+import { PaymentMethod } from "@prisma/client";
 
 type AppointmentResponse = {
   id: string;
   status: AppointmentStatus;
 };
 
+type CreateAppointmentData = {
+  serviceId: string;
+  clientId: string;
+  scheduledStartTime: Date;
+  scheduledEndTime: Date;
+  description: string;
+  paymentMethod: PaymentMethod;
+  price: number;
+};
+
 export class AppointmentRepository {
   async create(
-    createAppointmentDTO: CreateAppointmentSchemaDTO
+    createAppointmentData: CreateAppointmentData
   ): Promise<AppointmentResponse> {
-    const { serviceId, clientId, scheduledAt, description, paymentMethod } =
-      createAppointmentDTO;
+    const {
+      serviceId,
+      clientId,
+      scheduledStartTime,
+      scheduledEndTime,
+      description,
+      paymentMethod,
+      price,
+    } = createAppointmentData;
 
     const newAppointment = await prisma.appointment.create({
       data: {
         serviceId: serviceId,
         clientId: clientId,
-        scheduledAt: scheduledAt,
+        scheduledStartTime: scheduledStartTime,
+        scheduledEndTime: scheduledEndTime,
         description: description,
         paymentMethod: paymentMethod,
+        price: price,
         status: AppointmentStatus.PENDING,
       },
       select: {
@@ -73,7 +90,7 @@ export class AppointmentRepository {
     const result = await prisma.appointment.updateMany({
       where: {
         serviceId: { in: serviceIds },
-        scheduledAt: { gt: now },
+        scheduledStartTime: { gt: now },
         status: {
           in: [AppointmentStatus.PENDING, AppointmentStatus.APPROVED],
         },
@@ -84,5 +101,50 @@ export class AppointmentRepository {
     });
 
     return result.count;
+  }
+
+  async findProviderAppointmentsByDateRange(
+    providerId: string,
+    startDate: Date,
+    endDate: Date
+  ) {
+    const providerServices = await prisma.service.findMany({
+      where: { providerId },
+      select: { id: true },
+    });
+
+    const serviceIds = providerServices.map((ps) => ps.id);
+
+    if (serviceIds.length === 0) {
+      return [];
+    }
+
+    return await prisma.appointment.findMany({
+      where: {
+        serviceId: { in: serviceIds },
+        scheduledStartTime: {
+          gte: startDate,
+          lte: endDate,
+        },
+        status: {
+          in: [AppointmentStatus.PENDING, AppointmentStatus.APPROVED],
+        },
+      },
+      select: {
+        id: true,
+        scheduledStartTime: true,
+        scheduledEndTime: true,
+        service: {
+          select: {
+            id: true,
+            availabilities: {
+              select: {
+                slotDuration: true,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 }

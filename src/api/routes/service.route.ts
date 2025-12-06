@@ -136,6 +136,19 @@ export async function serviceRoutes(server: FastifyInstance) {
                         .describe("Description of the category"),
                     })
                     .describe("Category details"),
+                  unavailableTimeSlots: z
+                    .array(
+                      z.object({
+                        start: z
+                          .string()
+                          .describe("Start time in HH:MM format"),
+                        end: z.string().describe("End time in HH:MM format"),
+                        date: z.string().describe("Date in YYYY-MM-DD format"),
+                      })
+                    )
+                    .describe(
+                      "List of unavailable time slots due to appointments"
+                    ),
                 })
               )
               .describe("Array of service objects"),
@@ -256,6 +269,15 @@ export async function serviceRoutes(server: FastifyInstance) {
                   .describe("Description of the category"),
               })
               .describe("Category details"),
+            unavailableTimeSlots: z
+              .array(
+                z.object({
+                  start: z.string().describe("Start time in HH:MM format"),
+                  end: z.string().describe("End time in HH:MM format"),
+                  date: z.string().describe("Date in YYYY-MM-DD format"),
+                })
+              )
+              .describe("List of unavailable time slots due to appointments"),
           }),
         },
       },

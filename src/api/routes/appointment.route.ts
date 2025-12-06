@@ -21,9 +21,11 @@ export async function appointmentRoutes(server: FastifyInstance) {
   server.post<CreateAppointmentRouteRequest>(
     "/",
     {
+      preHandler: [server.authenticate],
       schema: {
         summary: "Create scheduling request",
-        description: "Create a service scheduling request",
+        description:
+          "Create a service scheduling request. Requires authentication.",
         tags: ["Appointment"],
         body: createAppointmentSchema,
         response: {
@@ -39,17 +41,20 @@ export async function appointmentRoutes(server: FastifyInstance) {
   );
 
   server.patch<UpdateAppointmentStatusRouteRequest>(
-    "/:appointmentId/status", 
+    "/:appointmentId/status",
     {
+      preHandler: [server.authenticate],
       schema: {
         summary: "Update appointment status",
-        description: "Update the status (e.g., CONFIRMED, CANCELED) of an existing appointment.",
+        description:
+          "Update the status (e.g., CONFIRMED, CANCELED) of an existing appointment. Requires authentication.",
         tags: ["Appointment"],
         params: z.object({
-            appointmentId: updateAppointmentStatusRequestSchema.shape.appointmentId,
+          appointmentId:
+            updateAppointmentStatusRequestSchema.shape.appointmentId,
         }),
-        body: z.object({ 
-            status: updateAppointmentStatusRequestSchema.shape.status,
+        body: z.object({
+          status: updateAppointmentStatusRequestSchema.shape.status,
         }),
         response: {
           200: z.object({

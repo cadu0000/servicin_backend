@@ -30,7 +30,8 @@ const authService = new AuthService(authRepository, appointmentRepository);
 const serviceService = new ServiceService(serviceRepository, authRepository);
 const serviceProviderService = new ServiceProviderService(
   serviceProviderRepository,
-  authRepository
+  authRepository,
+  appointmentRepository
 );
 const categoryService = new CategoryService(categoryRepository, authRepository);
 const appointmentService = new AppointmentService(

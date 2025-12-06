@@ -139,6 +139,19 @@ export class ServiceRepository {
           },
         },
         availabilities: true,
+        appointments: {
+          where: {
+            status: {
+              in: ["PENDING", "APPROVED"],
+            },
+          },
+          select: {
+            id: true,
+            scheduledStartTime: true,
+            scheduledEndTime: true,
+            status: true,
+          },
+        },
         provider: {
           select: {
             userId: true,
@@ -196,6 +209,19 @@ export class ServiceRepository {
           },
         },
         availabilities: true,
+        appointments: {
+          where: {
+            status: {
+              in: ["PENDING", "APPROVED"],
+            },
+          },
+          select: {
+            id: true,
+            scheduledStartTime: true,
+            scheduledEndTime: true,
+            status: true,
+          },
+        },
         provider: {
           select: {
             userId: true,

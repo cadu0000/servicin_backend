@@ -5,6 +5,7 @@ import {
   CreateAppointmentSchemaDTO,
   UpdateAppointmentStatusDTO,
 } from "../../schemas/appointment.shema";
+import type { UserPayload } from "../../@types/fastify";
 
 type CreateAppointmentRequest = FastifyRequest<{
   Body: CreateAppointmentSchemaDTO;
@@ -12,19 +13,21 @@ type CreateAppointmentRequest = FastifyRequest<{
 
 type UpdateAppointmentStatusRequest = FastifyRequest<{
   Params: { appointmentId: UpdateAppointmentStatusDTO["appointmentId"] };
-  Body: {status: UpdateAppointmentStatusDTO["status"]}
-}>; 
+  Body: { status: UpdateAppointmentStatusDTO["status"] };
+}>;
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
 
   async create(req: CreateAppointmentRequest, res: FastifyReply) {
     const body = req.body;
+    const { sub: clientId } = req.user as UserPayload;
 
     try {
       const appointmentDTO = createAppointmentSchema.parse(body);
-      const appointment = await this.appointmentService.createAppointment(
-        appointmentDTO
-      );
+      const appointment = await this.appointmentService.createAppointment({
+        ...appointmentDTO,
+        clientId,
+      });
 
       return res.status(201).send({
         message:
@@ -65,7 +68,10 @@ export class AppointmentController {
       console.error("Erro ao atualizar status do agendamento:", error);
 
       if (error instanceof Error) {
-        if (error.message.includes("não encontrado") || error.message.includes("does not exist")) {
+        if (
+          error.message.includes("não encontrado") ||
+          error.message.includes("does not exist")
+        ) {
           return res.status(404).send({
             statusCode: 404,
             message: error.message,

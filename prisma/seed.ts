@@ -4,6 +4,8 @@ import { seedStates } from "./seeds/states.seed";
 import { seedCities } from "./seeds/cities.seed";
 import { seedUsers } from "./seeds/users.seed";
 import { seedServices } from "./seeds/services.seed";
+import { seedAvailabilities } from "./seeds/availabilities.seed";
+import { seedAppointments } from "./seeds/appointments.seed";
 
 async function seed() {
   await seedCountries();
@@ -12,6 +14,8 @@ async function seed() {
   await seedCategories();
   await seedUsers();
   await seedServices();
+  await seedAvailabilities();
+  await seedAppointments();
 }
 
 seed().then(() => {
