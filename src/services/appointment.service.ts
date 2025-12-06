@@ -210,7 +210,8 @@ export class AppointmentService {
 
   async updateAppointmentStatus(
     appointmentId: string,
-    status: AppointmentStatus
+    status: AppointmentStatus,
+    reason?: string
   ) {
     const validStatuses = [
       "PENDING",
@@ -223,15 +224,69 @@ export class AppointmentService {
       throw new Error("Status inválido.");
     }
 
+    if (status === AppointmentStatus.CANCELED) {
+      if (!reason || reason.trim().length === 0) {
+        throw new Error("O motivo do cancelamento é obrigatório.");
+      }
+    }
+
     try {
       const updatedAppointment = await this.appointmentRepository.updateStatus(
         appointmentId,
-        status
+        status,
+        reason
       );
 
       return updatedAppointment;
     } catch (error) {
       console.error("Erro no updateAppointmentStatus:", error);
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new Error("Agendamento não encontrado.");
+        }
+      }
+
+      throw error;
+    }
+  }
+
+  async cancelAppointment(
+    appointmentId: string,
+    userId: string,
+    reason: string
+  ) {
+    if (!reason || reason.trim().length === 0) {
+      throw new Error("O motivo do cancelamento é obrigatório.");
+    }
+
+    const appointment = await this.appointmentRepository.findByIdWithRelations(
+      appointmentId
+    );
+
+    if (!appointment) {
+      throw new Error("Agendamento não encontrado.");
+    }
+
+    const isClient = appointment.clientId === userId;
+    const isProvider = appointment.service.providerId === userId;
+
+    if (!isClient && !isProvider) {
+      throw new Error(
+        "Você não tem permissão para cancelar este agendamento. Apenas o cliente ou o prestador podem cancelar."
+      );
+    }
+
+    try {
+      const updatedAppointment = await this.appointmentRepository.updateStatus(
+        appointmentId,
+        AppointmentStatus.CANCELED,
+        reason
+      );
+
+      return updatedAppointment;
+    } catch (error) {
+      console.error("Erro no cancelAppointment:", error);
 
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2025") {

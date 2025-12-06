@@ -55,15 +55,25 @@ export class AppointmentRepository {
 
   async updateStatus(
     appointmentId: string,
-    status: AppointmentStatus
+    status: AppointmentStatus,
+    cancellationReason?: string
   ): Promise<AppointmentResponse> {
+    const updateData: {
+      status: AppointmentStatus;
+      cancellationReason?: string;
+    } = {
+      status: status,
+    };
+
+    if (status === AppointmentStatus.CANCELED && cancellationReason) {
+      updateData.cancellationReason = cancellationReason;
+    }
+
     const updatedAppointment = await prisma.appointment.update({
       where: {
         id: appointmentId,
       },
-      data: {
-        status: status,
-      },
+      data: updateData,
       select: {
         id: true,
         status: true,
@@ -103,6 +113,23 @@ export class AppointmentRepository {
     });
 
     return result.count;
+  }
+
+  async findByIdWithRelations(appointmentId: string) {
+    return await prisma.appointment.findUnique({
+      where: {
+        id: appointmentId,
+      },
+      select: {
+        id: true,
+        clientId: true,
+        service: {
+          select: {
+            providerId: true,
+          },
+        },
+      },
+    });
   }
 
   async findProviderAppointmentsByDateRange(

@@ -50,7 +50,7 @@ export const createAppointmentSchema = z
     path: ["scheduledEndTime"],
   });
 
-export const updateAppointmentStatusRequestSchema = z.object({
+export const updateAppointmentStatusRequestBaseSchema = z.object({
   appointmentId: z
     .string()
     .uuid()
@@ -61,6 +61,32 @@ export const updateAppointmentStatusRequestSchema = z.object({
     .nativeEnum(AppointmentStatus)
     .describe("Novo status do agendamento.")
     .default(AppointmentStatus.APPROVED),
+  reason: z
+    .string()
+    .optional()
+    .describe("Motivo do cancelamento (obrigatório quando status é CANCELED)."),
+});
+
+export const updateAppointmentStatusRequestSchema =
+  updateAppointmentStatusRequestBaseSchema.refine(
+    (data) => {
+      if (data.status === AppointmentStatus.CANCELED) {
+        return data.reason !== undefined && data.reason.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message:
+        "O motivo do cancelamento é obrigatório quando o status é CANCELED.",
+      path: ["reason"],
+    }
+  );
+
+export const cancelAppointmentSchema = z.object({
+  reason: z
+    .string()
+    .min(1, "O motivo do cancelamento é obrigatório.")
+    .describe("Motivo do cancelamento."),
 });
 
 export type UpdateAppointmentStatusDTO = z.infer<
@@ -70,3 +96,5 @@ export type UpdateAppointmentStatusDTO = z.infer<
 export type CreateAppointmentSchemaDTO = z.infer<
   typeof createAppointmentSchema
 >;
+
+export type CancelAppointmentDTO = z.infer<typeof cancelAppointmentSchema>;

@@ -4,6 +4,8 @@ import {
   createAppointmentSchema,
   CreateAppointmentSchemaDTO,
   UpdateAppointmentStatusDTO,
+  CancelAppointmentDTO,
+  cancelAppointmentSchema,
 } from "../../schemas/appointment.shema";
 import type { UserPayload } from "../../@types/fastify";
 
@@ -13,7 +15,15 @@ type CreateAppointmentRequest = FastifyRequest<{
 
 type UpdateAppointmentStatusRequest = FastifyRequest<{
   Params: { appointmentId: UpdateAppointmentStatusDTO["appointmentId"] };
-  Body: { status: UpdateAppointmentStatusDTO["status"] };
+  Body: {
+    status: UpdateAppointmentStatusDTO["status"];
+    reason?: UpdateAppointmentStatusDTO["reason"];
+  };
+}>;
+
+type CancelAppointmentRequest = FastifyRequest<{
+  Params: { appointmentId: string };
+  Body: CancelAppointmentDTO;
 }>;
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
@@ -54,13 +64,14 @@ export class AppointmentController {
 
   async updateStatus(req: UpdateAppointmentStatusRequest, res: FastifyReply) {
     const { appointmentId } = req.params;
-    const { status } = req.body;
+    const { status, reason } = req.body;
 
     try {
       const updatedAppointment =
         await this.appointmentService.updateAppointmentStatus(
           appointmentId,
-          status
+          status,
+          reason
         );
 
       return res.status(200).send(updatedAppointment);
@@ -80,7 +91,8 @@ export class AppointmentController {
 
         if (
           error.message.includes("inválido") ||
-          error.message.includes("status atual")
+          error.message.includes("status atual") ||
+          error.message.includes("obrigatório")
         ) {
           return res.status(400).send({
             statusCode: 400,
@@ -92,6 +104,57 @@ export class AppointmentController {
       return res.status(500).send({
         statusCode: 500,
         message: "Erro interno do servidor ao processar a atualização.",
+      });
+    }
+  }
+
+  async cancel(req: CancelAppointmentRequest, res: FastifyReply) {
+    const { appointmentId } = req.params;
+    const { reason } = req.body;
+    const { sub: userId } = req.user as UserPayload;
+
+    try {
+      const cancelDTO = cancelAppointmentSchema.parse({ reason });
+      const canceledAppointment =
+        await this.appointmentService.cancelAppointment(
+          appointmentId,
+          userId,
+          cancelDTO.reason
+        );
+
+      return res.status(200).send(canceledAppointment);
+    } catch (error) {
+      console.error("Erro ao cancelar agendamento:", error);
+
+      if (error instanceof Error) {
+        if (
+          error.message.includes("não encontrado") ||
+          error.message.includes("does not exist")
+        ) {
+          return res.status(404).send({
+            statusCode: 404,
+            message: error.message,
+          });
+        }
+
+        if (error.message.includes("permissão")) {
+          return res.status(403).send({
+            statusCode: 403,
+            message: error.message,
+          });
+        }
+
+        if (error.message.includes("obrigatório")) {
+          return res.status(400).send({
+            statusCode: 400,
+            message: error.message,
+          });
+        }
+      }
+
+      return res.status(500).send({
+        statusCode: 500,
+        message: "Erro interno do servidor ao processar o cancelamento.",
       });
     }
   }
