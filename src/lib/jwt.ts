@@ -1,8 +1,9 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { FastifyRequest, FastifyReply, FastifyPluginAsync } from "fastify";
 import fjwt from "@fastify/jwt";
+import fp from "fastify-plugin";
 import { env } from "../env";
 
-export async function jwtPlugin(server: FastifyInstance) {
+const jwtPlugin: FastifyPluginAsync = async (server) => {
   await server.register(fjwt, { secret: env.JWT_SECRET });
 
   server.addHook("preHandler", (req, _res, next) => {
@@ -25,4 +26,6 @@ export async function jwtPlugin(server: FastifyInstance) {
       }
     }
   );
-}
+};
+
+export default fp(jwtPlugin);

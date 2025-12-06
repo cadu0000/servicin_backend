@@ -6,13 +6,16 @@ import {
   jsonSchemaTransform,
 } from "fastify-type-provider-zod";
 import scalarFastify from "@scalar/fastify-api-reference";
+import fastifyCookie from "@fastify/cookie";
 import { authRoutes } from "./api/routes/auth.route";
-import { jwtPlugin } from "./lib/jwt";
+import jwtPlugin from "./lib/jwt";
 import cookieSetterPlugin from "./lib/cookies";
 import { serviceProviderRoutes } from "./api/routes/service-provider.route";
 import { serviceRoutes } from "./api/routes/service.route";
 import { categoryRoutes } from "./api/routes/category.route";
 import { appointmentRoutes } from "./api/routes/appointment.route";
+import { locationRoutes } from "./api/routes/location.route";
+import { reviewRoutes } from "./api/routes/review.route";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const server = fastify();
@@ -35,6 +38,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     routePrefix: "/docs",
   });
 
+  server.register(fastifyCookie);
   server.register(cookieSetterPlugin);
   server.register(jwtPlugin);
 
@@ -43,6 +47,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   server.register(serviceProviderRoutes, { prefix: "/service-providers" });
   server.register(categoryRoutes, { prefix: "/categories" });
   server.register(appointmentRoutes, { prefix: "/appointments" });
+  server.register(locationRoutes, { prefix: "/locations" });
+  server.register(reviewRoutes, { prefix: "/reviews" });
 
   return server;
 }

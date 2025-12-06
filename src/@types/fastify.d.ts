@@ -2,6 +2,11 @@ import "@fastify/jwt";
 import "fastify";
 import "@fastify/cookie";
 
+export interface UserPayload {
+  sub: string;
+  email: string;
+}
+
 declare module "@fastify/jwt" {
   interface FastifyJWT {
     sign: <T extends object>(payload: T) => string;
@@ -13,7 +18,13 @@ declare module "@fastify/jwt" {
 declare module "fastify" {
   interface FastifyRequest {
     jwt: import("@fastify/jwt").FastifyJWT;
-    user?: { sub: string; email: string };
+    user: UserPayload;
+  }
+
+  interface FastifyInstance {
+    authenticate: (
+      req: FastifyRequest,
+      reply: import("fastify").FastifyReply
+    ) => Promise<void>;
   }
 }
-

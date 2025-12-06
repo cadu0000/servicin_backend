@@ -1,4 +1,3 @@
-import MOCK_SERVICES from "../data/service.mock";
 import { ServiceFiltersDTO } from "../core/dtos/ServiceFiltersDTO";
 import { prisma } from "../lib/prisma";
 import {
@@ -6,54 +5,179 @@ import {
   FetchServicesQueryParamsDTO,
 } from "../schemas/service.schema";
 
-interface FilterParams extends ServiceFiltersDTO {
-  searchTerm?: string;
-}
 export class ServiceRepository {
-  async fetch(fetchServicesQueryParamsDTO: FetchServicesQueryParamsDTO) {
-    const { page, pageSize } = fetchServicesQueryParamsDTO;
+  async fetch(
+    fetchServicesQueryParamsDTO: FetchServicesQueryParamsDTO &
+      ServiceFiltersDTO & { q?: string }
+  ) {
+    const {
+      page = 1,
+      pageSize = 12,
+      q,
+      ...filters
+    } = fetchServicesQueryParamsDTO;
+
+    const where: any = {};
+
+    if (q && q.trim().length >= 2 && !filters.category) {
+      const searchTerm = q.trim();
+      where.OR = [
+        {
+          name: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        },
+        {
+          category: {
+            name: {
+              contains: searchTerm,
+              mode: "insensitive",
+            },
+          },
+        },
+      ];
+    } else if (q && q.trim().length >= 2 && filters.category) {
+      const searchTerm = q.trim();
+      where.name = {
+        contains: searchTerm,
+        mode: "insensitive",
+      };
+    }
+
+    if (filters.minPrice !== undefined) {
+      where.price = {
+        ...where.price,
+        gte: filters.minPrice,
+      };
+    }
+
+    if (filters.maxPrice !== undefined) {
+      where.price = {
+        ...where.price,
+        lte: filters.maxPrice,
+      };
+    }
+
+    const providerFilters: any = {};
+
+    if (filters.providerName) {
+      providerFilters.user = {
+        OR: [
+          {
+            individual: {
+              fullName: {
+                contains: filters.providerName,
+                mode: "insensitive",
+              },
+            },
+          },
+          {
+            company: {
+              tradeName: {
+                contains: filters.providerName,
+                mode: "insensitive",
+              },
+            },
+          },
+          {
+            company: {
+              corporateName: {
+                contains: filters.providerName,
+                mode: "insensitive",
+              },
+            },
+          },
+        ],
+      };
+    }
+
+    if (filters.minRating !== undefined) {
+      providerFilters.averageRating = {
+        gte: filters.minRating,
+      };
+    }
+
+    if (Object.keys(providerFilters).length > 0) {
+      where.provider = providerFilters;
+    }
+
+    if (filters.category) {
+      where.category = {
+        name: {
+          equals: filters.category,
+          mode: "insensitive",
+        },
+      };
+    }
+
+    if (filters.stateId) {
+      where.address = {
+        ...where.address,
+        stateId: filters.stateId,
+      };
+    }
+
+    if (filters.cityId) {
+      where.address = {
+        ...where.address,
+        cityId: filters.cityId,
+      };
+    }
 
     const services = await prisma.service.findMany({
+      where,
       select: {
         id: true,
         name: true,
         description: true,
         price: true,
+        rating: true,
         photos: {
           select: {
             id: true,
             photoUrl: true,
           },
         },
-        providers: {
-          select: {
-            category: {
-              select: {
-                id: true,
-                name: true,
-              },
+        availabilities: true,
+        appointments: {
+          where: {
+            status: {
+              in: ["PENDING", "APPROVED"],
             },
-            provider: {
+          },
+          select: {
+            id: true,
+            scheduledStartTime: true,
+            scheduledEndTime: true,
+            status: true,
+          },
+        },
+        provider: {
+          select: {
+            userId: true,
+            averageRating: true,
+            autoAcceptAppointments: true,
+            showContactInfo: true,
+            user: {
               select: {
-                user: {
+                photoUrl: true,
+                individual: {
                   select: {
-                    id: true,
-                    email: true,
-                    contacts: {
-                      select: {
-                        type: true,
-                        value: true,
-                      },
-                    },
+                    fullName: true,
+                  },
+                },
+                contacts: {
+                  select: {
+                    type: true,
+                    value: true,
                   },
                 },
               },
             },
-            createdAt: true,
-            updatedAt: true,
-            finishedAt: true,
           },
         },
+        category: true,
       },
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -62,7 +186,7 @@ export class ServiceRepository {
       },
     });
 
-    const totalServices = await prisma.service.count();
+    const totalServices = await prisma.service.count({ where });
     const totalPages = Math.ceil(totalServices / pageSize);
 
     return {
@@ -81,41 +205,52 @@ export class ServiceRepository {
         name: true,
         description: true,
         price: true,
+        rating: true,
         photos: {
           select: {
             id: true,
             photoUrl: true,
           },
         },
-        providers: {
-          select: {
-            category: {
-              select: {
-                id: true,
-                name: true,
-              },
+        availabilities: true,
+        appointments: {
+          where: {
+            status: {
+              in: ["PENDING", "APPROVED"],
             },
-            provider: {
+          },
+          select: {
+            id: true,
+            scheduledStartTime: true,
+            scheduledEndTime: true,
+            status: true,
+          },
+        },
+        provider: {
+          select: {
+            userId: true,
+            averageRating: true,
+            autoAcceptAppointments: true,
+            showContactInfo: true,
+            user: {
               select: {
-                user: {
+                photoUrl: true,
+                individual: {
                   select: {
-                    id: true,
-                    email: true,
-                    contacts: {
-                      select: {
-                        type: true,
-                        value: true,
-                      },
-                    },
+                    fullName: true,
+                  },
+                },
+                contacts: {
+                  select: {
+                    type: true,
+                    value: true,
                   },
                 },
               },
             },
-            createdAt: true,
-            updatedAt: true,
-            finishedAt: true,
           },
         },
+        category: true,
       },
       where: {
         id,
@@ -126,25 +261,29 @@ export class ServiceRepository {
   }
 
   async create(createServiceSchemaDTO: CreateServiceSchemaDTO) {
-    const { name, description, price, providerId, categoryId } =
-      createServiceSchemaDTO;
+    const {
+      name,
+      description,
+      price,
+      providerId,
+      categoryId,
+      addressId,
+      availability,
+    } = createServiceSchemaDTO;
 
     const service = await prisma.service.create({
-      select: {
-        id: true,
-      },
       data: {
         name,
         description,
         price,
-      },
-    });
-
-    await prisma.providerService.create({
-      data: {
-        serviceId: service.id,
-        providerId,
         categoryId,
+        providerId,
+        addressId,
+        availabilities: {
+          createMany: {
+            data: availability,
+          },
+        },
       },
     });
 
@@ -159,57 +298,5 @@ export class ServiceRepository {
     });
 
     return category;
-  }
-
-  async filterServices(filters: FilterParams) {
-    let results = MOCK_SERVICES;
-
-    if (filters.searchTerm && filters.searchTerm.trim().length >= 2) {
-      const term = filters.searchTerm.toLowerCase().trim();
-
-      results = results.filter((service) => {
-        const nameMatch = service.name.toLowerCase().includes(term);
-        const axisMatch = service.axis.toLowerCase().includes(term);
-        return nameMatch || axisMatch;
-      });
-    }
-
-    if (filters.minRating !== undefined) {
-      results = results.filter(
-        (service) => service.averageRating >= filters.minRating!
-      );
-    }
-
-    if (filters.providerName) {
-      const name = filters.providerName.toLowerCase();
-      results = results.filter(
-        (service) =>
-          service.providerName &&
-          service.providerName.toLowerCase().includes(name)
-      );
-    }
-
-    if (filters.axis) {
-      const axisTerm = filters.axis.toLowerCase();
-      results = results.filter(
-        (service) => service.axis.toLowerCase() === axisTerm
-      );
-    }
-
-    if (filters.minPrice !== undefined) {
-      results = results.filter((service) => service.price >= filters.minPrice!);
-    }
-    if (filters.maxPrice !== undefined) {
-      results = results.filter((service) => service.price <= filters.maxPrice!);
-    }
-
-    if (filters.chargeType) {
-      const type = filters.chargeType.toLowerCase();
-      results = results.filter(
-        (service) => service.chargeType.toLowerCase() === type
-      );
-    }
-
-    return Promise.resolve(results);
   }
 }

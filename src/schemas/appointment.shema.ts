@@ -15,40 +15,42 @@ export enum PaymentMethod {
   PIX = "PIX",
 }
 
-export const createAppointmentSchema = z.object({
-  serviceId: z
-    .string()
-    .uuid()
-    .describe("ID do serviço a ser agendado.")
-    .min(1, "O ID do serviço não pode ser vazio.")
-    .default("550e8400-e29b-41d4-a716-446655440000"),
-  clientId: z
-    .string()
-    .uuid()
-    .describe("ID do cliente (usuário logado).")
-    .min(1, "O ID do cliente não pode ser vazio.")
-    .default("550e8400-e29b-41d4-a716-446655449999"),
-  scheduledAt: z
-    .preprocess(
-      (arg) =>
-        typeof arg === "string" || arg instanceof Date ? new Date(arg) : arg,
-      z.date().min(new Date(), "A data de agendamento deve ser futura.")
-    )
-    .describe("Data e hora solicitada para o serviço.")
-    .default("2025-12-31T10:00:00.000Z"),
-  description: z
-    .string()
-    .min(20)
-    .max(1000)
-    .describe("Detalhamento do serviço que deve ser realizado.")
-    .default("Detalhes do serviço a ser realizado pelo prestador."),
-  paymentMethod: z
-    .nativeEnum(PaymentMethod)
-    .describe("Forma de pagamento escolhida.")
-    .default(PaymentMethod.CREDIT_CARD),
-});
+export const createAppointmentSchema = z
+  .object({
+    serviceId: z
+      .string()
+      .uuid()
+      .describe("ID do serviço a ser agendado.")
+      .min(1, "O ID do serviço não pode ser vazio."),
+    scheduledStartTime: z
+      .preprocess(
+        (arg) =>
+          typeof arg === "string" || arg instanceof Date ? new Date(arg) : arg,
+        z.date().min(new Date(), "A data de agendamento deve ser futura.")
+      )
+      .describe("Data e hora de início solicitada para o serviço."),
+    scheduledEndTime: z
+      .preprocess(
+        (arg) =>
+          typeof arg === "string" || arg instanceof Date ? new Date(arg) : arg,
+        z.date().min(new Date(), "A data de término deve ser futura.")
+      )
+      .describe("Data e hora de término solicitada para o serviço."),
+    description: z
+      .string()
+      .min(20)
+      .max(1000)
+      .describe("Detalhamento do serviço que deve ser realizado."),
+    paymentMethod: z
+      .nativeEnum(PaymentMethod)
+      .describe("Forma de pagamento escolhida."),
+  })
+  .refine((data) => data.scheduledEndTime > data.scheduledStartTime, {
+    message: "A data de término deve ser posterior à data de início.",
+    path: ["scheduledEndTime"],
+  });
 
-export const updateAppointmentStatusRequestSchema = z.object({
+export const updateAppointmentStatusRequestBaseSchema = z.object({
   appointmentId: z
     .string()
     .uuid()
@@ -59,6 +61,32 @@ export const updateAppointmentStatusRequestSchema = z.object({
     .nativeEnum(AppointmentStatus)
     .describe("Novo status do agendamento.")
     .default(AppointmentStatus.APPROVED),
+  reason: z
+    .string()
+    .optional()
+    .describe("Motivo do cancelamento (obrigatório quando status é CANCELED)."),
+});
+
+export const updateAppointmentStatusRequestSchema =
+  updateAppointmentStatusRequestBaseSchema.refine(
+    (data) => {
+      if (data.status === AppointmentStatus.CANCELED) {
+        return data.reason !== undefined && data.reason.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message:
+        "O motivo do cancelamento é obrigatório quando o status é CANCELED.",
+      path: ["reason"],
+    }
+  );
+
+export const cancelAppointmentSchema = z.object({
+  reason: z
+    .string()
+    .min(1, "O motivo do cancelamento é obrigatório.")
+    .describe("Motivo do cancelamento."),
 });
 
 export type UpdateAppointmentStatusDTO = z.infer<
@@ -68,3 +96,5 @@ export type UpdateAppointmentStatusDTO = z.infer<
 export type CreateAppointmentSchemaDTO = z.infer<
   typeof createAppointmentSchema
 >;
+
+export type CancelAppointmentDTO = z.infer<typeof cancelAppointmentSchema>;

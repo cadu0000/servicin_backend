@@ -4,13 +4,15 @@
     "start": "node dist/index.js",
     "db:up": "docker-compose up -d",
     "db:stop": "docker-compose down",
+    "db:clean": "tsx prisma/clean.ts",
     "db:seed": "npx prisma db seed",
     "migrate:dev": "npx prisma migrate dev",
     "start:dev": "tsx watch src/index.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "dev": "npm run db:up && npm run migrate:dev && npm run db:seed && npm run start:dev"
+    "dev": "npm run db:up && npm run migrate:dev && npm run db:seed && npm run start:dev",
+    "check:types": "tsc --noEmit"
   },
   "dependencies": {
     "@fastify/cookie": "^9.3.1",
@@ -36,6 +38,7 @@
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
+    "@faker-js/faker": "^10.1.0",
     "@tsconfig/node24": "^24.0.1",
     "@types/bcrypt": "^6.0.0",
     "@types/jest": "^30.0.0",

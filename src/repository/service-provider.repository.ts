@@ -1,20 +1,41 @@
 import { prisma } from "../lib/prisma";
-import { CreateServiceProviderDTO } from "../schemas/service-provider.schema";
+import {
+  CreateServiceProviderDTO,
+  UpdateServiceProviderDTO,
+} from "../schemas/service-provider.schema";
 
 export class ServiceProviderRepository {
   async findById(id: string) {
     const serviceProvider = await prisma.serviceProvider.findUnique({
       select: {
         userId: true,
-        serviceDescription: true,
-        serviceProviderAvailabilities: {
+        averageRating: true,
+        showContactInfo: true,
+        services: {
           select: {
-            dayOfWeek: true,
-            startTime: true,
-            endTime: true,
-            breakStart: true,
-            breakEnd: true,
-            slotDuration: true,
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            rating: true,
+            photos: {
+              select: {
+                id: true,
+                photoUrl: true,
+              },
+            },
+            availabilities: true,
+            category: true,
+          },
+        },
+        user: {
+          select: {
+            contacts: {
+              select: {
+                type: true,
+                value: true,
+              },
+            },
           },
         },
       },
@@ -27,24 +48,24 @@ export class ServiceProviderRepository {
   }
 
   async create(createServiceProviderDTO: CreateServiceProviderDTO) {
-    const { userId, serviceDescription, availability } =
-      createServiceProviderDTO;
+    const { userId } = createServiceProviderDTO;
 
-    const serviceProvider = await prisma.serviceProvider.create({
-      select: {
-        userId: true,
-      },
+    await prisma.serviceProvider.create({
       data: {
         userId,
-        serviceDescription,
       },
     });
+  }
 
-    await prisma.serviceProviderAvailability.createMany({
-      data: availability.map((slot) => ({
-        providerId: serviceProvider.userId,
-        ...slot,
-      })),
+  async update(
+    userId: string,
+    updateServiceProviderDTO: UpdateServiceProviderDTO
+  ) {
+    await prisma.serviceProvider.update({
+      where: {
+        userId,
+      },
+      data: updateServiceProviderDTO,
     });
   }
 }

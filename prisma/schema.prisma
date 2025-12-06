@@ -32,37 +32,81 @@ enum PaymentMethod {
   PIX
 }
 
-model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now()) @map("created_at")
-  userType  UserRole @map("user_type")
-  photoUrl  String?  @map("photo_url") @db.Text
+enum PaymentStatus {
+  PENDING
+  PAID
+  CANCELED
+}
 
-  address              Address[]
+model User {
+  id        String    @id @default(uuid()) @db.Uuid
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now()) @map("created_at")
+  userType  UserRole  @map("user_type")
+  photoUrl  String?   @map("photo_url") @db.Text
+  deletedAt DateTime? @map("deleted_at")
+  address   Address   @relation(fields: [addressId], references: [id])
+
   individual           Individual?
   company              Company?
   serviceProvider      ServiceProvider?
   contacts             Contact[]
   reviewsWritten       Review[]         @relation("ClientReviews")
   appointmentsAsClient Appointment[]    @relation("ClientAppointments")
+  addressId            String           @db.Uuid
 
   @@map("users")
 }
 
+model Country {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  states    State[]
+  addresses Address[]
+
+  @@map("countries")
+}
+
+model State {
+  id      String  @id @default(uuid()) @db.Uuid
+  name    String  @unique
+  country Country @relation(fields: [countryId], references: [id])
+
+  cities    City[]
+  addresses Address[]
+  countryId String    @db.Uuid
+
+  @@map("states")
+}
+
+model City {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  state     State     @relation(fields: [stateId], references: [id])
+  stateId   String    @db.Uuid
+  addresses Address[]
+
+  @@unique([stateId, name])
+  @@map("cities")
+}
+
 model Address {
   id           String  @id @default(uuid()) @db.Uuid
-  userId       String  @map("user_id") @db.Uuid
-  country      String
-  state        String
-  city         String
+  country      Country @relation(fields: [countryId], references: [id])
+  state        State   @relation(fields: [stateId], references: [id])
+  city         City    @relation(fields: [cityId], references: [id])
   neighborhood String
   street       String
   zipCode      String  @map("zip_code")
   number       String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cityId    String    @db.Uuid
+  stateId   String    @db.Uuid
+  countryId String    @db.Uuid
+  users     User[]
+  services  Service[]
 
   @@map("address")
 }
@@ -90,32 +134,30 @@ model Company {
 }
 
 model ServiceProvider {
-  userId             String  @id @map("user_id") @db.Uuid
-  serviceDescription String? @map("service_description") @db.Text
-  averageRating      Decimal @default(0.00) @map("average_rating") @db.Decimal(3, 2)
+  userId                 String  @id @map("user_id") @db.Uuid
+  averageRating          Decimal @default(0.00) @map("average_rating") @db.Decimal(3, 2)
+  autoAcceptAppointments Boolean @default(false) @map("auto_accept_appointments")
+  showContactInfo        Boolean @default(true) @map("show_contact_info")
 
-  user                          User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  servicesOffered               ProviderService[]
-  reviewsReceived               Review[]                      @relation("ProviderReviews")
-  serviceProviderAvailabilities ServiceProviderAvailability[]
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  services Service[]
 
   @@map("service_providers")
 }
 
-model ServiceProviderAvailability {
-  id           String  @id @default(uuid()) @db.Uuid
-  providerId   String  @map("provider_id") @db.Uuid
-  dayOfWeek    Int     @map("day_of_week")
-  startTime    String  @map("start_time")
-  endTime      String  @map("end_time")
-  breakStart   String? @map("break_start")
-  breakEnd     String? @map("break_end")
-  slotDuration Int     @default(30) @map("slot_duration")
+model ServiceAvailability {
+  id           String   @id @default(uuid()) @db.Uuid
+  dayOfWeek    Int      @map("day_of_week")
+  startTime    String   @map("start_time")
+  endTime      String   @map("end_time")
+  breakStart   String?  @map("break_start")
+  breakEnd     String?  @map("break_end")
+  slotDuration Int      @default(30) @map("slot_duration")
+  service      Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  serviceId    String?  @db.Uuid
 
-  provider ServiceProvider @relation(fields: [providerId], references: [userId], onDelete: Cascade)
-
-  @@unique([providerId, dayOfWeek])
-  @@map("service_provider_availabilities")
+  @@unique([serviceId, dayOfWeek])
+  @@map("service_availabilities")
 }
 
 model Category {
@@ -123,7 +165,7 @@ model Category {
   name        String  @unique
   description String? @db.Text
 
-  providerServices ProviderService[]
+  services Service[]
 
   @@map("categories")
 }
@@ -133,11 +175,19 @@ model Service {
   name        String   @unique
   description String?  @db.Text
   price       Decimal  @default(0.00) @db.Decimal(10, 2)
+  rating      Decimal  @default(0.00) @db.Decimal(3, 2)
   createdAt   DateTime @default(now()) @map("created_at")
+  address     Address  @relation(fields: [addressId], references: [id])
 
-  photos       ServicePhoto[]
-  providers    ProviderService[]
-  appointments Appointment[]
+  photos         ServicePhoto[]
+  availabilities ServiceAvailability[]
+  provider       ServiceProvider       @relation(fields: [providerId], references: [userId], onDelete: Cascade)
+  providerId     String                @db.Uuid
+  appointments   Appointment[]
+  reviews        Review[]
+  category       Category              @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId     Int
+  addressId      String                @db.Uuid
 
   @@map("services")
 }
@@ -152,32 +202,16 @@ model ServicePhoto {
   @@map("service_photos")
 }
 
-model ProviderService {
-  providerId String    @map("provider_id") @db.Uuid
-  serviceId  String    @map("service_id") @db.Uuid
-  categoryId Int       @map("category_id")
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime? @updatedAt @map("updated_at")
-  finishedAt DateTime? @map("finished_at")
-
-  provider ServiceProvider @relation(fields: [providerId], references: [userId], onDelete: Cascade)
-  service  Service         @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  category Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  @@id([providerId, serviceId])
-  @@map("provider_services")
-}
-
 model Review {
-  id         String   @id @default(uuid()) @db.Uuid
-  providerId String   @map("provider_id") @db.Uuid
-  clientId   String   @map("client_id") @db.Uuid
-  rating     Decimal  @db.Decimal(2, 1)
-  comment    String?  @db.Text
-  createdAt  DateTime @default(now()) @map("created_at")
+  id        String   @id @default(uuid()) @db.Uuid
+  serviceId String   @map("service_id") @db.Uuid
+  clientId  String   @map("client_id") @db.Uuid
+  rating    Decimal  @db.Decimal(2, 1)
+  comment   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
 
-  provider ServiceProvider @relation("ProviderReviews", fields: [providerId], references: [userId], onDelete: Cascade)
-  client   User            @relation("ClientReviews", fields: [clientId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  client  User    @relation("ClientReviews", fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("review")
 }
@@ -194,11 +228,15 @@ model Contact {
 }
 
 model Appointment {
-  id            String            @id @default(uuid()) @db.Uuid
-  description   String            @db.VarChar(1000)
-  scheduledAt   DateTime
-  status        AppointmentStatus @default(PENDING)
-  paymentMethod PaymentMethod
+  id                 String            @id @default(uuid()) @db.Uuid
+  description        String            @db.VarChar(1000)
+  scheduledStartTime DateTime
+  scheduledEndTime   DateTime
+  status             AppointmentStatus @default(PENDING)
+  paymentMethod      PaymentMethod
+  paymentStatus      PaymentStatus     @default(PENDING) @map("payment_status")
+  price              Decimal           @default(0.00) @db.Decimal(10, 2)
+  cancellationReason String?           @map("cancellation_reason") @db.Text
 
   serviceId String  @db.Uuid
   service   Service @relation(fields: [serviceId], references: [id])

@@ -1,42 +1,39 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { cleanCategories, seedCategories } from "./seeds/categories.seed";
+import { seedCountries } from "./seeds/countries.seed";
+import { seedStates } from "./seeds/states.seed";
+import { seedCities } from "./seeds/cities.seed";
+import { cleanUsers, seedUsers } from "./seeds/users.seed";
+import { cleanServices, seedServices } from "./seeds/services.seed";
+import {
+  cleanAvailabilities,
+  seedAvailabilities,
+} from "./seeds/availabilities.seed";
+import { cleanAppointments, seedAppointments } from "./seeds/appointments.seed";
+import { cleanReviews, seedReviews } from "./seeds/reviews.seed";
 
 async function seed() {
-  await prisma.category.deleteMany();
+  console.log("🧹 Starting cleanup...");
+  await cleanReviews();
+  await cleanAppointments();
+  await cleanAvailabilities();
+  await cleanServices();
+  await cleanUsers();
+  await cleanCategories();
+  console.log("✅ Cleanup completed.\n");
 
-  const categories = [
-    {
-      name: "Encanamento",
-      description:
-        "Serviços relacionados a sistemas hidráulicos e reparos de encanamento.",
-    },
-    {
-      name: "Elétrica",
-      description: "Serviços relacionados a instalações e reparos elétricos.",
-    },
-    {
-      name: "Limpeza",
-      description: "Serviços de limpeza residencial e comercial.",
-    },
-    {
-      name: "Paisagismo",
-      description: "Serviços de jardinagem e manutenção de áreas verdes.",
-    },
-    {
-      name: "Pintura",
-      description: "Serviços de pintura interna e externa de edificações.",
-    },
-    {
-      name: "Outros",
-      description:
-        "Serviços diversos que não se enquadram nas categorias acima.",
-    },
-  ];
-
-  await prisma.category.createMany({ data: categories });
+  console.log("🌱 Starting seeding...");
+  await seedCountries();
+  await seedStates();
+  await seedCities();
+  await seedCategories();
+  await seedUsers();
+  await seedServices();
+  await seedAvailabilities();
+  await seedAppointments();
+  await seedReviews();
+  console.log("✅ Seeding completed successfully.");
 }
 
 seed().then(() => {
-  console.log("Seeding completed successfully.");
+  console.log("\n🎉 All operations completed successfully.");
 });

@@ -1,3 +1,32 @@
+export type TimeInterval = {
+  start: string;
+  end: string;
+};
+
+export function toMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+}
+
+export function isTimeIntervalIncluded(
+  interval: TimeInterval,
+  consumedIntervals: TimeInterval[]
+): boolean {
+  const intervalStart = toMinutes(interval.start);
+  const intervalEnd = toMinutes(interval.end);
+
+  return consumedIntervals.some((consumed) => {
+    const consumedStart = toMinutes(consumed.start);
+    const consumedEnd = toMinutes(consumed.end);
+
+    return (
+      (intervalStart >= consumedStart && intervalStart < consumedEnd) ||
+      (intervalEnd > consumedStart && intervalEnd <= consumedEnd) ||
+      (intervalStart <= consumedStart && intervalEnd >= consumedEnd)
+    );
+  });
+}
+
 export function generateSlotTimeIntervals(
   startTime: string,
   endTime: string,
@@ -15,11 +44,6 @@ export function generateSlotTimeIntervals(
 
   const end = new Date();
   end.setHours(endHour, endMinute, 0, 0);
-
-  const toMinutes = (hhmm: string) => {
-    const [h, m] = hhmm.split(":").map(Number);
-    return h * 60 + m;
-  };
 
   const breakStartMin = breakStart ? toMinutes(breakStart) : null;
   const breakEndMin = breakEnd ? toMinutes(breakEnd) : null;

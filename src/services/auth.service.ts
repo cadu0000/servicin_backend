@@ -1,4 +1,5 @@
 import { AuthRepository } from "../repository/auth.repository";
+import { AppointmentRepository } from "../repository/appointment.repository";
 import {
   SignupCompanyUserDTO,
   SignupIndividualUserDTO,
@@ -8,7 +9,10 @@ import { generateToken } from "../utils/jwt";
 import { hashPassword } from "../utils/password";
 
 export class AuthService {
-  constructor(private readonly userRepository: AuthRepository) {}
+  constructor(
+    private readonly userRepository: AuthRepository,
+    private readonly appointmentRepository: AppointmentRepository
+  ) {}
 
   async signup(signupUserDTO: SignupUserDTO) {
     const { email, userType } = signupUserDTO;
@@ -118,5 +122,27 @@ export class AuthService {
     });
 
     return token;
+  }
+
+  async getCurrentUser(userId: string) {
+    const user = await this.userRepository.findUserWithDetails(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    return user;
+  }
+
+  async deleteAccount(userId: string): Promise<void> {
+    const isProvider = await this.userRepository.isServiceProvider(userId);
+
+    if (isProvider) {
+      await this.appointmentRepository.cancelFutureAppointmentsForProvider(
+        userId
+      );
+    }
+
+    await this.userRepository.deleteAccount(userId);
   }
 }
