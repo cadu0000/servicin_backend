@@ -269,7 +269,14 @@ export class AppointmentService {
     }
 
     const isClient = appointment.clientId === userId;
-    const isProvider = appointment.service.providerId === userId;
+
+    const service = await this.serviceRepository.fetchById(
+      appointment.serviceId
+    );
+    if (!service) {
+      throw new Error("Serviço não encontrado.");
+    }
+    const isProvider = service.provider.userId === userId;
 
     if (!isClient && !isProvider) {
       throw new Error(
@@ -308,7 +315,14 @@ export class AppointmentService {
     }
 
     const isClient = appointment.clientId === userId;
-    const isProvider = appointment.service.providerId === userId;
+
+    const service = await this.serviceRepository.fetchById(
+      appointment.serviceId
+    );
+    if (!service) {
+      throw new Error("Serviço não encontrado.");
+    }
+    const isProvider = service.provider.userId === userId;
 
     if (!isClient && !isProvider) {
       throw new Error(
@@ -357,7 +371,14 @@ export class AppointmentService {
     }
 
     const isClient = appointment.clientId === userId;
-    const isProvider = appointment.service.providerId === userId;
+
+    const service = await this.serviceRepository.fetchById(
+      appointment.serviceId
+    );
+    if (!service) {
+      throw new Error("Serviço não encontrado.");
+    }
+    const isProvider = service.provider.userId === userId;
 
     if (!isClient && !isProvider) {
       throw new Error(

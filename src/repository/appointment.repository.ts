@@ -124,13 +124,9 @@ export class AppointmentRepository {
         id: true,
         status: true,
         clientId: true,
+        serviceId: true,
         paymentMethod: true,
         paymentStatus: true,
-        service: {
-          select: {
-            providerId: true,
-          },
-        },
       },
     });
   }

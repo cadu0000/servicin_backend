@@ -37,6 +37,9 @@ export async function serviceRoutes(server: FastifyInstance) {
                   price: z.coerce
                     .string()
                     .describe("Price of the service in BRL"),
+                  rating: z.coerce
+                    .string()
+                    .describe("Average rating of the service (0.00 to 5.00)"),
                   photos: z
                     .array(
                       z.object({
@@ -178,6 +181,9 @@ export async function serviceRoutes(server: FastifyInstance) {
               .nullable()
               .describe("Description of the service"),
             price: z.coerce.string().describe("Price of the service in BRL"),
+            rating: z.coerce
+              .string()
+              .describe("Average rating of the service (0.00 to 5.00)"),
             photos: z
               .array(
                 z.object({

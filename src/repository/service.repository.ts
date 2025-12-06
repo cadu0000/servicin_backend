@@ -132,6 +132,7 @@ export class ServiceRepository {
         name: true,
         description: true,
         price: true,
+        rating: true,
         photos: {
           select: {
             id: true,
@@ -203,6 +204,7 @@ export class ServiceRepository {
         name: true,
         description: true,
         price: true,
+        rating: true,
         photos: {
           select: {
             id: true,

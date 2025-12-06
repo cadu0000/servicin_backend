@@ -1,5 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { AppointmentStatus, PaymentMethod } from "@prisma/client";
+import {
+  AppointmentStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -24,7 +28,6 @@ export async function seedAppointments() {
   console.log("🌱 Starting appointments seed...");
 
   try {
-
     const services = await prisma.service.findMany({
       select: {
         id: true,
@@ -140,7 +143,9 @@ export async function seedAppointments() {
       const todayAfternoon = new Date(now);
       todayAfternoon.setHours(15, 0, 0, 0);
       const todayAfternoonEnd = new Date(todayAfternoon);
-      todayAfternoonEnd.setMinutes(todayAfternoonEnd.getMinutes() + slotDuration);
+      todayAfternoonEnd.setMinutes(
+        todayAfternoonEnd.getMinutes() + slotDuration
+      );
 
       if (todayAfternoon > now) {
         appointments.push({
@@ -156,13 +161,100 @@ export async function seedAppointments() {
       }
     }
 
+    const createdAppointments = [];
+
     for (const appointment of appointments) {
-      await prisma.appointment.create({
+      const created = await prisma.appointment.create({
         data: appointment,
       });
+      createdAppointments.push(created);
     }
 
-    console.log(`✅ Created ${appointments.length} appointments.`);
+    const completedAppointments = [];
+
+    for (let i = 0; i < services.length && i < clients.length; i++) {
+      const service = services[i];
+      const client = clients[i];
+
+      const dayOfWeek = (now.getDay() + 1) % 7 || 7;
+      const availability = service.availabilities.find(
+        (av) => av.dayOfWeek === dayOfWeek
+      );
+      const slotDuration = availability?.slotDuration || 30;
+
+      const oneWeekAgo = new Date(now);
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      oneWeekAgo.setHours(9 + i, 0, 0, 0);
+      const oneWeekAgoEnd = new Date(oneWeekAgo);
+      oneWeekAgoEnd.setMinutes(oneWeekAgoEnd.getMinutes() + slotDuration);
+
+      const twoWeeksAgo = new Date(now);
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+      twoWeeksAgo.setHours(10 + i, 30, 0, 0);
+      const twoWeeksAgoEnd = new Date(twoWeeksAgo);
+      twoWeeksAgoEnd.setMinutes(twoWeeksAgoEnd.getMinutes() + slotDuration);
+
+      const threeWeeksAgo = new Date(now);
+      threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21);
+      threeWeeksAgo.setHours(14 + i, 0, 0, 0);
+      const threeWeeksAgoEnd = new Date(threeWeeksAgo);
+      threeWeeksAgoEnd.setMinutes(threeWeeksAgoEnd.getMinutes() + slotDuration);
+
+      const price = Number(service.price);
+
+      completedAppointments.push(
+        {
+          serviceId: service.id,
+          clientId: client.id,
+          scheduledStartTime: oneWeekAgo,
+          scheduledEndTime: oneWeekAgoEnd,
+          description: `Agendamento concluído para ${service.name} - Semana passada`,
+          paymentMethod: PaymentMethod.PIX,
+          price: price,
+          status: AppointmentStatus.COMPLETED,
+          paymentStatus: PaymentStatus.PAID,
+        },
+        {
+          serviceId: service.id,
+          clientId: client.id,
+          scheduledStartTime: twoWeeksAgo,
+          scheduledEndTime: twoWeeksAgoEnd,
+          description: `Agendamento concluído para ${service.name} - Duas semanas atrás`,
+          paymentMethod: PaymentMethod.CREDIT_CARD,
+          price: price,
+          status: AppointmentStatus.COMPLETED,
+          paymentStatus: PaymentStatus.PAID,
+        },
+        {
+          serviceId: service.id,
+          clientId: client.id,
+          scheduledStartTime: threeWeeksAgo,
+          scheduledEndTime: threeWeeksAgoEnd,
+          description: `Agendamento concluído para ${service.name} - Três semanas atrás`,
+          paymentMethod: PaymentMethod.CASH,
+          price: price,
+          status: AppointmentStatus.COMPLETED,
+          paymentStatus: PaymentStatus.PAID,
+        }
+      );
+    }
+
+    for (const appointment of completedAppointments) {
+      const created = await prisma.appointment.create({
+        data: appointment,
+      });
+      createdAppointments.push(created);
+    }
+
+    console.log(
+      `✅ Created ${appointments.length} pending/approved appointments.`
+    );
+    console.log(
+      `✅ Created ${completedAppointments.length} completed and paid appointments.`
+    );
+    console.log(
+      `✅ Total: ${createdAppointments.length} appointments created.`
+    );
     console.log("✅ Appointments seed completed successfully.");
   } catch (error) {
     console.error("❌ Error seeding appointments:");

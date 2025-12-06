@@ -9,9 +9,11 @@ import {
   seedAvailabilities,
 } from "./seeds/availabilities.seed";
 import { cleanAppointments, seedAppointments } from "./seeds/appointments.seed";
+import { cleanReviews, seedReviews } from "./seeds/reviews.seed";
 
 async function seed() {
   console.log("🧹 Starting cleanup...");
+  await cleanReviews();
   await cleanAppointments();
   await cleanAvailabilities();
   await cleanServices();
@@ -28,6 +30,7 @@ async function seed() {
   await seedServices();
   await seedAvailabilities();
   await seedAppointments();
+  await seedReviews();
   console.log("✅ Seeding completed successfully.");
 }
 

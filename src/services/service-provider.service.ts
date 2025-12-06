@@ -103,12 +103,16 @@ export class ServiceProviderService {
 
       return {
         ...service,
+        rating: (service as any).rating ? Number((service as any).rating) : 0,
         availabilities: availabilitiesWithSlots,
       };
     });
 
     return {
       ...serviceProvider,
+      averageRating: (serviceProvider as any).averageRating
+        ? Number((serviceProvider as any).averageRating)
+        : 0,
       services: servicesWithSlots,
     };
   }

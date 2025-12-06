@@ -54,6 +54,13 @@ export class ServiceService {
       const { appointments, ...serviceWithoutAppointments } = service;
       return {
         ...serviceWithoutAppointments,
+        rating: (service as any).rating ? Number((service as any).rating) : 0,
+        provider: {
+          ...service.provider,
+          averageRating: (service.provider as any).averageRating
+            ? Number((service.provider as any).averageRating)
+            : 0,
+        },
         unavailableTimeSlots,
       };
     });
@@ -105,6 +112,13 @@ export class ServiceService {
     const { appointments, ...serviceWithoutAppointments } = service;
     return {
       ...serviceWithoutAppointments,
+      rating: (service as any).rating ? Number((service as any).rating) : 0,
+      provider: {
+        ...service.provider,
+        averageRating: (service.provider as any).averageRating
+          ? Number((service.provider as any).averageRating)
+          : 0,
+      },
       unavailableTimeSlots,
     };
   }

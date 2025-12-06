@@ -38,6 +38,7 @@ const MOCK_FETCH_RESULT = {
       name: "Serviço de Teste",
       description: "Teste",
       price: 100,
+      rating: 4.5,
       photos: [],
       availabilities: [],
       appointments: [],
@@ -94,6 +95,13 @@ describe("ServiceService", () => {
           const { appointments, ...serviceWithoutAppointments } = service;
           return {
             ...serviceWithoutAppointments,
+            rating: service.rating ? Number(service.rating) : 0,
+            provider: {
+              ...service.provider,
+              averageRating: service.provider.averageRating
+                ? Number(service.provider.averageRating)
+                : 0,
+            },
             unavailableTimeSlots: [],
           };
         }),
@@ -184,6 +192,15 @@ describe("ServiceService", () => {
         mockService as any;
       const expectedResult = {
         ...serviceWithoutAppointments,
+        rating: (mockService as any).rating
+          ? Number((mockService as any).rating)
+          : 0,
+        provider: {
+          ...(mockService as any).provider,
+          averageRating: (mockService as any).provider.averageRating
+            ? Number((mockService as any).provider.averageRating)
+            : 0,
+        },
         unavailableTimeSlots: [],
       };
       expect(result).toEqual(expectedResult);

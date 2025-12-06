@@ -9,12 +9,14 @@ export class ServiceProviderRepository {
     const serviceProvider = await prisma.serviceProvider.findUnique({
       select: {
         userId: true,
+        averageRating: true,
         services: {
           select: {
             id: true,
             name: true,
             description: true,
             price: true,
+            rating: true,
             photos: {
               select: {
                 id: true,
