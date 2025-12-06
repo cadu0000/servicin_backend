@@ -128,8 +128,9 @@ model Company {
 }
 
 model ServiceProvider {
-  userId        String  @id @map("user_id") @db.Uuid
-  averageRating Decimal @default(0.00) @map("average_rating") @db.Decimal(3, 2)
+  userId                 String  @id @map("user_id") @db.Uuid
+  averageRating          Decimal @default(0.00) @map("average_rating") @db.Decimal(3, 2)
+  autoAcceptAppointments Boolean @default(false) @map("auto_accept_appointments")
 
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   reviewsReceived Review[]  @relation("ProviderReviews")

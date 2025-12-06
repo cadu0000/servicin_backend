@@ -1,6 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { createServiceProviderSchema } from "../../schemas/service-provider.schema";
+import {
+  createServiceProviderSchema,
+  updateServiceProviderSchema,
+} from "../../schemas/service-provider.schema";
 import { serviceProviderController } from "../../container";
 
 export async function serviceProviderRoutes(server: FastifyInstance) {
@@ -125,5 +128,26 @@ export async function serviceProviderRoutes(server: FastifyInstance) {
       },
     },
     (request, reply) => serviceProviderController.create(request, reply)
+  );
+
+  server.patch(
+    "/:id",
+    {
+      preHandler: [server.authenticate],
+      schema: {
+        summary: "Update service provider profile",
+        description:
+          "Endpoint to update service provider profile settings. Requires authentication.",
+        tags: ["Service Provider"],
+        params: z.object({
+          id: z.string().uuid().describe("ID of the service provider user"),
+        }),
+        body: updateServiceProviderSchema,
+        response: {
+          200: z.null().describe("Service provider updated successfully"),
+        },
+      },
+    },
+    (request, reply) => serviceProviderController.update(request, reply)
   );
 }

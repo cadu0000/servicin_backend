@@ -1,5 +1,8 @@
 import { prisma } from "../lib/prisma";
-import { CreateServiceProviderDTO } from "../schemas/service-provider.schema";
+import {
+  CreateServiceProviderDTO,
+  UpdateServiceProviderDTO,
+} from "../schemas/service-provider.schema";
 
 export class ServiceProviderRepository {
   async findById(id: string) {
@@ -38,6 +41,18 @@ export class ServiceProviderRepository {
       data: {
         userId,
       },
+    });
+  }
+
+  async update(
+    userId: string,
+    updateServiceProviderDTO: UpdateServiceProviderDTO
+  ) {
+    await prisma.serviceProvider.update({
+      where: {
+        userId,
+      },
+      data: updateServiceProviderDTO,
     });
   }
 }

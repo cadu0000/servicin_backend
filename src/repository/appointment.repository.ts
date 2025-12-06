@@ -15,6 +15,7 @@ type CreateAppointmentData = {
   description: string;
   paymentMethod: PaymentMethod;
   price: number;
+  status?: AppointmentStatus;
 };
 
 export class AppointmentRepository {
@@ -29,6 +30,7 @@ export class AppointmentRepository {
       description,
       paymentMethod,
       price,
+      status,
     } = createAppointmentData;
 
     const newAppointment = await prisma.appointment.create({
@@ -40,7 +42,7 @@ export class AppointmentRepository {
         description: description,
         paymentMethod: paymentMethod,
         price: price,
-        status: AppointmentStatus.PENDING,
+        status: status || AppointmentStatus.PENDING,
       },
       select: {
         id: true,

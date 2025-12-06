@@ -10,3 +10,13 @@ export const createServiceProviderSchema = z.object({
 export type CreateServiceProviderDTO = z.infer<
   typeof createServiceProviderSchema
 >;
+
+export const updateServiceProviderSchema = z.object({
+  autoAcceptAppointments: z
+    .boolean()
+    .optional()
+    .describe("Whether to automatically accept appointments"),
+});
+export type UpdateServiceProviderDTO = z.infer<
+  typeof updateServiceProviderSchema
+>;

@@ -156,6 +156,7 @@ export class ServiceRepository {
           select: {
             userId: true,
             averageRating: true,
+            autoAcceptAppointments: true,
             user: {
               select: {
                 photoUrl: true,
@@ -226,6 +227,7 @@ export class ServiceRepository {
           select: {
             userId: true,
             averageRating: true,
+            autoAcceptAppointments: true,
             user: {
               select: {
                 photoUrl: true,

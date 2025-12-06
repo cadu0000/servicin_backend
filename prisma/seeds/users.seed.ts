@@ -107,9 +107,11 @@ export async function seedUsers() {
       }
 
       if ((userData as any).isServiceProvider) {
+        const isFirstProvider = userData.email === "carlos.provedor@email.com";
         await prisma.serviceProvider.create({
           data: {
             userId: user.id,
+            autoAcceptAppointments: isFirstProvider,
           },
         });
       }

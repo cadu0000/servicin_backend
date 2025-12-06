@@ -1,7 +1,10 @@
 import { AuthRepository } from "../repository/auth.repository";
 import { ServiceProviderRepository } from "../repository/service-provider.repository";
 import { AppointmentRepository } from "../repository/appointment.repository";
-import { CreateServiceProviderDTO } from "../schemas/service-provider.schema";
+import {
+  CreateServiceProviderDTO,
+  UpdateServiceProviderDTO,
+} from "../schemas/service-provider.schema";
 import {
   generateSlotTimeIntervals,
   isTimeIntervalIncluded,
@@ -28,11 +31,12 @@ export class ServiceProviderService {
     const endOfDay = new Date(targetDate);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const appointments = await this.appointmentRepository.findProviderAppointmentsByDateRange(
-      id,
-      startOfDay,
-      endOfDay
-    );
+    const appointments =
+      await this.appointmentRepository.findProviderAppointmentsByDateRange(
+        id,
+        startOfDay,
+        endOfDay
+      );
 
     const consumedIntervals: TimeInterval[] = appointments.map((apt) => {
       const startDate = new Date(apt.scheduledStartTime);
@@ -41,7 +45,10 @@ export class ServiceProviderService {
       const startTime = `${startDate
         .getHours()
         .toString()
-        .padStart(2, "0")}:${startDate.getMinutes().toString().padStart(2, "0")}`;
+        .padStart(2, "0")}:${startDate
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}`;
 
       const endTime = `${endDate
         .getHours()
@@ -123,5 +130,17 @@ export class ServiceProviderService {
     }
 
     await this.serviceProviderRepository.create(params);
+  }
+
+  async update(userId: string, params: UpdateServiceProviderDTO) {
+    const serviceProvider = await this.serviceProviderRepository.findById(
+      userId
+    );
+
+    if (!serviceProvider) {
+      throw new Error("Service provider not found");
+    }
+
+    await this.serviceProviderRepository.update(userId, params);
   }
 }

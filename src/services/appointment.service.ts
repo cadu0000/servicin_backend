@@ -190,6 +190,10 @@ export class AppointmentService {
     const priceMultiplier = appointmentDurationMinutes / slotDuration;
     const price = servicePrice * priceMultiplier;
 
+    const initialStatus = serviceExists.provider.autoAcceptAppointments
+      ? AppointmentStatus.APPROVED
+      : AppointmentStatus.PENDING;
+
     const appointment = await this.appointmentRepository.create({
       serviceId: createAppointmentDTO.serviceId,
       clientId: createAppointmentDTO.clientId,
@@ -198,6 +202,7 @@ export class AppointmentService {
       description: createAppointmentDTO.description,
       paymentMethod: createAppointmentDTO.paymentMethod,
       price,
+      status: initialStatus,
     });
 
     return appointment;
