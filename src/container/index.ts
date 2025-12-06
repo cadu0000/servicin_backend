@@ -13,6 +13,9 @@ import { CategoryRepository } from "../repository/category.repository";
 import { CategoryController } from "../api/controllers/category.controller";
 import { CategoryService } from "../services/category.service";
 import { AppointmentService } from "../services/appointment.service";
+import { LocationRepository } from "../repository/location.repository";
+import { LocationService } from "../services/location.service";
+import { LocationController } from "../api/controllers/location.controller";
 
 // Repositories
 const authRepository = new AuthRepository();
@@ -20,6 +23,7 @@ const serviceRepository = new ServiceRepository();
 const serviceProviderRepository = new ServiceProviderRepository();
 const categoryRepository = new CategoryRepository();
 const appointmentRepository = new AppointmentRepository();
+const locationRepository = new LocationRepository();
 
 // Services
 const authService = new AuthService(authRepository, appointmentRepository);
@@ -34,6 +38,7 @@ const appointmentService = new AppointmentService(
   serviceRepository,
   authRepository
 );
+const locationService = new LocationService(locationRepository);
 
 // Controllers
 const authController = new AuthController(authService);
@@ -43,6 +48,7 @@ const serviceProviderController = new ServiceProviderController(
 );
 const categoryController = new CategoryController(categoryService);
 const appointmentController = new AppointmentController(appointmentService);
+const locationController = new LocationController(locationService);
 
 export {
   authController,
@@ -50,4 +56,5 @@ export {
   serviceProviderController,
   categoryController,
   appointmentController,
+  locationController,
 };

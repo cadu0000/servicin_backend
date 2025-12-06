@@ -13,6 +13,58 @@ export async function seedUsers() {
 
     for (const userData of usersData) {
       const hashedPassword = await hashPassword(userData.password);
+      const addressData = userData.address[0];
+
+      let country = await prisma.country.findUnique({
+        where: { name: addressData.country },
+      });
+
+      if (!country) {
+        country = await prisma.country.create({
+          data: { name: addressData.country },
+        });
+      }
+
+      let state = await prisma.state.findUnique({
+        where: { name: addressData.state },
+      });
+
+      if (!state) {
+        state = await prisma.state.create({
+          data: {
+            name: addressData.state,
+            countryId: country.id,
+          },
+        });
+      }
+
+      let city = await prisma.city.findFirst({
+        where: {
+          name: addressData.city,
+          stateId: state.id,
+        },
+      });
+
+      if (!city) {
+        city = await prisma.city.create({
+          data: {
+            name: addressData.city,
+            stateId: state.id,
+          },
+        });
+      }
+
+      const address = await prisma.address.create({
+        data: {
+          countryId: country.id,
+          stateId: state.id,
+          cityId: city.id,
+          neighborhood: addressData.neighborhood,
+          street: addressData.street,
+          zipCode: addressData.zipCode,
+          number: addressData.number,
+        },
+      });
 
       const user = await prisma.user.create({
         data: {
@@ -20,11 +72,7 @@ export async function seedUsers() {
           password: hashedPassword,
           userType: userData.userType as UserRole,
           photoUrl: faker.image.avatar(),
-          address: {
-            createMany: {
-              data: userData.address,
-            },
-          },
+          addressId: address.id,
           contacts: {
             createMany: {
               data: userData.contacts.map((contact) => ({

@@ -25,6 +25,16 @@ export const fetchServicesQueryParamsSchema = z.object({
     .max(5)
     .optional()
     .describe("Average rating of services provided (1.0 to 5.0)"),
+  stateId: z
+    .string()
+    .uuid()
+    .optional()
+    .describe("Filter services by state ID (UUID)"),
+  cityId: z
+    .string()
+    .uuid()
+    .optional()
+    .describe("Filter services by city ID (UUID)"),
 });
 
 export const createServiceSchema = z.object({
@@ -34,6 +44,11 @@ export const createServiceSchema = z.object({
     .describe("ID of the service provider")
     .default("550e8400-e29b-41d4-a716-446655440000"),
   categoryId: z.number().describe("ID of the service category").default(1),
+  addressId: z
+    .string()
+    .uuid()
+    .describe("ID of the address where the service is provided")
+    .default("550e8400-e29b-41d4-a716-446655440000"),
   name: z
     .string()
     .min(3)

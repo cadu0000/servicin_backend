@@ -74,18 +74,22 @@ export async function authRoutes(server: FastifyInstance) {
             userType: z.enum(["INDIVIDUAL", "COMPANY"]),
             photoUrl: z.string().nullable(),
             createdAt: z.date(),
-            address: z.array(
-              z.object({
-                id: z.string().uuid(),
-                country: z.string(),
-                state: z.string(),
-                city: z.string(),
-                neighborhood: z.string(),
-                street: z.string(),
-                zipCode: z.string(),
-                number: z.string().nullable(),
-              })
-            ),
+            address: z.object({
+              id: z.string().uuid(),
+              country: z.object({
+                name: z.string(),
+              }),
+              state: z.object({
+                name: z.string(),
+              }),
+              city: z.object({
+                name: z.string(),
+              }),
+              neighborhood: z.string(),
+              street: z.string(),
+              zipCode: z.string(),
+              number: z.string().nullable(),
+            }),
             contacts: z.array(
               z.object({
                 id: z.string().uuid(),

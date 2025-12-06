@@ -2,6 +2,15 @@ import { ServiceService } from "../service.service";
 import { ServiceRepository } from "../../repository/service.repository";
 import { AuthRepository } from "../../repository/auth.repository";
 import { FetchServicesQueryParamsDTO } from "../../schemas/service.schema";
+import { prisma } from "../../lib/prisma";
+
+jest.mock("../../lib/prisma", () => ({
+  prisma: {
+    address: {
+      findUnique: jest.fn(),
+    },
+  },
+}));
 
 const mockServiceRepository: jest.Mocked<ServiceRepository> = {
   fetch: jest.fn(),
@@ -179,6 +188,7 @@ describe("ServiceService", () => {
       const createData = {
         providerId: "provider-1",
         categoryId: 1,
+        addressId: "address-1",
         name: "Novo Serviço",
         description: "Descrição",
         price: 100,
@@ -187,12 +197,14 @@ describe("ServiceService", () => {
 
       const mockUser = { id: "provider-1" };
       const mockCategory = { id: 1, name: "Limpeza" };
+      const mockAddress = { id: "address-1" };
       const mockCreatedService = { id: "new-service-id" };
 
       mockUserRepository.findById.mockResolvedValue(mockUser as any);
       mockServiceRepository.findCategoryById.mockResolvedValue(
         mockCategory as any
       );
+      (prisma.address.findUnique as jest.Mock).mockResolvedValue(mockAddress);
       mockServiceRepository.create.mockResolvedValue(mockCreatedService as any);
 
       const result = await serviceService.create(createData);
@@ -207,6 +219,7 @@ describe("ServiceService", () => {
       const createData = {
         providerId: "non-existent",
         categoryId: 1,
+        addressId: "address-1",
         name: "Novo Serviço",
         description: "Descrição",
         price: 100,
@@ -224,6 +237,7 @@ describe("ServiceService", () => {
       const createData = {
         providerId: "provider-1",
         categoryId: 999,
+        addressId: "address-1",
         name: "Novo Serviço",
         description: "Descrição",
         price: 100,
@@ -237,6 +251,31 @@ describe("ServiceService", () => {
 
       await expect(serviceService.create(createData)).rejects.toThrow(
         "Category does not exist"
+      );
+    });
+
+    it("should throw error when address does not exist", async () => {
+      const createData = {
+        providerId: "provider-1",
+        categoryId: 1,
+        addressId: "non-existent-address",
+        name: "Novo Serviço",
+        description: "Descrição",
+        price: 100,
+        availability: [],
+      };
+
+      const mockUser = { id: "provider-1" };
+      const mockCategory = { id: 1, name: "Limpeza" };
+
+      mockUserRepository.findById.mockResolvedValue(mockUser as any);
+      mockServiceRepository.findCategoryById.mockResolvedValue(
+        mockCategory as any
+      );
+      (prisma.address.findUnique as jest.Mock).mockResolvedValue(null);
+
+      await expect(serviceService.create(createData)).rejects.toThrow(
+        "Address does not exist"
       );
     });
   });

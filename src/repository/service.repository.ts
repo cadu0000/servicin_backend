@@ -111,6 +111,20 @@ export class ServiceRepository {
       };
     }
 
+    if (filters.stateId) {
+      where.address = {
+        ...where.address,
+        stateId: filters.stateId,
+      };
+    }
+
+    if (filters.cityId) {
+      where.address = {
+        ...where.address,
+        cityId: filters.cityId,
+      };
+    }
+
     const services = await prisma.service.findMany({
       where,
       select: {
@@ -215,8 +229,15 @@ export class ServiceRepository {
   }
 
   async create(createServiceSchemaDTO: CreateServiceSchemaDTO) {
-    const { name, description, price, providerId, categoryId, availability } =
-      createServiceSchemaDTO;
+    const {
+      name,
+      description,
+      price,
+      providerId,
+      categoryId,
+      addressId,
+      availability,
+    } = createServiceSchemaDTO;
 
     const service = await prisma.service.create({
       data: {
@@ -225,6 +246,7 @@ export class ServiceRepository {
         price,
         categoryId,
         providerId,
+        addressId,
         availabilities: {
           createMany: {
             data: availability,

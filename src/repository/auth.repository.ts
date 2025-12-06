@@ -49,6 +49,53 @@ export class AuthRepository {
     const { email, password, photoUrl, userType, address, contacts } =
       signupUserDTO;
 
+    const country = await prisma.country.findUnique({
+      where: { id: address.countryId },
+    });
+
+    if (!country) {
+      throw new Error("Country not found");
+    }
+
+    const state = await prisma.state.findUnique({
+      where: { id: address.stateId },
+    });
+
+    if (!state) {
+      throw new Error("State not found");
+    }
+
+    if (state.countryId !== address.countryId) {
+      throw new Error("State does not belong to the specified country");
+    }
+
+    const city = await prisma.city.findFirst({
+      where: {
+        id: address.cityId,
+        stateId: address.stateId,
+      },
+    });
+
+    if (!city) {
+      throw new Error("City not found");
+    }
+
+    if (city.stateId !== address.stateId) {
+      throw new Error("City does not belong to the specified state");
+    }
+
+    const createdAddress = await prisma.address.create({
+      data: {
+        countryId: address.countryId,
+        stateId: address.stateId,
+        cityId: address.cityId,
+        neighborhood: address.neighborhood,
+        street: address.street,
+        zipCode: address.zipCode,
+        number: address.number,
+      },
+    });
+
     const user = await prisma.user.create({
       select: {
         id: true,
@@ -59,11 +106,7 @@ export class AuthRepository {
         password,
         photoUrl,
         userType,
-        address: {
-          createMany: {
-            data: address,
-          },
-        },
+        addressId: createdAddress.id,
         contacts: {
           createMany: {
             data: contacts,
@@ -128,9 +171,21 @@ export class AuthRepository {
         address: {
           select: {
             id: true,
-            country: true,
-            state: true,
-            city: true,
+            country: {
+              select: {
+                name: true,
+              },
+            },
+            state: {
+              select: {
+                name: true,
+              },
+            },
+            city: {
+              select: {
+                name: true,
+              },
+            },
             neighborhood: true,
             street: true,
             zipCode: true,

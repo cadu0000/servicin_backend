@@ -40,30 +40,67 @@ model User {
   userType  UserRole  @map("user_type")
   photoUrl  String?   @map("photo_url") @db.Text
   deletedAt DateTime? @map("deleted_at")
+  address   Address   @relation(fields: [addressId], references: [id])
 
-  address              Address[]
   individual           Individual?
   company              Company?
   serviceProvider      ServiceProvider?
   contacts             Contact[]
   reviewsWritten       Review[]         @relation("ClientReviews")
   appointmentsAsClient Appointment[]    @relation("ClientAppointments")
+  addressId            String           @db.Uuid
 
   @@map("users")
 }
 
+model Country {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  states    State[]
+  addresses Address[]
+
+  @@map("countries")
+}
+
+model State {
+  id      String  @id @default(uuid()) @db.Uuid
+  name    String  @unique
+  country Country @relation(fields: [countryId], references: [id])
+
+  cities    City[]
+  addresses Address[]
+  countryId String    @db.Uuid
+
+  @@map("states")
+}
+
+model City {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  state     State     @relation(fields: [stateId], references: [id])
+  stateId   String    @db.Uuid
+  addresses Address[]
+
+  @@unique([stateId, name])
+  @@map("cities")
+}
+
 model Address {
   id           String  @id @default(uuid()) @db.Uuid
-  userId       String  @map("user_id") @db.Uuid
-  country      String
-  state        String
-  city         String
+  country      Country @relation(fields: [countryId], references: [id])
+  state        State   @relation(fields: [stateId], references: [id])
+  city         City    @relation(fields: [cityId], references: [id])
   neighborhood String
   street       String
   zipCode      String  @map("zip_code")
   number       String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cityId    String    @db.Uuid
+  stateId   String    @db.Uuid
+  countryId String    @db.Uuid
+  users     User[]
+  services  Service[]
 
   @@map("address")
 }
@@ -132,6 +169,7 @@ model Service {
   description String?  @db.Text
   price       Decimal  @default(0.00) @db.Decimal(10, 2)
   createdAt   DateTime @default(now()) @map("created_at")
+  address     Address  @relation(fields: [addressId], references: [id])
 
   photos         ServicePhoto[]
   availabilities ServiceAvailability[]
@@ -140,6 +178,7 @@ model Service {
   appointments   Appointment[]
   category       Category              @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId     Int
+  addressId      String                @db.Uuid
 
   @@map("services")
 }

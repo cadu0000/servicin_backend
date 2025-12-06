@@ -8,4 +8,6 @@ export interface ServiceFiltersDTO {
   radiusKm?: number;
   chargeType?: string;
   minRating?: number;
+  stateId?: string;
+  cityId?: string;
 }

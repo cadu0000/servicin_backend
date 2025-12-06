@@ -1,5 +1,6 @@
 import { AuthRepository } from "../repository/auth.repository";
 import { ServiceRepository } from "../repository/service.repository";
+import { prisma } from "../lib/prisma";
 import {
   CreateServiceSchemaDTO,
   FetchServicesQueryParamsDTO,
@@ -34,7 +35,7 @@ export class ServiceService {
   }
 
   async create(createServiceSchemaDTO: CreateServiceSchemaDTO) {
-    const { categoryId, providerId } = createServiceSchemaDTO;
+    const { categoryId, providerId, addressId } = createServiceSchemaDTO;
 
     const userAlreadyExists = await this.authRepository.findById(providerId);
 
@@ -56,6 +57,14 @@ export class ServiceService {
 
     if (!categoryExists) {
       throw new Error("Category does not exist");
+    }
+
+    const address = await prisma.address.findUnique({
+      where: { id: addressId },
+    });
+
+    if (!address) {
+      throw new Error("Address does not exist");
     }
 
     const service = await this.serviceRepository.create(createServiceSchemaDTO);

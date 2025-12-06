@@ -49,6 +49,7 @@ export async function seedServices() {
           price: serviceData.price,
           providerId: provider.id,
           categoryId: category.id,
+          addressId: provider.addressId,
           photos: photoUrl
             ? {
                 create: {

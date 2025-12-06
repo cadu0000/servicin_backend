@@ -27,46 +27,43 @@ const signupDefaultUserSchema = z.object({
     .describe("The user can provide a photo URL")
     .default(null),
   address: z
-    .array(
-      z.object({
-        street: z
-          .string()
-          .min(1, "Street cannot be empty")
-          .describe("The user must provide a street")
-          .default("Main St"),
-        city: z
-          .string()
-          .min(1, "City cannot be empty")
-          .describe("The user must provide a city")
-          .default("Springfield"),
-        state: z
-          .string()
-          .min(1, "State cannot be empty")
-          .describe("The user must provide a state")
-          .default("IL"),
-        zipCode: z
-          .string()
-          .min(1, "Zip code cannot be empty")
-          .describe("The user must provide a zip code")
-          .default("62701"),
-        neighborhood: z
-          .string()
-          .min(1, "Neighborhood cannot be empty")
-          .describe("The user must provide a neighborhood")
-          .default("Downtown"),
-        number: z
-          .string()
-          .nullable()
-          .describe("The user must provide a number")
-          .default("123"),
-        country: z
-          .string()
-          .min(1, "Country cannot be empty")
-          .describe("The user must provide a country")
-          .default("USA"),
-      })
-    )
-    .min(1, "At least one address is required")
+    .object({
+      street: z
+        .string()
+        .min(1, "Street cannot be empty")
+        .describe("The user must provide a street")
+        .default("Main St"),
+      cityId: z
+        .string()
+        .uuid("City ID must be a valid UUID")
+        .describe("The user must provide a city ID")
+        .default("550e8400-e29b-41d4-a716-446655440000"),
+      stateId: z
+        .string()
+        .uuid("State ID must be a valid UUID")
+        .describe("The user must provide a state ID")
+        .default("550e8400-e29b-41d4-a716-446655440001"),
+      zipCode: z
+        .string()
+        .min(1, "Zip code cannot be empty")
+        .describe("The user must provide a zip code")
+        .default("62701"),
+      neighborhood: z
+        .string()
+        .min(1, "Neighborhood cannot be empty")
+        .describe("The user must provide a neighborhood")
+        .default("Downtown"),
+      number: z
+        .string()
+        .nullable()
+        .describe("The user must provide a number")
+        .default("123"),
+      countryId: z
+        .string()
+        .uuid("Country ID must be a valid UUID")
+        .describe("The user must provide a country ID")
+        .default("550e8400-e29b-41d4-a716-446655440002"),
+    })
     .describe("The user must provide an address"),
   contacts: z
     .array(

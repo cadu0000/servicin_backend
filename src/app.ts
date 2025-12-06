@@ -14,6 +14,7 @@ import { serviceProviderRoutes } from "./api/routes/service-provider.route";
 import { serviceRoutes } from "./api/routes/service.route";
 import { categoryRoutes } from "./api/routes/category.route";
 import { appointmentRoutes } from "./api/routes/appointment.route";
+import { locationRoutes } from "./api/routes/location.route";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const server = fastify();
@@ -45,6 +46,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   server.register(serviceProviderRoutes, { prefix: "/service-providers" });
   server.register(categoryRoutes, { prefix: "/categories" });
   server.register(appointmentRoutes, { prefix: "/appointments" });
+  server.register(locationRoutes, { prefix: "/locations" });
 
   return server;
 }
