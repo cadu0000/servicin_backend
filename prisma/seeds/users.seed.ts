@@ -26,7 +26,6 @@ export async function seedUsers() {
   console.log("🌱 Starting users seed...");
 
   try {
-
     for (const userData of usersData) {
       const hashedPassword = await hashPassword(userData.password);
       const addressData = userData.address[0];
@@ -128,6 +127,7 @@ export async function seedUsers() {
           data: {
             userId: user.id,
             autoAcceptAppointments: isFirstProvider,
+            showContactInfo: !isFirstProvider,
           },
         });
       }

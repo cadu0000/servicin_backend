@@ -108,11 +108,18 @@ export class ServiceProviderService {
       };
     });
 
+    const contacts = serviceProvider.user?.contacts || [];
+    const filteredContacts = serviceProvider.showContactInfo
+      ? contacts
+      : contacts.filter((contact) => contact.type !== "PHONE");
+
     return {
-      ...serviceProvider,
+      userId: serviceProvider.userId,
       averageRating: (serviceProvider as any).averageRating
         ? Number((serviceProvider as any).averageRating)
         : 0,
+      showContactInfo: serviceProvider.showContactInfo,
+      contacts: filteredContacts,
       services: servicesWithSlots,
     };
   }

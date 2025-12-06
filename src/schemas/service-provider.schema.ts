@@ -16,6 +16,10 @@ export const updateServiceProviderSchema = z.object({
     .boolean()
     .optional()
     .describe("Whether to automatically accept appointments"),
+  showContactInfo: z
+    .boolean()
+    .optional()
+    .describe("Whether to show contact information (phone/whatsapp)"),
 });
 export type UpdateServiceProviderDTO = z.infer<
   typeof updateServiceProviderSchema

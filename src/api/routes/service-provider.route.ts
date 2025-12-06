@@ -26,7 +26,26 @@ export async function serviceProviderRoutes(server: FastifyInstance) {
                 .describe("ID of the service provider user"),
               averageRating: z.coerce
                 .string()
-                .describe("Average rating of the service provider (0.00 to 5.00)"),
+                .describe(
+                  "Average rating of the service provider (0.00 to 5.00)"
+                ),
+              showContactInfo: z
+                .boolean()
+                .describe(
+                  "Whether the service provider shows contact information"
+                ),
+              contacts: z
+                .array(
+                  z.object({
+                    type: z
+                      .enum(["EMAIL", "PHONE"])
+                      .describe("Type of contact (EMAIL or PHONE)"),
+                    value: z.string().describe("Contact value"),
+                  })
+                )
+                .describe(
+                  "List of user contacts (filtered if showContactInfo is false)"
+                ),
               services: z
                 .array(
                   z.object({
@@ -143,12 +162,14 @@ export async function serviceProviderRoutes(server: FastifyInstance) {
       schema: {
         summary: "Update service provider profile",
         description:
-          "Endpoint to update service provider profile settings. Requires authentication.",
+          "Endpoint to update service provider profile settings. Requires authentication. You can update: autoAcceptAppointments and showContactInfo.",
         tags: ["Service Provider"],
         params: z.object({
           id: z.string().uuid().describe("ID of the service provider user"),
         }),
-        body: updateServiceProviderSchema,
+        body: updateServiceProviderSchema.describe(
+          "Service provider update payload. All fields are optional."
+        ),
         response: {
           200: z.null().describe("Service provider updated successfully"),
         },

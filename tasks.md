@@ -134,9 +134,9 @@ Este documento contém as tarefas técnicas necessárias para concluir o desenvo
 **Objetivo:** Ocultar WhatsApp se o prestador desejar.
 **Passo a Passo:**
 
-1. [ ] Adicionar campo `showContactInfo Boolean @default(true)` no model `ServiceProvider`.
-2. [ ] No endpoint `GET /service-providers/:id`, verificar essa flag.
-3. [ ] Se `false`, não retornar o array de contatos ou filtrar contatos do tipo PHONE/WHATSAPP.
+1. [x] Adicionar campo `showContactInfo Boolean @default(true)` no model `ServiceProvider`.
+2. [x] No endpoint `GET /service-providers/:id`, verificar essa flag.
+3. [x] Se `false`, não retornar o array de contatos ou filtrar contatos do tipo PHONE/WHATSAPP.
 
 ### [NOTIF-02] Estrutura Básica de Notificações (RF18 / RN24)
 

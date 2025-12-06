@@ -137,6 +137,7 @@ model ServiceProvider {
   userId                 String  @id @map("user_id") @db.Uuid
   averageRating          Decimal @default(0.00) @map("average_rating") @db.Decimal(3, 2)
   autoAcceptAppointments Boolean @default(false) @map("auto_accept_appointments")
+  showContactInfo        Boolean @default(true) @map("show_contact_info")
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   services Service[]

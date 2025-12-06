@@ -10,6 +10,7 @@ export class ServiceProviderRepository {
       select: {
         userId: true,
         averageRating: true,
+        showContactInfo: true,
         services: {
           select: {
             id: true,
@@ -25,6 +26,16 @@ export class ServiceProviderRepository {
             },
             availabilities: true,
             category: true,
+          },
+        },
+        user: {
+          select: {
+            contacts: {
+              select: {
+                type: true,
+                value: true,
+              },
+            },
           },
         },
       },

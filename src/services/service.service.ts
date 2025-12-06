@@ -52,6 +52,11 @@ export class ServiceService {
       );
 
       const { appointments, ...serviceWithoutAppointments } = service;
+      const contacts = service.provider.user?.contacts || [];
+      const filteredContacts = service.provider.showContactInfo
+        ? contacts
+        : contacts.filter((contact) => contact.type !== "PHONE");
+
       return {
         ...serviceWithoutAppointments,
         rating: (service as any).rating ? Number((service as any).rating) : 0,
@@ -60,6 +65,10 @@ export class ServiceService {
           averageRating: (service.provider as any).averageRating
             ? Number((service.provider as any).averageRating)
             : 0,
+          user: {
+            ...service.provider.user,
+            contacts: filteredContacts,
+          },
         },
         unavailableTimeSlots,
       };
@@ -110,6 +119,11 @@ export class ServiceService {
     );
 
     const { appointments, ...serviceWithoutAppointments } = service;
+    const contacts = service.provider.user?.contacts || [];
+    const filteredContacts = service.provider.showContactInfo
+      ? contacts
+      : contacts.filter((contact) => contact.type !== "PHONE");
+
     return {
       ...serviceWithoutAppointments,
       rating: (service as any).rating ? Number((service as any).rating) : 0,
@@ -118,6 +132,10 @@ export class ServiceService {
         averageRating: (service.provider as any).averageRating
           ? Number((service.provider as any).averageRating)
           : 0,
+        user: {
+          ...service.provider.user,
+          contacts: filteredContacts,
+        },
       },
       unavailableTimeSlots,
     };
