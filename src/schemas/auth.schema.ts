@@ -58,11 +58,6 @@ const signupDefaultUserSchema = z.object({
         .nullable()
         .describe("The user must provide a number")
         .default("123"),
-      countryId: z
-        .string()
-        .uuid("Country ID must be a valid UUID")
-        .describe("The user must provide a country ID")
-        .default("550e8400-e29b-41d4-a716-446655440002"),
     })
     .describe("The user must provide an address"),
   contacts: z

@@ -50,7 +50,7 @@ export class AuthRepository {
       signupUserDTO;
 
     const country = await prisma.country.findUnique({
-      where: { id: address.countryId },
+      where: { name: "Brasil" },
     });
 
     if (!country) {
@@ -65,8 +65,8 @@ export class AuthRepository {
       throw new Error("State not found");
     }
 
-    if (state.countryId !== address.countryId) {
-      throw new Error("State does not belong to the specified country");
+    if (state.countryId !== country.id) {
+      throw new Error("State does not belong to Brazil");
     }
 
     const city = await prisma.city.findFirst({
@@ -86,7 +86,7 @@ export class AuthRepository {
 
     const createdAddress = await prisma.address.create({
       data: {
-        countryId: address.countryId,
+        countryId: country.id,
         stateId: address.stateId,
         cityId: address.cityId,
         neighborhood: address.neighborhood,
