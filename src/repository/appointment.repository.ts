@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma";
 import { AppointmentStatus } from "../schemas/appointment.shema";
-import { PaymentMethod } from "@prisma/client";
+import { PaymentMethod, PaymentStatus } from "@prisma/client";
 
 type AppointmentResponse = {
   id: string;
@@ -122,7 +122,10 @@ export class AppointmentRepository {
       },
       select: {
         id: true,
+        status: true,
         clientId: true,
+        paymentMethod: true,
+        paymentStatus: true,
         service: {
           select: {
             providerId: true,
@@ -130,6 +133,41 @@ export class AppointmentRepository {
         },
       },
     });
+  }
+
+  async completeService(appointmentId: string): Promise<AppointmentResponse> {
+    const updatedAppointment = await prisma.appointment.update({
+      where: {
+        id: appointmentId,
+      },
+      data: {
+        status: AppointmentStatus.COMPLETED,
+        paymentStatus: PaymentStatus.PENDING,
+      },
+      select: {
+        id: true,
+        status: true,
+      },
+    });
+
+    return updatedAppointment as AppointmentResponse;
+  }
+
+  async confirmPayment(appointmentId: string): Promise<AppointmentResponse> {
+    const updatedAppointment = await prisma.appointment.update({
+      where: {
+        id: appointmentId,
+      },
+      data: {
+        paymentStatus: PaymentStatus.PAID,
+      },
+      select: {
+        id: true,
+        status: true,
+      },
+    });
+
+    return updatedAppointment as AppointmentResponse;
   }
 
   async findProviderAppointmentsByDateRange(

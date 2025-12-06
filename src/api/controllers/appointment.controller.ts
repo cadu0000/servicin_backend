@@ -25,6 +25,14 @@ type CancelAppointmentRequest = FastifyRequest<{
   Params: { appointmentId: string };
   Body: CancelAppointmentDTO;
 }>;
+
+type CompleteServiceRequest = FastifyRequest<{
+  Params: { appointmentId: string };
+}>;
+
+type ConfirmPaymentRequest = FastifyRequest<{
+  Params: { appointmentId: string };
+}>;
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
 
@@ -155,6 +163,109 @@ export class AppointmentController {
       return res.status(500).send({
         statusCode: 500,
         message: "Erro interno do servidor ao processar o cancelamento.",
+      });
+    }
+  }
+
+  async completeService(req: CompleteServiceRequest, res: FastifyReply) {
+    const { appointmentId } = req.params;
+    const { sub: userId } = req.user as UserPayload;
+
+    try {
+      const completedAppointment =
+        await this.appointmentService.completeService(appointmentId, userId);
+
+      return res.status(200).send(completedAppointment);
+    } catch (error) {
+      console.error("Erro ao completar serviço:", error);
+
+      if (error instanceof Error) {
+        if (
+          error.message.includes("não encontrado") ||
+          error.message.includes("does not exist")
+        ) {
+          return res.status(404).send({
+            statusCode: 404,
+            message: error.message,
+          });
+        }
+
+        if (error.message.includes("permissão")) {
+          return res.status(403).send({
+            statusCode: 403,
+            message: error.message,
+          });
+        }
+
+        if (
+          error.message.includes("já foi") ||
+          error.message.includes("não é possível")
+        ) {
+          return res.status(400).send({
+            statusCode: 400,
+            message: error.message,
+          });
+        }
+      }
+
+      return res.status(500).send({
+        statusCode: 500,
+        message:
+          "Erro interno do servidor ao processar a finalização do serviço.",
+      });
+    }
+  }
+
+  async confirmPayment(req: ConfirmPaymentRequest, res: FastifyReply) {
+    const { appointmentId } = req.params;
+    const { sub: userId } = req.user as UserPayload;
+
+    try {
+      const confirmedPayment = await this.appointmentService.confirmPayment(
+        appointmentId,
+        userId
+      );
+
+      return res.status(200).send(confirmedPayment);
+    } catch (error) {
+      console.error("Erro ao confirmar pagamento:", error);
+
+      if (error instanceof Error) {
+        if (
+          error.message.includes("não encontrado") ||
+          error.message.includes("does not exist")
+        ) {
+          return res.status(404).send({
+            statusCode: 404,
+            message: error.message,
+          });
+        }
+
+        if (
+          error.message.includes("permissão") ||
+          error.message.includes("Apenas")
+        ) {
+          return res.status(403).send({
+            statusCode: 403,
+            message: error.message,
+          });
+        }
+
+        if (
+          error.message.includes("já foi") ||
+          error.message.includes("só pode ser confirmado")
+        ) {
+          return res.status(400).send({
+            statusCode: 400,
+            message: error.message,
+          });
+        }
+      }
+
+      return res.status(500).send({
+        statusCode: 500,
+        message:
+          "Erro interno do servidor ao processar a confirmação do pagamento.",
       });
     }
   }

@@ -5,7 +5,7 @@ import {
   AppointmentStatus,
   CreateAppointmentSchemaDTO,
 } from "../schemas/appointment.shema";
-import { Prisma } from "@prisma/client";
+import { Prisma, PaymentMethod } from "@prisma/client";
 import {
   generateSlotTimeIntervals,
   isTimeIntervalIncluded,
@@ -287,6 +287,109 @@ export class AppointmentService {
       return updatedAppointment;
     } catch (error) {
       console.error("Erro no cancelAppointment:", error);
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new Error("Agendamento não encontrado.");
+        }
+      }
+
+      throw error;
+    }
+  }
+
+  async completeService(appointmentId: string, userId: string) {
+    const appointment = await this.appointmentRepository.findByIdWithRelations(
+      appointmentId
+    );
+
+    if (!appointment) {
+      throw new Error("Agendamento não encontrado.");
+    }
+
+    const isClient = appointment.clientId === userId;
+    const isProvider = appointment.service.providerId === userId;
+
+    if (!isClient && !isProvider) {
+      throw new Error(
+        "Você não tem permissão para completar este serviço. Apenas o cliente ou o prestador podem completar."
+      );
+    }
+
+    if (appointment.status === AppointmentStatus.COMPLETED) {
+      throw new Error("O serviço já foi marcado como completo.");
+    }
+
+    if (
+      appointment.status === AppointmentStatus.CANCELED ||
+      appointment.status === AppointmentStatus.REJECTED
+    ) {
+      throw new Error(
+        "Não é possível completar um serviço cancelado ou rejeitado."
+      );
+    }
+
+    try {
+      const updatedAppointment =
+        await this.appointmentRepository.completeService(appointmentId);
+
+      return updatedAppointment;
+    } catch (error) {
+      console.error("Erro no completeService:", error);
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new Error("Agendamento não encontrado.");
+        }
+      }
+
+      throw error;
+    }
+  }
+
+  async confirmPayment(appointmentId: string, userId: string) {
+    const appointment = await this.appointmentRepository.findByIdWithRelations(
+      appointmentId
+    );
+
+    if (!appointment) {
+      throw new Error("Agendamento não encontrado.");
+    }
+
+    const isClient = appointment.clientId === userId;
+    const isProvider = appointment.service.providerId === userId;
+
+    if (!isClient && !isProvider) {
+      throw new Error(
+        "Você não tem permissão para confirmar o pagamento deste serviço. Apenas o cliente ou o prestador podem confirmar."
+      );
+    }
+
+    if (appointment.paymentStatus === "PAID") {
+      throw new Error("O pagamento já foi confirmado.");
+    }
+
+    if (appointment.paymentMethod === PaymentMethod.CASH) {
+      if (!isProvider) {
+        throw new Error(
+          "Apenas o prestador pode confirmar o pagamento em espécie."
+        );
+      }
+    }
+
+    if (appointment.status !== AppointmentStatus.COMPLETED) {
+      throw new Error(
+        "O pagamento só pode ser confirmado após o serviço ser marcado como completo."
+      );
+    }
+
+    try {
+      const updatedAppointment =
+        await this.appointmentRepository.confirmPayment(appointmentId);
+
+      return updatedAppointment;
+    } catch (error) {
+      console.error("Erro no confirmPayment:", error);
 
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2025") {

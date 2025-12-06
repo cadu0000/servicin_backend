@@ -28,6 +28,14 @@ type CancelAppointmentRouteRequest = {
   Body: CancelAppointmentDTO;
 };
 
+type CompleteServiceRouteRequest = {
+  Params: { appointmentId: string };
+};
+
+type ConfirmPaymentRouteRequest = {
+  Params: { appointmentId: string };
+};
+
 export async function appointmentRoutes(server: FastifyInstance) {
   server.post<CreateAppointmentRouteRequest>(
     "/",
@@ -116,5 +124,53 @@ export async function appointmentRoutes(server: FastifyInstance) {
       },
     },
     async (request, reply) => appointmentController.cancel(request, reply)
+  );
+
+  server.patch<CompleteServiceRouteRequest>(
+    "/:appointmentId/complete-service",
+    {
+      preHandler: [server.authenticate],
+      schema: {
+        summary: "Complete service",
+        description:
+          "Mark an appointment service as completed. Only the client or provider of the appointment can complete it. Requires authentication.",
+        tags: ["Appointment"],
+        params: z.object({
+          appointmentId: z.string().uuid(),
+        }),
+        response: {
+          200: z.object({
+            id: z.string().uuid(),
+            status: z.nativeEnum(AppointmentStatus),
+          }),
+        },
+      },
+    },
+    async (request, reply) =>
+      appointmentController.completeService(request, reply)
+  );
+
+  server.patch<ConfirmPaymentRouteRequest>(
+    "/:appointmentId/confirm-payment",
+    {
+      preHandler: [server.authenticate],
+      schema: {
+        summary: "Confirm payment",
+        description:
+          "Confirm payment for a completed service. Only the client or provider can confirm payment. For CASH payments, only the provider can confirm. Requires authentication.",
+        tags: ["Appointment"],
+        params: z.object({
+          appointmentId: z.string().uuid(),
+        }),
+        response: {
+          200: z.object({
+            id: z.string().uuid(),
+            status: z.nativeEnum(AppointmentStatus),
+          }),
+        },
+      },
+    },
+    async (request, reply) =>
+      appointmentController.confirmPayment(request, reply)
   );
 }
