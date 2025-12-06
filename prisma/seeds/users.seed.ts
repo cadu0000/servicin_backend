@@ -5,11 +5,27 @@ import { hashPassword } from "../../src/utils/password";
 
 const prisma = new PrismaClient();
 
+export async function cleanUsers() {
+  console.log("🧹 Cleaning users...");
+
+  try {
+    await prisma.user.deleteMany();
+    console.log("✅ Users cleaned successfully.");
+  } catch (error) {
+    console.error("❌ Error cleaning users:");
+    console.error({
+      message: error instanceof Error ? error.message : "Unknown error",
+      code: (error as any)?.code,
+      meta: (error as any)?.meta,
+    });
+    throw error;
+  }
+}
+
 export async function seedUsers() {
   console.log("🌱 Starting users seed...");
 
   try {
-    await prisma.user.deleteMany();
 
     for (const userData of usersData) {
       const hashedPassword = await hashPassword(userData.password);
@@ -116,6 +132,8 @@ export async function seedUsers() {
         });
       }
     }
+
+    console.log("✅ Users seed completed successfully.");
   } catch (error) {
     console.error("❌ Error seeding users:");
     console.error({

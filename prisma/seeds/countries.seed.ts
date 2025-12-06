@@ -2,16 +2,33 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+export async function cleanCountries() {
+  console.log("🧹 Cleaning countries...");
+
+  try {
+    await prisma.country.deleteMany();
+    console.log("✅ Countries cleaned successfully.");
+  } catch (error) {
+    console.error("❌ Error cleaning countries:");
+    console.error({
+      message: error instanceof Error ? error.message : "Unknown error",
+      code: (error as any)?.code,
+      meta: (error as any)?.meta,
+    });
+    throw error;
+  }
+}
+
 export async function seedCountries() {
   console.log("🌱 Starting countries seed...");
 
   try {
-    const existingCountry = await prisma.country.findUnique({
-      where: { name: "Brasil" },
-    });
+    const existingCountries = await prisma.country.findMany();
 
-    if (existingCountry) {
-      console.log("✅ Brasil already exists, skipping...");
+    if (existingCountries.length > 0) {
+      console.log(
+        `✅ Countries already exist (${existingCountries.length} found), skipping...`
+      );
       return;
     }
 

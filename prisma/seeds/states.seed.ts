@@ -8,10 +8,36 @@ interface IBGEState {
   nome: string;
 }
 
+export async function cleanStates() {
+  console.log("🧹 Cleaning states...");
+
+  try {
+    await prisma.state.deleteMany();
+    console.log("✅ States cleaned successfully.");
+  } catch (error) {
+    console.error("❌ Error cleaning states:");
+    console.error({
+      message: error instanceof Error ? error.message : "Unknown error",
+      code: (error as any)?.code,
+      meta: (error as any)?.meta,
+    });
+    throw error;
+  }
+}
+
 export async function seedStates() {
   console.log("🌱 Starting states seed...");
 
   try {
+    const existingStates = await prisma.state.findMany();
+
+    if (existingStates.length > 0) {
+      console.log(
+        `✅ States already exist (${existingStates.length} found), skipping...`
+      );
+      return;
+    }
+
     const brasil = await prisma.country.findUnique({
       where: { name: "Brasil" },
     });
@@ -33,21 +59,13 @@ export async function seedStates() {
     const states: IBGEState[] = (await response.json()) as any;
 
     for (const state of states) {
-      const existingState = await prisma.state.findUnique({
-        where: { name: state.nome },
+      await prisma.state.create({
+        data: {
+          name: state.nome,
+          countryId: brasil.id,
+        },
       });
-
-      if (!existingState) {
-        await prisma.state.create({
-          data: {
-            name: state.nome,
-            countryId: brasil.id,
-          },
-        });
-        console.log(`✅ Created state: ${state.nome}`);
-      } else {
-        console.log(`⏭️  State already exists: ${state.nome}`);
-      }
+      console.log(`✅ Created state: ${state.nome}`);
     }
 
     console.log("✅ States seed completed successfully.");

@@ -4,6 +4,7 @@
     "start": "node dist/index.js",
     "db:up": "docker-compose up -d",
     "db:stop": "docker-compose down",
+    "db:clean": "tsx prisma/clean.ts",
     "db:seed": "npx prisma db seed",
     "migrate:dev": "npx prisma migrate dev",
     "start:dev": "tsx watch src/index.ts",

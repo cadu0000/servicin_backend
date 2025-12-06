@@ -2,11 +2,27 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+export async function cleanAvailabilities() {
+  console.log("🧹 Cleaning availabilities...");
+
+  try {
+    await prisma.serviceAvailability.deleteMany();
+    console.log("✅ Availabilities cleaned successfully.");
+  } catch (error) {
+    console.error("❌ Error cleaning availabilities:");
+    console.error({
+      message: error instanceof Error ? error.message : "Unknown error",
+      code: (error as any)?.code,
+      meta: (error as any)?.meta,
+    });
+    throw error;
+  }
+}
+
 export async function seedAvailabilities() {
   console.log("🌱 Starting availabilities seed...");
 
   try {
-    await prisma.serviceAvailability.deleteMany();
 
     const services = await prisma.service.findMany({
       select: {

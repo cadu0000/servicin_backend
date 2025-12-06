@@ -4,11 +4,27 @@ import servicesData from "./services.json";
 
 const prisma = new PrismaClient();
 
+export async function cleanServices() {
+  console.log("🧹 Cleaning services...");
+
+  try {
+    await prisma.service.deleteMany();
+    console.log("✅ Services cleaned successfully.");
+  } catch (error) {
+    console.error("❌ Error cleaning services:");
+    console.error({
+      message: error instanceof Error ? error.message : "Unknown error",
+      code: (error as any)?.code,
+      meta: (error as any)?.meta,
+    });
+    throw error;
+  }
+}
+
 export async function seedServices() {
   console.log("🌱 Starting services seed...");
 
   try {
-    await prisma.service.deleteMany();
 
     for (const serviceData of servicesData) {
       const provider = await prisma.user.findUnique({
@@ -60,6 +76,8 @@ export async function seedServices() {
         },
       });
     }
+
+    console.log("✅ Services seed completed successfully.");
   } catch (error) {
     console.error("❌ Error seeding services:");
     console.error({

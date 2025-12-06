@@ -3,11 +3,27 @@ import { AppointmentStatus, PaymentMethod } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+export async function cleanAppointments() {
+  console.log("🧹 Cleaning appointments...");
+
+  try {
+    await prisma.appointment.deleteMany();
+    console.log("✅ Appointments cleaned successfully.");
+  } catch (error) {
+    console.error("❌ Error cleaning appointments:");
+    console.error({
+      message: error instanceof Error ? error.message : "Unknown error",
+      code: (error as any)?.code,
+      meta: (error as any)?.meta,
+    });
+    throw error;
+  }
+}
+
 export async function seedAppointments() {
   console.log("🌱 Starting appointments seed...");
 
   try {
-    await prisma.appointment.deleteMany();
 
     const services = await prisma.service.findMany({
       select: {
