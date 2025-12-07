@@ -271,4 +271,45 @@ export class AppointmentController {
       });
     }
   }
+
+  async getMyAppointments(req: FastifyRequest, res: FastifyReply) {
+    const { sub: clientId } = req.user as UserPayload;
+
+    try {
+      const appointments = await this.appointmentService.getClientAppointments(
+        clientId
+      );
+
+      return res.status(200).send({
+        appointments,
+      });
+    } catch (error) {
+      console.error("Erro ao buscar agendamentos do cliente:", error);
+
+      return res.status(500).send({
+        statusCode: 500,
+        message: "Erro interno do servidor ao buscar agendamentos.",
+      });
+    }
+  }
+
+  async getReceivedAppointments(req: FastifyRequest, res: FastifyReply) {
+    const { sub: providerId } = req.user as UserPayload;
+
+    try {
+      const appointments =
+        await this.appointmentService.getProviderAppointments(providerId);
+
+      return res.status(200).send({
+        appointments,
+      });
+    } catch (error) {
+      console.error("Erro ao buscar agendamentos recebidos:", error);
+
+      return res.status(500).send({
+        statusCode: 500,
+        message: "Erro interno do servidor ao buscar agendamentos.",
+      });
+    }
+  }
 }

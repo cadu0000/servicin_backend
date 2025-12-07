@@ -98,3 +98,110 @@ export type CreateAppointmentSchemaDTO = z.infer<
 >;
 
 export type CancelAppointmentDTO = z.infer<typeof cancelAppointmentSchema>;
+
+export const appointmentResponseSchema = z.object({
+  id: z.string().uuid(),
+  description: z.string(),
+  scheduledStartTime: z.coerce.date(),
+  scheduledEndTime: z.coerce.date(),
+  status: z.nativeEnum(AppointmentStatus),
+  paymentMethod: z.nativeEnum(PaymentMethod),
+  paymentStatus: z.enum(["PENDING", "PAID", "CANCELED"]),
+  price: z.coerce.number(),
+  cancellationReason: z.string().nullable(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  service: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    description: z.string().nullable(),
+    price: z.coerce.number(),
+    rating: z.coerce.number(),
+    photos: z.array(
+      z.object({
+        id: z.string().uuid(),
+        photoUrl: z.string(),
+      })
+    ),
+    provider: z.object({
+      userId: z.string().uuid(),
+      averageRating: z.coerce.number(),
+      user: z.object({
+        photoUrl: z.string().nullable(),
+        individual: z
+          .object({
+            fullName: z.string(),
+          })
+          .nullable(),
+        company: z
+          .object({
+            tradeName: z.string().nullable(),
+            corporateName: z.string(),
+          })
+          .nullable(),
+        contacts: z.array(
+          z.object({
+            type: z.enum(["EMAIL", "PHONE"]),
+            value: z.string(),
+          })
+        ),
+      }),
+    }),
+    category: z.object({
+      id: z.number(),
+      name: z.string(),
+    }),
+  }),
+});
+
+export const appointmentWithClientResponseSchema = z.object({
+  id: z.string().uuid(),
+  description: z.string(),
+  scheduledStartTime: z.coerce.date(),
+  scheduledEndTime: z.coerce.date(),
+  status: z.nativeEnum(AppointmentStatus),
+  paymentMethod: z.nativeEnum(PaymentMethod),
+  paymentStatus: z.enum(["PENDING", "PAID", "CANCELED"]),
+  price: z.coerce.number(),
+  cancellationReason: z.string().nullable(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  client: z.object({
+    id: z.string().uuid(),
+    photoUrl: z.string().nullable(),
+    individual: z
+      .object({
+        fullName: z.string(),
+      })
+      .nullable(),
+    company: z
+      .object({
+        tradeName: z.string().nullable(),
+        corporateName: z.string(),
+      })
+      .nullable(),
+    contacts: z.array(
+      z.object({
+        type: z.enum(["EMAIL", "PHONE"]),
+        value: z.string(),
+      })
+    ),
+  }),
+  service: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    description: z.string().nullable(),
+    price: z.coerce.number(),
+    rating: z.coerce.number(),
+    photos: z.array(
+      z.object({
+        id: z.string().uuid(),
+        photoUrl: z.string(),
+      })
+    ),
+    category: z.object({
+      id: z.number(),
+      name: z.string(),
+    }),
+  }),
+});

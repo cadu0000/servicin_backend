@@ -7,6 +7,8 @@ import {
   AppointmentStatus,
   cancelAppointmentSchema,
   CancelAppointmentDTO,
+  appointmentResponseSchema,
+  appointmentWithClientResponseSchema,
 } from "../../schemas/appointment.shema";
 import { z } from "zod";
 import { appointmentController } from "../../container/index";
@@ -172,5 +174,45 @@ export async function appointmentRoutes(server: FastifyInstance) {
     },
     async (request, reply) =>
       appointmentController.confirmPayment(request, reply)
+  );
+
+  server.get(
+    "/my-appointments",
+    {
+      preHandler: [server.authenticate],
+      schema: {
+        summary: "Get my appointments",
+        description:
+          "Get all appointments made by the authenticated user as a client. Requires authentication.",
+        tags: ["Appointment"],
+        response: {
+          200: z.object({
+            appointments: z.array(appointmentResponseSchema),
+          }),
+        },
+      },
+    },
+    async (request, reply) =>
+      appointmentController.getMyAppointments(request, reply)
+  );
+
+  server.get(
+    "/received",
+    {
+      preHandler: [server.authenticate],
+      schema: {
+        summary: "Get received appointments",
+        description:
+          "Get all appointments received by the authenticated user as a service provider. Requires authentication.",
+        tags: ["Appointment"],
+        response: {
+          200: z.object({
+            appointments: z.array(appointmentWithClientResponseSchema),
+          }),
+        },
+      },
+    },
+    async (request, reply) =>
+      appointmentController.getReceivedAppointments(request, reply)
   );
 }

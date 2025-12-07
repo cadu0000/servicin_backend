@@ -210,4 +210,156 @@ export class AppointmentRepository {
       },
     });
   }
+
+  async findByClientId(clientId: string) {
+    return await prisma.appointment.findMany({
+      where: {
+        clientId,
+      },
+      select: {
+        id: true,
+        description: true,
+        scheduledStartTime: true,
+        scheduledEndTime: true,
+        status: true,
+        paymentMethod: true,
+        paymentStatus: true,
+        price: true,
+        cancellationReason: true,
+        createdAt: true,
+        updatedAt: true,
+        service: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            rating: true,
+            photos: {
+              select: {
+                id: true,
+                photoUrl: true,
+              },
+            },
+            provider: {
+              select: {
+                userId: true,
+                averageRating: true,
+                user: {
+                  select: {
+                    photoUrl: true,
+                    individual: {
+                      select: {
+                        fullName: true,
+                      },
+                    },
+                    company: {
+                      select: {
+                        tradeName: true,
+                        corporateName: true,
+                      },
+                    },
+                    contacts: {
+                      select: {
+                        type: true,
+                        value: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        scheduledStartTime: "desc",
+      },
+    });
+  }
+
+  async findByProviderId(providerId: string) {
+    const providerServices = await prisma.service.findMany({
+      where: { providerId },
+      select: { id: true },
+    });
+
+    const serviceIds = providerServices.map((ps) => ps.id);
+
+    if (serviceIds.length === 0) {
+      return [];
+    }
+
+    return await prisma.appointment.findMany({
+      where: {
+        serviceId: { in: serviceIds },
+      },
+      select: {
+        id: true,
+        description: true,
+        scheduledStartTime: true,
+        scheduledEndTime: true,
+        status: true,
+        paymentMethod: true,
+        paymentStatus: true,
+        price: true,
+        cancellationReason: true,
+        createdAt: true,
+        updatedAt: true,
+        client: {
+          select: {
+            id: true,
+            photoUrl: true,
+            individual: {
+              select: {
+                fullName: true,
+              },
+            },
+            company: {
+              select: {
+                tradeName: true,
+                corporateName: true,
+              },
+            },
+            contacts: {
+              select: {
+                type: true,
+                value: true,
+              },
+            },
+          },
+        },
+        service: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            rating: true,
+            photos: {
+              select: {
+                id: true,
+                photoUrl: true,
+              },
+            },
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        scheduledStartTime: "desc",
+      },
+    });
+  }
 }

@@ -503,4 +503,12 @@ export class AppointmentService {
       throw error;
     }
   }
+
+  async getClientAppointments(clientId: string) {
+    return await this.appointmentRepository.findByClientId(clientId);
+  }
+
+  async getProviderAppointments(providerId: string) {
+    return await this.appointmentRepository.findByProviderId(providerId);
+  }
 }
