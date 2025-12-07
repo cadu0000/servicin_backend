@@ -73,13 +73,15 @@ export class AppointmentController {
   async updateStatus(req: UpdateAppointmentStatusRequest, res: FastifyReply) {
     const { appointmentId } = req.params;
     const { status, reason } = req.body;
+    const { sub: userId } = req.user as UserPayload;
 
     try {
       const updatedAppointment =
         await this.appointmentService.updateAppointmentStatus(
           appointmentId,
           status,
-          reason
+          reason,
+          userId
         );
 
       return res.status(200).send(updatedAppointment);

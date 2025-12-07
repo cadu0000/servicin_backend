@@ -1,5 +1,6 @@
 import { AuthRepository } from "../repository/auth.repository";
 import { AppointmentRepository } from "../repository/appointment.repository";
+import { NotificationService } from "./notification.service";
 import {
   SignupCompanyUserDTO,
   SignupIndividualUserDTO,
@@ -11,7 +12,8 @@ import { hashPassword } from "../utils/password";
 export class AuthService {
   constructor(
     private readonly userRepository: AuthRepository,
-    private readonly appointmentRepository: AppointmentRepository
+    private readonly appointmentRepository: AppointmentRepository,
+    private readonly notificationService: NotificationService
   ) {}
 
   async signup(signupUserDTO: SignupUserDTO) {
@@ -64,6 +66,8 @@ export class AuthService {
       throw new Error("Error generating authentication token");
     }
 
+    await this.notificationService.notifyWelcome(individualUser.id);
+
     return token;
   }
 
@@ -98,6 +102,8 @@ export class AuthService {
     if (!token) {
       throw new Error("Error generating authentication token");
     }
+
+    await this.notificationService.notifyWelcome(companyUser.id);
 
     return token;
   }

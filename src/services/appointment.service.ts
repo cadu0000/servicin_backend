@@ -1,6 +1,7 @@
 import { AppointmentRepository } from "../repository/appointment.repository";
 import { ServiceRepository } from "../repository/service.repository";
 import { AuthRepository } from "../repository/auth.repository";
+import { NotificationService } from "./notification.service";
 import {
   AppointmentStatus,
   CreateAppointmentSchemaDTO,
@@ -17,7 +18,8 @@ export class AppointmentService {
   constructor(
     private readonly appointmentRepository: AppointmentRepository,
     private readonly serviceRepository: ServiceRepository,
-    private readonly authRepository: AuthRepository
+    private readonly authRepository: AuthRepository,
+    private readonly notificationService: NotificationService
   ) {}
 
   async createAppointment(
@@ -205,13 +207,31 @@ export class AppointmentService {
       status: initialStatus,
     });
 
+    await this.notificationService.notifyAppointmentCreated(
+      serviceProviderId,
+      serviceExists.name,
+      appointment.id,
+      serviceExists.id,
+      initialStatus === AppointmentStatus.APPROVED
+    );
+
+    if (initialStatus === AppointmentStatus.APPROVED) {
+      await this.notificationService.notifyAppointmentAutoApproved(
+        clientId,
+        serviceExists.name,
+        appointment.id,
+        serviceExists.id
+      );
+    }
+
     return appointment;
   }
 
   async updateAppointmentStatus(
     appointmentId: string,
     status: AppointmentStatus,
-    reason?: string
+    reason?: string,
+    userId?: string
   ) {
     const validStatuses = [
       "PENDING",
@@ -231,10 +251,37 @@ export class AppointmentService {
     }
 
     try {
+      const appointment =
+        await this.appointmentRepository.findByIdWithRelations(appointmentId);
+
+      if (!appointment) {
+        throw new Error("Agendamento não encontrado.");
+      }
+
+      const service = await this.serviceRepository.fetchById(
+        appointment.serviceId
+      );
+      if (!service) {
+        throw new Error("Serviço não encontrado.");
+      }
+
       const updatedAppointment = await this.appointmentRepository.updateStatus(
         appointmentId,
         status,
         reason
+      );
+
+      const isProvider = service.provider.userId === userId;
+      const targetUserId = isProvider
+        ? appointment.clientId
+        : service.provider.userId;
+
+      await this.notificationService.notifyAppointmentStatusChanged(
+        targetUserId,
+        service.name,
+        status,
+        appointment.id,
+        service.id
       );
 
       return updatedAppointment;
@@ -289,6 +336,18 @@ export class AppointmentService {
         appointmentId,
         AppointmentStatus.CANCELED,
         reason
+      );
+
+      const targetUserId = isClient
+        ? service.provider.userId
+        : appointment.clientId;
+
+      await this.notificationService.notifyAppointmentStatusChanged(
+        targetUserId,
+        service.name,
+        AppointmentStatus.CANCELED,
+        appointment.id,
+        service.id
       );
 
       return updatedAppointment;
@@ -346,6 +405,18 @@ export class AppointmentService {
     try {
       const updatedAppointment =
         await this.appointmentRepository.completeService(appointmentId);
+
+      const targetUserId = isClient
+        ? service.provider.userId
+        : appointment.clientId;
+
+      await this.notificationService.notifyAppointmentStatusChanged(
+        targetUserId,
+        service.name,
+        AppointmentStatus.COMPLETED,
+        appointment.id,
+        service.id
+      );
 
       return updatedAppointment;
     } catch (error) {
@@ -407,6 +478,17 @@ export class AppointmentService {
     try {
       const updatedAppointment =
         await this.appointmentRepository.confirmPayment(appointmentId);
+
+      const targetUserId = isClient
+        ? service.provider.userId
+        : appointment.clientId;
+
+      await this.notificationService.notifyPaymentConfirmed(
+        targetUserId,
+        service.name,
+        appointment.id,
+        service.id
+      );
 
       return updatedAppointment;
     } catch (error) {

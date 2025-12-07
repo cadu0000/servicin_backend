@@ -19,6 +19,9 @@ import { LocationController } from "../api/controllers/location.controller";
 import { ReviewRepository } from "../repository/review.repository";
 import { ReviewService } from "../services/review.service";
 import { ReviewController } from "../api/controllers/review.controller";
+import { NotificationRepository } from "../repository/notification.repository";
+import { NotificationService } from "../services/notification.service";
+import { NotificationController } from "../api/controllers/notification.controller";
 
 // Repositories
 const authRepository = new AuthRepository();
@@ -28,9 +31,15 @@ const categoryRepository = new CategoryRepository();
 const appointmentRepository = new AppointmentRepository();
 const locationRepository = new LocationRepository();
 const reviewRepository = new ReviewRepository();
+const notificationRepository = new NotificationRepository();
 
 // Services
-const authService = new AuthService(authRepository, appointmentRepository);
+const notificationService = new NotificationService(notificationRepository);
+const authService = new AuthService(
+  authRepository,
+  appointmentRepository,
+  notificationService
+);
 const serviceService = new ServiceService(serviceRepository, authRepository);
 const serviceProviderService = new ServiceProviderService(
   serviceProviderRepository,
@@ -41,10 +50,16 @@ const categoryService = new CategoryService(categoryRepository, authRepository);
 const appointmentService = new AppointmentService(
   appointmentRepository,
   serviceRepository,
-  authRepository
+  authRepository,
+  notificationService
 );
 const locationService = new LocationService(locationRepository);
-const reviewService = new ReviewService(reviewRepository, appointmentRepository);
+const reviewService = new ReviewService(
+  reviewRepository,
+  appointmentRepository,
+  serviceRepository,
+  notificationService
+);
 
 // Controllers
 const authController = new AuthController(authService);
@@ -56,6 +71,7 @@ const categoryController = new CategoryController(categoryService);
 const appointmentController = new AppointmentController(appointmentService);
 const locationController = new LocationController(locationService);
 const reviewController = new ReviewController(reviewService);
+const notificationController = new NotificationController(notificationService);
 
 export {
   authController,
@@ -65,4 +81,5 @@ export {
   appointmentController,
   locationController,
   reviewController,
+  notificationController,
 };
