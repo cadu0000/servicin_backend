@@ -2,6 +2,42 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { notificationController } from "../../container/index";
 
+const notificationSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  title: z.string(),
+  message: z.string(),
+  type: z.string(),
+  read: z.boolean(),
+  appointmentId: z.string().uuid().nullable(),
+  reviewId: z.string().uuid().nullable(),
+  serviceId: z.string().uuid().nullable(),
+  createdAt: z.date(),
+  appointment: z
+    .object({
+      id: z.string().uuid(),
+      service: z
+        .object({
+          id: z.string().uuid(),
+          name: z.string(),
+        })
+        .nullable(),
+    })
+    .nullable(),
+  review: z
+    .object({
+      id: z.string().uuid(),
+      serviceId: z.string().uuid(),
+    })
+    .nullable(),
+  service: z
+    .object({
+      id: z.string().uuid(),
+      name: z.string(),
+    })
+    .nullable(),
+});
+
 export async function notificationRoutes(server: FastifyInstance) {
   server.get(
     "/",
@@ -14,43 +50,7 @@ export async function notificationRoutes(server: FastifyInstance) {
         tags: ["Notification"],
         response: {
           200: z.object({
-            notifications: z.array(
-              z.object({
-                id: z.string().uuid(),
-                userId: z.string().uuid(),
-                title: z.string(),
-                message: z.string(),
-                type: z.string(),
-                read: z.boolean(),
-                appointmentId: z.string().uuid().nullable(),
-                reviewId: z.string().uuid().nullable(),
-                serviceId: z.string().uuid().nullable(),
-                createdAt: z.date(),
-                appointment: z
-                  .object({
-                    id: z.string().uuid(),
-                    service: z
-                      .object({
-                        id: z.string().uuid(),
-                        name: z.string(),
-                      })
-                      .nullable(),
-                  })
-                  .nullable(),
-                review: z
-                  .object({
-                    id: z.string().uuid(),
-                    serviceId: z.string().uuid(),
-                  })
-                  .nullable(),
-                service: z
-                  .object({
-                    id: z.string().uuid(),
-                    name: z.string(),
-                  })
-                  .nullable(),
-              })
-            ),
+            notifications: z.array(notificationSchema),
           }),
         },
       },
@@ -69,43 +69,7 @@ export async function notificationRoutes(server: FastifyInstance) {
         tags: ["Notification"],
         response: {
           200: z.object({
-            notifications: z.array(
-              z.object({
-                id: z.string().uuid(),
-                userId: z.string().uuid(),
-                title: z.string(),
-                message: z.string(),
-                type: z.string(),
-                read: z.boolean(),
-                appointmentId: z.string().uuid().nullable(),
-                reviewId: z.string().uuid().nullable(),
-                serviceId: z.string().uuid().nullable(),
-                createdAt: z.date(),
-                appointment: z
-                  .object({
-                    id: z.string().uuid(),
-                    service: z
-                      .object({
-                        id: z.string().uuid(),
-                        name: z.string(),
-                      })
-                      .nullable(),
-                  })
-                  .nullable(),
-                review: z
-                  .object({
-                    id: z.string().uuid(),
-                    serviceId: z.string().uuid(),
-                  })
-                  .nullable(),
-                service: z
-                  .object({
-                    id: z.string().uuid(),
-                    name: z.string(),
-                  })
-                  .nullable(),
-              })
-            ),
+            notifications: z.array(notificationSchema),
           }),
         },
       },
@@ -127,46 +91,13 @@ export async function notificationRoutes(server: FastifyInstance) {
         }),
         response: {
           200: z.object({
-            notification: z.object({
-              id: z.string().uuid(),
-              userId: z.string().uuid(),
-              title: z.string(),
-              message: z.string(),
-              type: z.string(),
-              read: z.boolean(),
-              appointmentId: z.string().uuid().nullable(),
-              reviewId: z.string().uuid().nullable(),
-              serviceId: z.string().uuid().nullable(),
-              createdAt: z.date(),
-              appointment: z
-                .object({
-                  id: z.string().uuid(),
-                  service: z
-                    .object({
-                      id: z.string().uuid(),
-                      name: z.string(),
-                    })
-                    .nullable(),
-                })
-                .nullable(),
-              review: z
-                .object({
-                  id: z.string().uuid(),
-                  serviceId: z.string().uuid(),
-                })
-                .nullable(),
-              service: z
-                .object({
-                  id: z.string().uuid(),
-                  name: z.string(),
-                })
-                .nullable(),
-            }),
+            notification: notificationSchema,
           }),
         },
       },
     },
-    async (request, reply) => notificationController.findById(request, reply)
+    async (request, reply) =>
+      notificationController.findById(request as any, reply)
   );
 
   server.patch(
@@ -188,7 +119,8 @@ export async function notificationRoutes(server: FastifyInstance) {
         },
       },
     },
-    async (request, reply) => notificationController.markAsRead(request, reply)
+    async (request, reply) =>
+      notificationController.markAsRead(request as any, reply)
   );
 
   server.patch(
