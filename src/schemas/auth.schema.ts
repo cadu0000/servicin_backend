@@ -4,16 +4,16 @@ import { z } from "zod";
 const signupDefaultUserSchema = z.object({
   email: z
     .string()
-    .email("Invalid email address")
+    .email("Endereço de email inválido")
     .describe("The user must register an email")
     .default("johndoe@email.com"),
   password: z
     .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(30, "Password must be at most 30 characters")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
+    .min(8, "A senha deve ter pelo menos 8 caracteres")
+    .max(30, "A senha deve ter no máximo 30 caracteres")
+    .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula")
+    .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula")
+    .regex(/[0-9]/, "A senha deve conter pelo menos um número")
     .describe("The user must register a password")
     .default("JohnDoe123"),
   userType: z
@@ -27,46 +27,38 @@ const signupDefaultUserSchema = z.object({
     .describe("The user can provide a photo URL")
     .default(null),
   address: z
-    .array(
-      z.object({
-        street: z
-          .string()
-          .min(1, "Street cannot be empty")
-          .describe("The user must provide a street")
-          .default("Main St"),
-        city: z
-          .string()
-          .min(1, "City cannot be empty")
-          .describe("The user must provide a city")
-          .default("Springfield"),
-        state: z
-          .string()
-          .min(1, "State cannot be empty")
-          .describe("The user must provide a state")
-          .default("IL"),
-        zipCode: z
-          .string()
-          .min(1, "Zip code cannot be empty")
-          .describe("The user must provide a zip code")
-          .default("62701"),
-        neighborhood: z
-          .string()
-          .min(1, "Neighborhood cannot be empty")
-          .describe("The user must provide a neighborhood")
-          .default("Downtown"),
-        number: z
-          .string()
-          .nullable()
-          .describe("The user must provide a number")
-          .default("123"),
-        country: z
-          .string()
-          .min(1, "Country cannot be empty")
-          .describe("The user must provide a country")
-          .default("USA"),
-      })
-    )
-    .min(1, "At least one address is required")
+    .object({
+      street: z
+        .string()
+        .min(1, "A rua não pode estar vazia")
+        .describe("The user must provide a street")
+        .default("Main St"),
+      cityId: z
+        .string()
+        .uuid("O ID da cidade deve ser um UUID válido")
+        .describe("The user must provide a city ID")
+        .default("550e8400-e29b-41d4-a716-446655440000"),
+      stateId: z
+        .string()
+        .uuid("O ID do estado deve ser um UUID válido")
+        .describe("The user must provide a state ID")
+        .default("550e8400-e29b-41d4-a716-446655440001"),
+      zipCode: z
+        .string()
+        .min(1, "O CEP não pode estar vazio")
+        .describe("The user must provide a zip code")
+        .default("62701"),
+      neighborhood: z
+        .string()
+        .min(1, "O bairro não pode estar vazio")
+        .describe("The user must provide a neighborhood")
+        .default("Downtown"),
+      number: z
+        .string()
+        .nullable()
+        .describe("The user must provide a number")
+        .default("123"),
+    })
     .describe("The user must provide an address"),
   contacts: z
     .array(
@@ -77,12 +69,12 @@ const signupDefaultUserSchema = z.object({
           .default("PHONE"),
         value: z
           .string()
-          .min(1, "Contact value cannot be empty")
+          .min(1, "O valor do contato não pode estar vazio")
           .describe("The contact value")
           .default("555-1234"),
       })
     )
-    .min(1, "At least one contact is required")
+    .min(1, "Pelo menos um contato é necessário")
     .describe("The user must provide contacts"),
 });
 
@@ -91,14 +83,14 @@ const signupIndividualUserSchema = z.object({
   userType: z.literal("INDIVIDUAL"),
   fullName: z
     .string()
-    .min(1, "Full name cannot be empty")
+    .min(1, "O nome completo não pode estar vazio")
     .describe("The full name of the individual user")
     .default("John Doe"),
   cpf: z
     .string()
-    .min(11, "CPF must be at least 11 characters")
-    .max(11, "CPF must be at most 11 characters")
-    .refine((val) => cpf.isValid(val), { message: "Invalid CPF" })
+    .min(11, "CPF deve ter pelo menos 11 caracteres")
+    .max(11, "CPF deve ter no máximo 11 caracteres")
+    .refine((val) => cpf.isValid(val), { message: "CPF inválido" })
     .describe("The CPF of the individual user")
     .default("37133126052"),
   birthDate: z
@@ -114,14 +106,14 @@ const signupCompanyUserSchema = z.object({
   userType: z.literal("COMPANY"),
   corporateName: z
     .string()
-    .min(1, "Corporate name cannot be empty")
+    .min(1, "A razão social não pode estar vazia")
     .describe("The corporate name of the company user")
     .default("Acme Corp"),
   cnpj: z
     .string()
-    .min(14, "CNPJ must be at least 14 characters")
-    .max(14, "CNPJ must be at most 14 characters")
-    .refine((val) => cnpj.isValid(val), { message: "Invalid CNPJ" })
+    .min(14, "CNPJ deve ter pelo menos 14 caracteres")
+    .max(14, "CNPJ deve ter no máximo 14 caracteres")
+    .refine((val) => cnpj.isValid(val), { message: "CNPJ inválido" })
     .describe("The CNPJ of the company user")
     .default("15357397000140"),
   tradeName: z
@@ -138,7 +130,7 @@ export const signupUserSchema = z.discriminatedUnion("userType", [
 
 export const loginUserSchema = z.object({
   email: z.string().email().default("johndoe@email.com"),
-  password: z.string().min(8).default("JohnDoe123"),
+  password: z.string().min(1, "A senha é obrigatória").default("JohnDoe123"),
 });
 
 export type LoginUserDTO = z.infer<typeof loginUserSchema>;

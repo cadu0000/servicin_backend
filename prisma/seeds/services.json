@@ -1,0 +1,30 @@
+[
+  {
+    "providerEmail": "carlos.provedor@email.com",
+    "name": "Reparo de Vazamentos",
+    "description": "Serviço profissional de reparo de vazamentos em tubulações residenciais e comerciais.",
+    "price": 150.0,
+    "categoryName": "Encanamento"
+  },
+  {
+    "providerEmail": "carlos.provedor@email.com",
+    "name": "Instalação de Torneiras",
+    "description": "Instalação e substituição de torneiras com garantia e material de qualidade.",
+    "price": 80.0,
+    "categoryName": "Encanamento"
+  },
+  {
+    "providerEmail": "ana.profissional@email.com",
+    "name": "Limpeza Residencial Completa",
+    "description": "Serviço completo de limpeza residencial incluindo todos os cômodos.",
+    "price": 200.0,
+    "categoryName": "Limpeza"
+  },
+  {
+    "providerEmail": "ana.profissional@email.com",
+    "name": "Limpeza Pós-Obra",
+    "description": "Limpeza especializada após reformas e obras, removendo resíduos e poeira.",
+    "price": 350.0,
+    "categoryName": "Limpeza"
+  }
+]

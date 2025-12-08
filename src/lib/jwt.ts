@@ -1,8 +1,9 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { FastifyRequest, FastifyReply, FastifyPluginAsync } from "fastify";
 import fjwt from "@fastify/jwt";
+import fp from "fastify-plugin";
 import { env } from "../env";
 
-export async function jwtPlugin(server: FastifyInstance) {
+const jwtPlugin: FastifyPluginAsync = async (server) => {
   await server.register(fjwt, { secret: env.JWT_SECRET });
 
   server.addHook("preHandler", (req, _res, next) => {
@@ -15,14 +16,16 @@ export async function jwtPlugin(server: FastifyInstance) {
     async (req: FastifyRequest, reply: FastifyReply) => {
       const token = req.cookies.token;
       if (!token) {
-        return reply.status(401).send({ message: "Authentication required" });
+        return reply.status(401).send({ message: "Autenticação necessária" });
       }
       try {
         const decoded = req.jwt.verify<{ sub: string; email: string }>(token);
         req.user = decoded;
       } catch (err) {
-        return reply.status(401).send({ message: "Invalid token" });
+        return reply.status(401).send({ message: "Token inválido" });
       }
     }
   );
-}
+};
+
+export default fp(jwtPlugin);

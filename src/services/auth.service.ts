@@ -1,4 +1,6 @@
 import { AuthRepository } from "../repository/auth.repository";
+import { AppointmentRepository } from "../repository/appointment.repository";
+import { NotificationService } from "./notification.service";
 import {
   SignupCompanyUserDTO,
   SignupIndividualUserDTO,
@@ -8,7 +10,11 @@ import { generateToken } from "../utils/jwt";
 import { hashPassword } from "../utils/password";
 
 export class AuthService {
-  constructor(private readonly userRepository: AuthRepository) {}
+  constructor(
+    private readonly userRepository: AuthRepository,
+    private readonly appointmentRepository: AppointmentRepository,
+    private readonly notificationService: NotificationService
+  ) {}
 
   async signup(signupUserDTO: SignupUserDTO) {
     const { email, userType } = signupUserDTO;
@@ -16,7 +22,7 @@ export class AuthService {
     const emailAlreadyExists = await this.userRepository.findByEmail(email);
 
     if (emailAlreadyExists) {
-      throw new Error("Email already in use");
+      throw new Error("Email já está em uso");
     }
 
     if (userType === "INDIVIDUAL") {
@@ -34,7 +40,7 @@ export class AuthService {
     const cpfAlreadyExists = await this.userRepository.findIndividualByCPF(cpf);
 
     if (cpfAlreadyExists) {
-      throw new Error("CPF already in use");
+      throw new Error("CPF já está em uso");
     }
 
     const hashedPassword = await hashPassword(password);
@@ -45,7 +51,7 @@ export class AuthService {
     });
 
     if (!individualUser) {
-      throw new Error("Error creating individual user");
+      throw new Error("Erro ao criar usuário individual");
     }
 
     const token = generateToken({
@@ -57,8 +63,10 @@ export class AuthService {
     });
 
     if (!token) {
-      throw new Error("Error generating authentication token");
+      throw new Error("Erro ao gerar token de autenticação");
     }
+
+    await this.notificationService.notifyWelcome(individualUser.id);
 
     return token;
   }
@@ -69,7 +77,7 @@ export class AuthService {
     const cnpjAlreadyExists = await this.userRepository.findCompanyByCNPJ(cnpj);
 
     if (cnpjAlreadyExists) {
-      throw new Error("CNPJ already in use");
+      throw new Error("CNPJ já está em uso");
     }
 
     const hashedPassword = await hashPassword(password);
@@ -80,7 +88,7 @@ export class AuthService {
     });
 
     if (!companyUser) {
-      throw new Error("Error creating company user");
+      throw new Error("Erro ao criar usuário empresa");
     }
 
     const token = generateToken({
@@ -92,8 +100,10 @@ export class AuthService {
     });
 
     if (!token) {
-      throw new Error("Error generating authentication token");
+      throw new Error("Erro ao gerar token de autenticação");
     }
+
+    await this.notificationService.notifyWelcome(companyUser.id);
 
     return token;
   }
@@ -101,7 +111,7 @@ export class AuthService {
   async login(email: string, password: string) {
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
-      throw new Error("Invalid email or password");
+      throw new Error("Email ou senha inválidos");
     }
 
     const isPasswordValid = await this.userRepository.verifyPassword(
@@ -109,7 +119,7 @@ export class AuthService {
       password
     );
     if (!isPasswordValid) {
-      throw new Error("Invalid email or password");
+      throw new Error("Email ou senha inválidos");
     }
 
     const token = generateToken({
@@ -118,5 +128,27 @@ export class AuthService {
     });
 
     return token;
+  }
+
+  async getCurrentUser(userId: string) {
+    const user = await this.userRepository.findUserWithDetails(userId);
+
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    return user;
+  }
+
+  async deleteAccount(userId: string): Promise<void> {
+    const isProvider = await this.userRepository.isServiceProvider(userId);
+
+    if (isProvider) {
+      await this.appointmentRepository.cancelFutureAppointmentsForProvider(
+        userId
+      );
+    }
+
+    await this.userRepository.deleteAccount(userId);
   }
 }

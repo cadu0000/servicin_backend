@@ -1,24 +1,48 @@
 import fastify, { FastifyInstance } from "fastify";
 import fastifySwagger from "@fastify/swagger";
+import fastifyCors from "@fastify/cors";
 import {
   validatorCompiler,
   serializerCompiler,
   jsonSchemaTransform,
 } from "fastify-type-provider-zod";
 import scalarFastify from "@scalar/fastify-api-reference";
+import fastifyCookie from "@fastify/cookie";
 import { authRoutes } from "./api/routes/auth.route";
-import { jwtPlugin } from "./lib/jwt";
+import jwtPlugin from "./lib/jwt";
 import cookieSetterPlugin from "./lib/cookies";
 import { serviceProviderRoutes } from "./api/routes/service-provider.route";
 import { serviceRoutes } from "./api/routes/service.route";
 import { categoryRoutes } from "./api/routes/category.route";
 import { appointmentRoutes } from "./api/routes/appointment.route";
+import { locationRoutes } from "./api/routes/location.route";
+import { reviewRoutes } from "./api/routes/review.route";
+import { notificationRoutes } from "./api/routes/notification.route";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const server = fastify();
 
   server.setValidatorCompiler(validatorCompiler);
   server.setSerializerCompiler(serializerCompiler);
+
+  server.register(fastifyCors, {
+    origin: (origin, cb) => {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        process.env.FRONTEND_URL,
+      ].filter(Boolean);
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        cb(null, true);
+        return;
+      }
+      cb(new Error("Não permitido pelo CORS"), false);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  });
 
   server.register(fastifySwagger, {
     openapi: {
@@ -35,6 +59,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     routePrefix: "/docs",
   });
 
+  server.register(fastifyCookie);
   server.register(cookieSetterPlugin);
   server.register(jwtPlugin);
 
@@ -43,6 +68,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   server.register(serviceProviderRoutes, { prefix: "/service-providers" });
   server.register(categoryRoutes, { prefix: "/categories" });
   server.register(appointmentRoutes, { prefix: "/appointments" });
+  server.register(locationRoutes, { prefix: "/locations" });
+  server.register(reviewRoutes, { prefix: "/reviews" });
+  server.register(notificationRoutes, { prefix: "/notifications" });
 
   return server;
 }

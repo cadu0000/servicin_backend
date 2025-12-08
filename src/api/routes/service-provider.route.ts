@@ -1,6 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { createServiceProviderSchema } from "../../schemas/service-provider.schema";
+import {
+  createServiceProviderSchema,
+  updateServiceProviderSchema,
+} from "../../schemas/service-provider.schema";
 import { serviceProviderController } from "../../container";
 
 export async function serviceProviderRoutes(server: FastifyInstance) {
@@ -21,28 +24,113 @@ export async function serviceProviderRoutes(server: FastifyInstance) {
                 .string()
                 .uuid()
                 .describe("ID of the service provider user"),
-              serviceDescription: z
+              averageRating: z.coerce
                 .string()
-                .nullable()
-                .describe("Description of the service provided"),
-              schedule: z
+                .describe(
+                  "Average rating of the service provider (0.00 to 5.00)"
+                ),
+              showContactInfo: z
+                .boolean()
+                .describe(
+                  "Whether the service provider shows contact information"
+                ),
+              contacts: z
                 .array(
                   z.object({
-                    dayOfWeek: z
-                      .number()
-                      .min(0)
-                      .max(6)
-                      .describe("Day of the week (0 - Sunday, 6 - Saturday)"),
-                    timeIntervals: z
-                      .array(
-                        z
-                          .string()
-                          .describe("Available time slot in HH:MM format")
-                      )
-                      .describe("List of available time slots for the day"),
+                    type: z
+                      .enum(["EMAIL", "PHONE"])
+                      .describe("Type of contact (EMAIL or PHONE)"),
+                    value: z.string().describe("Contact value"),
                   })
                 )
-                .describe("Weekly availability schedule"),
+                .describe(
+                  "List of user contacts (filtered if showContactInfo is false)"
+                ),
+              services: z
+                .array(
+                  z.object({
+                    id: z
+                      .string()
+                      .uuid()
+                      .describe("Unique identifier for the service"),
+                    name: z.string().describe("Name of the service"),
+                    description: z
+                      .string()
+                      .nullable()
+                      .describe("Description of the service"),
+                    price: z.coerce
+                      .string()
+                      .describe("Price of the service in BRL"),
+                    rating: z.coerce
+                      .string()
+                      .describe("Average rating of the service (0.00 to 5.00)"),
+                    photos: z
+                      .array(
+                        z.object({
+                          id: z
+                            .string()
+                            .uuid()
+                            .describe("Unique identifier for the photo"),
+                          photoUrl: z.string().describe("URL of the photo"),
+                        })
+                      )
+                      .describe("List of photos associated with the service"),
+                    availabilities: z
+                      .array(
+                        z.object({
+                          id: z
+                            .string()
+                            .uuid()
+                            .describe("Unique identifier for the availability"),
+                          dayOfWeek: z
+                            .number()
+                            .min(0)
+                            .max(6)
+                            .describe(
+                              "Day of the week (0 - Sunday, 6 - Saturday)"
+                            ),
+                          startTime: z
+                            .string()
+                            .describe("Start time in HH:MM format"),
+                          endTime: z
+                            .string()
+                            .describe("End time in HH:MM format"),
+                          breakStart: z
+                            .string()
+                            .nullable()
+                            .describe("Break start time in HH:MM format"),
+                          breakEnd: z
+                            .string()
+                            .nullable()
+                            .describe("Break end time in HH:MM format"),
+                          slotDuration: z
+                            .number()
+                            .describe(
+                              "Duration of each service slot in minutes"
+                            ),
+                          serviceId: z
+                            .string()
+                            .uuid()
+                            .nullable()
+                            .describe("ID of the service"),
+                        })
+                      )
+                      .describe("List of availability schedules"),
+                    category: z
+                      .object({
+                        id: z
+                          .number()
+                          .describe("Unique identifier for the category"),
+                        name: z.string().describe("Name of the category"),
+                        description: z
+                          .string()
+                          .nullable()
+                          .describe("Description of the category"),
+                      })
+                      .describe("Category details"),
+                  })
+                )
+                .describe("List of services provided"),
             })
             .describe("Service provider details"),
         },
@@ -65,5 +153,28 @@ export async function serviceProviderRoutes(server: FastifyInstance) {
       },
     },
     (request, reply) => serviceProviderController.create(request, reply)
+  );
+
+  server.patch(
+    "/:id",
+    {
+      preHandler: [server.authenticate],
+      schema: {
+        summary: "Update service provider profile",
+        description:
+          "Endpoint to update service provider profile settings. Requires authentication. You can update: autoAcceptAppointments and showContactInfo.",
+        tags: ["Service Provider"],
+        params: z.object({
+          id: z.string().uuid().describe("ID of the service provider user"),
+        }),
+        body: updateServiceProviderSchema.describe(
+          "Service provider update payload. All fields are optional."
+        ),
+        response: {
+          200: z.null().describe("Service provider updated successfully"),
+        },
+      },
+    },
+    (request, reply) => serviceProviderController.update(request, reply)
   );
 }
