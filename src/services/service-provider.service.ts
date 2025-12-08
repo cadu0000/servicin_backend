@@ -22,7 +22,7 @@ export class ServiceProviderService {
     const serviceProvider = await this.serviceProviderRepository.findById(id);
 
     if (!serviceProvider) {
-      throw new Error("Service provider not found");
+      throw new Error("Prestador de serviços não encontrado");
     }
 
     const targetDate = date || new Date();
@@ -130,14 +130,14 @@ export class ServiceProviderService {
     const userAlreadyExists = await this.authRepository.findById(userId);
 
     if (!userAlreadyExists) {
-      throw new Error("User not found");
+      throw new Error("Usuário não encontrado");
     }
 
     const serviceProviderAlreadyExists =
       await this.serviceProviderRepository.findById(userId);
 
     if (serviceProviderAlreadyExists) {
-      throw new Error("Service provider already exists for this user");
+      throw new Error("Prestador de serviços já existe para este usuário");
     }
 
     await this.serviceProviderRepository.create(params);
@@ -149,7 +149,7 @@ export class ServiceProviderService {
     );
 
     if (!serviceProvider) {
-      throw new Error("Service provider not found");
+      throw new Error("Prestador de serviços não encontrado");
     }
 
     await this.serviceProviderRepository.update(userId, params);

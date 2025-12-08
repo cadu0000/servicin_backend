@@ -28,7 +28,7 @@ export class ServiceProviderController {
 
     if (id !== userId) {
       return reply.status(403).send({
-        message: "You can only update your own profile",
+        message: "Você só pode atualizar seu próprio perfil",
         code: "FORBIDDEN",
       });
     }

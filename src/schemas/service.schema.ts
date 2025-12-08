@@ -79,7 +79,7 @@ export const createServiceSchema = z.object({
             .string()
             .regex(
               /^([0-1]\d|2[0-3]):([0-5]\d)$/,
-              "Invalid start time format (HH:MM)"
+              "Formato de horário de início inválido (HH:MM)"
             )
             .default("08:00")
             .describe("Start time in HH:MM format"),
@@ -87,7 +87,7 @@ export const createServiceSchema = z.object({
             .string()
             .regex(
               /^([0-1]\d|2[0-3]):([0-5]\d)$/,
-              "Invalid end time format (HH:MM)"
+              "Formato de horário de término inválido (HH:MM)"
             )
             .default("18:00")
             .describe("End time in HH:MM format"),
@@ -95,7 +95,7 @@ export const createServiceSchema = z.object({
             .string()
             .regex(
               /^([0-1]\d|2[0-3]):([0-5]\d)$/,
-              "Invalid break start time format (HH:MM)"
+              "Formato de horário de início do intervalo inválido (HH:MM)"
             )
             .nullable()
             .describe("Break start time in HH:MM format"),
@@ -103,14 +103,14 @@ export const createServiceSchema = z.object({
             .string()
             .regex(
               /^([0-1]\d|2[0-3]):([0-5]\d)$/,
-              "Invalid break end time format (HH:MM)"
+              "Formato de horário de término do intervalo inválido (HH:MM)"
             )
             .nullable()
             .describe("Break end time in HH:MM format"),
           slotDuration: z
             .number()
-            .min(15, "Slot duration must be at least 15 minutes")
-            .max(180, "Slot duration must be at most 180 minutes")
+            .min(15, "A duração do slot deve ser de pelo menos 15 minutos")
+            .max(180, "A duração do slot deve ser de no máximo 180 minutos")
             .default(30)
             .describe("Duration of each service slot in minutes"),
         })
@@ -130,7 +130,8 @@ export const createServiceSchema = z.object({
           if (isEndBeforeStart) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              message: "endTime must be later than startTime",
+              message:
+                "O horário de término deve ser posterior ao horário de início",
             });
           }
 
@@ -142,7 +143,7 @@ export const createServiceSchema = z.object({
           if (!hasBreakTimeDefined) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              message: "Both breakStart and breakEnd must be provided together",
+              message: "breakStart e breakEnd devem ser fornecidos juntos",
               path: hasBreakStart ? ["breakEnd"] : ["breakStart"],
             });
 
@@ -171,7 +172,8 @@ export const createServiceSchema = z.object({
             if (isBreakOrderInvalid) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: "breakEnd must be later than breakStart",
+                message:
+                  "O horário de término do intervalo deve ser posterior ao horário de início",
                 path: ["breakEnd"],
               });
             }
@@ -180,7 +182,7 @@ export const createServiceSchema = z.object({
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message:
-                  "breakStart must be within working hours (>= startTime)",
+                  "O horário de início do intervalo deve estar dentro do horário de trabalho (>= startTime)",
                 path: ["breakStart"],
               });
             }
@@ -188,14 +190,15 @@ export const createServiceSchema = z.object({
             if (isBreakEndAfterWork) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: "breakEnd must be within working hours (<= endTime)",
+                message:
+                  "O horário de término do intervalo deve estar dentro do horário de trabalho (<= endTime)",
                 path: ["breakEnd"],
               });
             }
           }
         })
     )
-    .min(1, "At least one availability entry is required")
+    .min(1, "Pelo menos uma entrada de disponibilidade é necessária")
     .superRefine((slots, ctx) => {
       const seenDays = new Set<number>();
       for (let i = 0; i < slots.length; i++) {
@@ -203,7 +206,7 @@ export const createServiceSchema = z.object({
         if (seenDays.has(dayOfWeek)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "It is not allowed to repeat the same day of the week.",
+            message: "Não é permitido repetir o mesmo dia da semana.",
             path: [i, "dayOfWeek"],
           });
           return;

@@ -32,7 +32,7 @@ export class CategoryService {
     );
 
     if (!isServiceProvider) {
-      throw new Error("Only service providers can create categories");
+      throw new Error("Apenas prestadores de serviços podem criar categorias");
     }
 
     const existingCategory = await this.categoryRepository.findByName(
@@ -40,7 +40,7 @@ export class CategoryService {
     );
 
     if (existingCategory) {
-      throw new Error("Category name already exists");
+      throw new Error("Nome da categoria já existe");
     }
 
     const category = await this.categoryRepository.create({

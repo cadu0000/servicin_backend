@@ -30,12 +30,12 @@ export class AppointmentService {
 
     const clientExists = await this.authRepository.findById(clientId);
     if (!clientExists) {
-      throw new Error("Client ID not found.");
+      throw new Error("ID do cliente não encontrado.");
     }
 
     const serviceExists = await this.serviceRepository.fetchById(serviceId);
     if (!serviceExists) {
-      throw new Error("Service ID not found.");
+      throw new Error("ID do serviço não encontrado.");
     }
 
     const serviceProviderId = serviceExists.provider.userId;

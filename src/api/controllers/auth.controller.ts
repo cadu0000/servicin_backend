@@ -26,7 +26,7 @@ export class AuthController {
 
   async logout(_: FastifyRequest, reply: FastifyReply) {
     reply.clearTokenCookie();
-    return reply.status(200).send({ message: "Logged out successfully" });
+    return reply.status(200).send({ message: "Logout realizado com sucesso" });
   }
 
   async getMe(request: FastifyRequest, reply: FastifyReply) {
@@ -38,6 +38,6 @@ export class AuthController {
   async deleteMe(request: FastifyRequest, reply: FastifyReply) {
     const { sub: userId } = request.user as UserPayload;
     await this.authService.deleteAccount(userId);
-    return reply.status(200).send({ message: "Account deleted successfully" });
+    return reply.status(200).send({ message: "Conta excluída com sucesso" });
   }
 }

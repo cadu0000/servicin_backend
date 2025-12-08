@@ -22,7 +22,7 @@ export class AuthService {
     const emailAlreadyExists = await this.userRepository.findByEmail(email);
 
     if (emailAlreadyExists) {
-      throw new Error("Email already in use");
+      throw new Error("Email já está em uso");
     }
 
     if (userType === "INDIVIDUAL") {
@@ -40,7 +40,7 @@ export class AuthService {
     const cpfAlreadyExists = await this.userRepository.findIndividualByCPF(cpf);
 
     if (cpfAlreadyExists) {
-      throw new Error("CPF already in use");
+      throw new Error("CPF já está em uso");
     }
 
     const hashedPassword = await hashPassword(password);
@@ -51,7 +51,7 @@ export class AuthService {
     });
 
     if (!individualUser) {
-      throw new Error("Error creating individual user");
+      throw new Error("Erro ao criar usuário individual");
     }
 
     const token = generateToken({
@@ -63,7 +63,7 @@ export class AuthService {
     });
 
     if (!token) {
-      throw new Error("Error generating authentication token");
+      throw new Error("Erro ao gerar token de autenticação");
     }
 
     await this.notificationService.notifyWelcome(individualUser.id);
@@ -77,7 +77,7 @@ export class AuthService {
     const cnpjAlreadyExists = await this.userRepository.findCompanyByCNPJ(cnpj);
 
     if (cnpjAlreadyExists) {
-      throw new Error("CNPJ already in use");
+      throw new Error("CNPJ já está em uso");
     }
 
     const hashedPassword = await hashPassword(password);
@@ -88,7 +88,7 @@ export class AuthService {
     });
 
     if (!companyUser) {
-      throw new Error("Error creating company user");
+      throw new Error("Erro ao criar usuário empresa");
     }
 
     const token = generateToken({
@@ -100,7 +100,7 @@ export class AuthService {
     });
 
     if (!token) {
-      throw new Error("Error generating authentication token");
+      throw new Error("Erro ao gerar token de autenticação");
     }
 
     await this.notificationService.notifyWelcome(companyUser.id);
@@ -111,7 +111,7 @@ export class AuthService {
   async login(email: string, password: string) {
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
-      throw new Error("Invalid email or password");
+      throw new Error("Email ou senha inválidos");
     }
 
     const isPasswordValid = await this.userRepository.verifyPassword(
@@ -119,7 +119,7 @@ export class AuthService {
       password
     );
     if (!isPasswordValid) {
-      throw new Error("Invalid email or password");
+      throw new Error("Email ou senha inválidos");
     }
 
     const token = generateToken({
@@ -134,7 +134,7 @@ export class AuthService {
     const user = await this.userRepository.findUserWithDetails(userId);
 
     if (!user) {
-      throw new Error("User not found");
+      throw new Error("Usuário não encontrado");
     }
 
     return user;

@@ -54,7 +54,7 @@ export class AuthRepository {
     });
 
     if (!country) {
-      throw new Error("Country not found");
+      throw new Error("País não encontrado");
     }
 
     const state = await prisma.state.findUnique({
@@ -62,11 +62,11 @@ export class AuthRepository {
     });
 
     if (!state) {
-      throw new Error("State not found");
+      throw new Error("Estado não encontrado");
     }
 
     if (state.countryId !== country.id) {
-      throw new Error("State does not belong to Brazil");
+      throw new Error("Estado não pertence ao Brasil");
     }
 
     const city = await prisma.city.findFirst({
@@ -77,11 +77,11 @@ export class AuthRepository {
     });
 
     if (!city) {
-      throw new Error("City not found");
+      throw new Error("Cidade não encontrada");
     }
 
     if (city.stateId !== address.stateId) {
-      throw new Error("City does not belong to the specified state");
+      throw new Error("Cidade não pertence ao estado especificado");
     }
 
     const createdAddress = await prisma.address.create({

@@ -22,14 +22,14 @@ export class LocationController {
         return reply.code(404).send({
           statusCode: 404,
           error: "Not Found",
-          message: "State not found",
+          message: "Estado não encontrado",
         });
       }
 
       return reply.code(500).send({
         statusCode: 500,
         error: "Internal Server Error",
-        message: "Unexpected error.",
+        message: "Erro inesperado.",
       });
     }
   }

@@ -19,7 +19,7 @@ export function generateToken({
   expiresIn = "7d",
 }: IGenerateTokenOptions): string {
   if (!secret) {
-    throw new Error("JWT secret must be provided to generate token.");
+    throw new Error("O segredo JWT deve ser fornecido para gerar o token.");
   }
 
   return jwt.sign(payload, secret, { expiresIn });

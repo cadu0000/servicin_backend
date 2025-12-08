@@ -91,7 +91,7 @@ export class AppointmentController {
       if (error instanceof Error) {
         if (
           error.message.includes("não encontrado") ||
-          error.message.includes("does not exist")
+          error.message.includes("não existe")
         ) {
           return res.status(404).send({
             statusCode: 404,
@@ -139,7 +139,7 @@ export class AppointmentController {
       if (error instanceof Error) {
         if (
           error.message.includes("não encontrado") ||
-          error.message.includes("does not exist")
+          error.message.includes("não existe")
         ) {
           return res.status(404).send({
             statusCode: 404,
@@ -184,7 +184,7 @@ export class AppointmentController {
       if (error instanceof Error) {
         if (
           error.message.includes("não encontrado") ||
-          error.message.includes("does not exist")
+          error.message.includes("não existe")
         ) {
           return res.status(404).send({
             statusCode: 404,
@@ -235,7 +235,7 @@ export class AppointmentController {
       if (error instanceof Error) {
         if (
           error.message.includes("não encontrado") ||
-          error.message.includes("does not exist")
+          error.message.includes("não existe")
         ) {
           return res.status(404).send({
             statusCode: 404,

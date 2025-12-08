@@ -18,7 +18,7 @@ export class ServiceService {
     );
 
     if (!services) {
-      throw new Error("No services found");
+      throw new Error("Nenhum serviço encontrado");
     }
 
     const servicesWithUnavailableSlots = services.data.map((service) => {
@@ -84,7 +84,7 @@ export class ServiceService {
     const service = await this.serviceRepository.fetchById(id);
 
     if (!service) {
-      throw new Error("No service found");
+      throw new Error("Serviço não encontrado");
     }
 
     const unavailableTimeSlots = (service.appointments || []).map(
@@ -147,7 +147,7 @@ export class ServiceService {
     const userAlreadyExists = await this.authRepository.findById(providerId);
 
     if (!userAlreadyExists) {
-      throw new Error("User does not exist");
+      throw new Error("Usuário não existe");
     }
 
     const serviceProviderExists = await this.authRepository.findById(
@@ -155,7 +155,7 @@ export class ServiceService {
     );
 
     if (!serviceProviderExists) {
-      throw new Error("User is not a service provider");
+      throw new Error("Usuário não é um prestador de serviços");
     }
 
     const categoryExists = await this.serviceRepository.findCategoryById(
@@ -163,7 +163,7 @@ export class ServiceService {
     );
 
     if (!categoryExists) {
-      throw new Error("Category does not exist");
+      throw new Error("Categoria não existe");
     }
 
     const address = await prisma.address.findUnique({
@@ -171,13 +171,13 @@ export class ServiceService {
     });
 
     if (!address) {
-      throw new Error("Address does not exist");
+      throw new Error("Endereço não existe");
     }
 
     const service = await this.serviceRepository.create(createServiceSchemaDTO);
 
     if (!service) {
-      throw new Error("Error creating service");
+      throw new Error("Erro ao criar serviço");
     }
 
     return service;

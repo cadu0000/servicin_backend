@@ -16,13 +16,13 @@ const jwtPlugin: FastifyPluginAsync = async (server) => {
     async (req: FastifyRequest, reply: FastifyReply) => {
       const token = req.cookies.token;
       if (!token) {
-        return reply.status(401).send({ message: "Authentication required" });
+        return reply.status(401).send({ message: "Autenticação necessária" });
       }
       try {
         const decoded = req.jwt.verify<{ sub: string; email: string }>(token);
         req.user = decoded;
       } catch (err) {
-        return reply.status(401).send({ message: "Invalid token" });
+        return reply.status(401).send({ message: "Token inválido" });
       }
     }
   );

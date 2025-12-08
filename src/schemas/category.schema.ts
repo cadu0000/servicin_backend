@@ -25,13 +25,13 @@ export const fetchCategoriesResponseSchema = z.object({
 export const createCategorySchema = z.object({
   name: z
     .string()
-    .min(1, "Category name is required")
-    .max(255, "Category name must be at most 255 characters")
+    .min(1, "O nome da categoria é obrigatório")
+    .max(255, "O nome da categoria deve ter no máximo 255 caracteres")
     .describe("Category name. Example: 'Electrical Repair'"),
   description: z
     .string()
-    .min(1, "Description is required")
-    .max(1000, "Description must be at most 1000 characters")
+    .min(1, "A descrição é obrigatória")
+    .max(1000, "A descrição deve ter no máximo 1000 caracteres")
     .describe(
       "Category description. Example: 'Services related to home electrical maintenance'"
     ),

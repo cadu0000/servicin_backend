@@ -39,7 +39,7 @@ export class CategoryController {
       return reply.code(500).send({
         statusCode: 500,
         error: "Internal Server Error",
-        message: "Unexpected error.",
+        message: "Erro inesperado.",
       });
     }
   }
@@ -53,26 +53,26 @@ export class CategoryController {
     } catch (error) {
       const message = (error as Error).message;
 
-      if (message === "Category name already exists") {
+      if (message === "Nome da categoria já existe") {
         return reply.code(409).send({
           statusCode: 409,
           error: "Conflict",
-          message: "Category name already exists",
+          message: "Nome da categoria já existe",
         });
       }
 
-      if (message === "Only service providers can create categories") {
+      if (message === "Apenas prestadores de serviços podem criar categorias") {
         return reply.code(403).send({
           statusCode: 403,
           error: "Forbidden",
-          message: "Only service providers can create categories",
+          message: "Apenas prestadores de serviços podem criar categorias",
         });
       }
 
       return reply.code(500).send({
         statusCode: 500,
         error: "Internal Server Error",
-        message: "Unexpected error.",
+        message: "Erro inesperado.",
       });
     }
   }
