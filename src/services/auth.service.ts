@@ -137,7 +137,12 @@ export class AuthService {
       throw new Error("Usuário não encontrado");
     }
 
-    return user;
+    const { serviceProvider, ...userInfo } = user;
+
+    const isProvider = await this.userRepository.isServiceProvider(userId);
+    const role = isProvider ? "PROVIDER" : "CUSTOMER";
+
+    return { ...userInfo, role };
   }
 
   async deleteAccount(userId: string): Promise<void> {

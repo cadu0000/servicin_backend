@@ -129,8 +129,8 @@ export const signupUserSchema = z.discriminatedUnion("userType", [
 ]);
 
 export const loginUserSchema = z.object({
-  email: z.string().email().default("johndoe@email.com"),
-  password: z.string().min(1, "A senha é obrigatória").default("JohnDoe123"),
+  email: z.string().email().default("carlos.provedor@email.com"),
+  password: z.string().min(1, "A senha é obrigatória").default("12345"),
 });
 
 export type LoginUserDTO = z.infer<typeof loginUserSchema>;

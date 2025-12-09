@@ -213,6 +213,11 @@ export class AuthRepository {
             tradeName: true,
           },
         },
+        serviceProvider: {
+          select: {
+            userId: true,
+          },
+        },
       },
     });
 

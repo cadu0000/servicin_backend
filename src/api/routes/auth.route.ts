@@ -111,6 +111,9 @@ export async function authRoutes(server: FastifyInstance) {
                 tradeName: z.string().nullable(),
               })
               .nullable(),
+            role: z
+              .enum(["PROVIDER", "CUSTOMER"])
+              .describe("The role of the user"),
           }),
         },
       },
