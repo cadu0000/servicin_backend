@@ -34,6 +34,9 @@ export async function serviceProviderRoutes(server: FastifyInstance) {
                 .describe(
                   "Whether the service provider shows contact information"
                 ),
+              autoAcceptAppointments: z
+                .boolean()
+                .describe("Whether to automatically accept appointments"),
               contacts: z
                 .array(
                   z.object({

@@ -11,6 +11,7 @@ export class ServiceProviderRepository {
         userId: true,
         averageRating: true,
         showContactInfo: true,
+        autoAcceptAppointments: true,
         services: {
           select: {
             id: true,
