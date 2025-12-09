@@ -57,19 +57,29 @@ export class ServiceService {
         ? contacts
         : contacts.filter((contact) => contact.type !== "PHONE");
 
+      const processedReviews = (service.reviews || []).map((review: any) => ({
+        ...review,
+        rating: review.rating ? String(review.rating) : "0",
+        createdAt: review.createdAt
+          ? new Date(review.createdAt).toISOString()
+          : new Date().toISOString(),
+      }));
+
       return {
         ...serviceWithoutAppointments,
-        rating: (service as any).rating ? Number((service as any).rating) : 0,
+        price: (service as any).price ? String((service as any).price) : "0",
+        rating: (service as any).rating ? String((service as any).rating) : "0",
         provider: {
           ...service.provider,
           averageRating: (service.provider as any).averageRating
-            ? Number((service.provider as any).averageRating)
-            : 0,
+            ? String((service.provider as any).averageRating)
+            : "0",
           user: {
             ...service.provider.user,
             contacts: filteredContacts,
           },
         },
+        reviews: processedReviews,
         unavailableTimeSlots,
       };
     });
@@ -124,19 +134,29 @@ export class ServiceService {
       ? contacts
       : contacts.filter((contact) => contact.type !== "PHONE");
 
+    const processedReviews = (service.reviews || []).map((review: any) => ({
+      ...review,
+      rating: review.rating ? String(review.rating) : "0",
+      createdAt: review.createdAt
+        ? new Date(review.createdAt).toISOString()
+        : new Date().toISOString(),
+    }));
+
     return {
       ...serviceWithoutAppointments,
-      rating: (service as any).rating ? Number((service as any).rating) : 0,
+      price: (service as any).price ? String((service as any).price) : "0",
+      rating: (service as any).rating ? String((service as any).rating) : "0",
       provider: {
         ...service.provider,
         averageRating: (service.provider as any).averageRating
-          ? Number((service.provider as any).averageRating)
-          : 0,
+          ? String((service.provider as any).averageRating)
+          : "0",
         user: {
           ...service.provider.user,
           contacts: filteredContacts,
         },
       },
+      reviews: processedReviews,
       unavailableTimeSlots,
     };
   }

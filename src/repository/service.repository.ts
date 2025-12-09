@@ -153,6 +153,22 @@ export class ServiceRepository {
             status: true,
           },
         },
+        address: {
+          select: {
+            state: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            city: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
         provider: {
           select: {
             userId: true,
@@ -178,6 +194,30 @@ export class ServiceRepository {
           },
         },
         category: true,
+        reviews: {
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+            client: {
+              select: {
+                id: true,
+                individual: {
+                  select: {
+                    fullName: true,
+                  },
+                },
+                company: {
+                  select: {
+                    corporateName: true,
+                  },
+                },
+                photoUrl: true,
+              },
+            },
+          },
+        },
       },
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -251,6 +291,46 @@ export class ServiceRepository {
           },
         },
         category: true,
+        address: {
+          select: {
+            state: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            city: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        reviews: {
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+            client: {
+              select: {
+                id: true,
+                individual: {
+                  select: {
+                    fullName: true,
+                  },
+                },
+                company: {
+                  select: {
+                    corporateName: true,
+                  },
+                },
+                photoUrl: true,
+              },
+            },
+          },
+        },
       },
       where: {
         id,

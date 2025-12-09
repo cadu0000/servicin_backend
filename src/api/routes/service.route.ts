@@ -99,6 +99,16 @@ export async function serviceRoutes(server: FastifyInstance) {
                       averageRating: z.coerce
                         .string()
                         .describe("Average rating of the service provider"),
+                      autoAcceptAppointments: z
+                        .boolean()
+                        .describe(
+                          "Whether the provider automatically accepts appointments"
+                        ),
+                      showContactInfo: z
+                        .boolean()
+                        .describe(
+                          "Whether the provider shows contact information"
+                        ),
                       user: z
                         .object({
                           photoUrl: z
@@ -152,6 +162,83 @@ export async function serviceRoutes(server: FastifyInstance) {
                     .describe(
                       "List of unavailable time slots due to appointments"
                     ),
+                  address: z
+                    .object({
+                      state: z
+                        .object({
+                          id: z
+                            .string()
+                            .uuid()
+                            .describe("Unique identifier for the state"),
+                          name: z.string().describe("Name of the state"),
+                        })
+                        .describe("State details"),
+                      city: z
+                        .object({
+                          id: z
+                            .string()
+                            .uuid()
+                            .describe("Unique identifier for the city"),
+                          name: z.string().describe("Name of the city"),
+                        })
+                        .describe("City details"),
+                    })
+                    .describe("Address details"),
+                  reviews: z
+                    .array(
+                      z.object({
+                        id: z
+                          .string()
+                          .uuid()
+                          .describe("Unique identifier for the review"),
+                        rating: z.coerce
+                          .string()
+                          .describe("Rating given to the service (1.0 to 5.0)"),
+                        comment: z
+                          .string()
+                          .nullable()
+                          .describe("Comment about the service"),
+                        createdAt: z
+                          .string()
+                          .datetime()
+                          .describe(
+                            "Date and time when the review was created"
+                          ),
+                        client: z
+                          .object({
+                            id: z
+                              .string()
+                              .uuid()
+                              .describe("Unique identifier for the client"),
+                            individual: z
+                              .object({
+                                fullName: z
+                                  .string()
+                                  .describe(
+                                    "Full name of the individual client"
+                                  ),
+                              })
+                              .nullable()
+                              .describe("Individual client details"),
+                            company: z
+                              .object({
+                                corporateName: z
+                                  .string()
+                                  .describe(
+                                    "Corporate name of the company client"
+                                  ),
+                              })
+                              .nullable()
+                              .describe("Company client details"),
+                            photoUrl: z
+                              .string()
+                              .nullable()
+                              .describe("URL of the client's profile photo"),
+                          })
+                          .describe("Client who wrote the review"),
+                      })
+                    )
+                    .describe("List of reviews for the service"),
                 })
               )
               .describe("Array of service objects"),
@@ -237,6 +324,14 @@ export async function serviceRoutes(server: FastifyInstance) {
                 averageRating: z.coerce
                   .string()
                   .describe("Average rating of the service provider"),
+                autoAcceptAppointments: z
+                  .boolean()
+                  .describe(
+                    "Whether the provider automatically accepts appointments"
+                  ),
+                showContactInfo: z
+                  .boolean()
+                  .describe("Whether the provider shows contact information"),
                 user: z
                   .object({
                     photoUrl: z
@@ -281,9 +376,95 @@ export async function serviceRoutes(server: FastifyInstance) {
                   start: z.string().describe("Start time in HH:MM format"),
                   end: z.string().describe("End time in HH:MM format"),
                   date: z.string().describe("Date in YYYY-MM-DD format"),
+                  appointmentId: z
+                    .string()
+                    .uuid()
+                    .optional()
+                    .describe("ID of the appointment"),
+                  status: z
+                    .enum([
+                      "PENDING",
+                      "APPROVED",
+                      "REJECTED",
+                      "CANCELED",
+                      "COMPLETED",
+                    ])
+                    .optional()
+                    .describe("Status of the appointment"),
                 })
               )
               .describe("List of unavailable time slots due to appointments"),
+            address: z
+              .object({
+                state: z
+                  .object({
+                    id: z
+                      .string()
+                      .uuid()
+                      .describe("Unique identifier for the state"),
+                    name: z.string().describe("Name of the state"),
+                  })
+                  .describe("State details"),
+                city: z
+                  .object({
+                    id: z
+                      .string()
+                      .uuid()
+                      .describe("Unique identifier for the city"),
+                    name: z.string().describe("Name of the city"),
+                  })
+                  .describe("City details"),
+              })
+              .describe("Address details"),
+            reviews: z
+              .array(
+                z.object({
+                  id: z
+                    .string()
+                    .uuid()
+                    .describe("Unique identifier for the review"),
+                  rating: z.coerce
+                    .string()
+                    .describe("Rating given to the service (1.0 to 5.0)"),
+                  comment: z
+                    .string()
+                    .nullable()
+                    .describe("Comment about the service"),
+                  createdAt: z
+                    .string()
+                    .datetime()
+                    .describe("Date and time when the review was created"),
+                  client: z
+                    .object({
+                      id: z
+                        .string()
+                        .uuid()
+                        .describe("Unique identifier for the client"),
+                      individual: z
+                        .object({
+                          fullName: z
+                            .string()
+                            .describe("Full name of the individual client"),
+                        })
+                        .nullable()
+                        .describe("Individual client details"),
+                      company: z
+                        .object({
+                          corporateName: z
+                            .string()
+                            .describe("Corporate name of the company client"),
+                        })
+                        .nullable()
+                        .describe("Company client details"),
+                      photoUrl: z
+                        .string()
+                        .nullable()
+                        .describe("URL of the client's profile photo"),
+                    })
+                    .describe("Client who wrote the review"),
+                })
+              )
+              .describe("List of reviews for the service"),
           }),
         },
       },
