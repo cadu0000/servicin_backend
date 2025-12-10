@@ -6,6 +6,10 @@ import {
   citySchema,
   getCitiesByStateParamsSchema,
 } from "../../schemas/location.schema";
+import {
+  createApiResponseSchema,
+  createErrorResponseSchema,
+} from "../../utils/response";
 
 export async function locationRoutes(server: FastifyInstance) {
   server.get(
@@ -16,7 +20,8 @@ export async function locationRoutes(server: FastifyInstance) {
         description: "Endpoint to fetch all states from Brazil",
         tags: ["Location"],
         response: {
-          200: z.array(stateSchema).describe("List of all states from Brazil"),
+          200: createApiResponseSchema(z.array(stateSchema)),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -32,14 +37,9 @@ export async function locationRoutes(server: FastifyInstance) {
         tags: ["Location"],
         params: getCitiesByStateParamsSchema,
         response: {
-          200: z
-            .array(citySchema)
-            .describe("List of all cities from the specified state"),
-          404: z.object({
-            statusCode: z.number().describe("HTTP status code"),
-            error: z.string().describe("Error type"),
-            message: z.string().describe("Error message"),
-          }),
+          200: createApiResponseSchema(z.array(citySchema)),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },

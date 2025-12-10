@@ -5,6 +5,7 @@ import {
   createServiceSchema,
   fetchServicesQueryParamsSchema,
 } from "../../schemas/service.schema";
+import { createApiResponseSchema, createErrorResponseSchema } from "../../utils/response";
 
 export async function serviceRoutes(server: FastifyInstance) {
   server.get(
@@ -17,13 +18,14 @@ export async function serviceRoutes(server: FastifyInstance) {
         tags: ["Service"],
         querystring: fetchServicesQueryParamsSchema,
         response: {
-          200: z.object({
-            total: z.number().describe("Total number of services"),
-            totalPages: z.number().describe("Total number of pages"),
-            page: z.number().describe("Current page number"),
-            pageSize: z.number().describe("Number of services per page"),
-            data: z
-              .array(
+          200: createApiResponseSchema(
+            z.object({
+              total: z.number().describe("Total number of services"),
+              totalPages: z.number().describe("Total number of pages"),
+              page: z.number().describe("Current page number"),
+              pageSize: z.number().describe("Number of services per page"),
+              data: z
+                .array(
                 z.object({
                   id: z
                     .string()
@@ -242,7 +244,10 @@ export async function serviceRoutes(server: FastifyInstance) {
                 })
               )
               .describe("Array of service objects"),
-          }),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -260,8 +265,9 @@ export async function serviceRoutes(server: FastifyInstance) {
           id: z.string().uuid().describe("Unique identifier for the service"),
         }),
         response: {
-          200: z.object({
-            id: z.string().uuid().describe("Unique identifier for the service"),
+          200: createApiResponseSchema(
+            z.object({
+              id: z.string().uuid().describe("Unique identifier for the service"),
             name: z.string().describe("Name of the service"),
             description: z
               .string()
@@ -465,7 +471,11 @@ export async function serviceRoutes(server: FastifyInstance) {
                 })
               )
               .describe("List of reviews for the service"),
-          }),
+            })
+          ),
+          404: createErrorResponseSchema(),
+          400: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -481,9 +491,13 @@ export async function serviceRoutes(server: FastifyInstance) {
         tags: ["Service"],
         body: createServiceSchema,
         response: {
-          201: z.object({
-            id: z.string().uuid().describe("Unique identifier for the service"),
-          }),
+          201: createApiResponseSchema(
+            z.object({
+              id: z.string().uuid().describe("Unique identifier for the service"),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },

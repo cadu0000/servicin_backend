@@ -2,45 +2,37 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { CategoryService } from "../../services/category.service";
 import { createCategorySchema } from "../../schemas/category.schema";
 import type { UserPayload } from "../../@types/fastify";
+import { sendSuccess, sendError } from "../../utils/response";
 
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   async getAllCategories(reply: FastifyReply) {
-    const categories = await this.categoryService.getAllCategories();
-    return reply.code(200).send(categories);
+    try {
+      const categories = await this.categoryService.getAllCategories();
+      return sendSuccess(reply, categories);
+    } catch (error) {
+      return sendError(reply, "Erro ao buscar categorias", 500);
+    }
   }
 
   async getCategoryById(request: FastifyRequest, reply: FastifyReply) {
-    const { id } = request.params as { id: number };
-
     try {
+      const { id } = request.params as { id: number };
       const category = await this.categoryService.getCategoryById(id);
-      return reply.code(200).send(category);
+      return sendSuccess(reply, category);
     } catch (error) {
       const message = (error as Error).message;
 
       if (message === "400.") {
-        return reply.code(400).send({
-          statusCode: 400,
-          error: "Bad Request",
-          message,
-        });
+        return sendError(reply, message, 400);
       }
 
       if (message === "404") {
-        return reply.code(404).send({
-          statusCode: 404,
-          error: "Not Found",
-          message,
-        });
+        return sendError(reply, "Categoria não encontrada", 404);
       }
 
-      return reply.code(500).send({
-        statusCode: 500,
-        error: "Internal Server Error",
-        message: "Erro inesperado.",
-      });
+      return sendError(reply, "Erro inesperado", 500);
     }
   }
 
@@ -49,31 +41,19 @@ export class CategoryController {
       const { sub: userId } = request.user as UserPayload;
       const params = createCategorySchema.parse(request.body);
       const category = await this.categoryService.create(params, userId);
-      return reply.code(201).send(category);
+      return sendSuccess(reply, category, "Categoria criada com sucesso", 201);
     } catch (error) {
       const message = (error as Error).message;
 
       if (message === "Nome da categoria já existe") {
-        return reply.code(409).send({
-          statusCode: 409,
-          error: "Conflict",
-          message: "Nome da categoria já existe",
-        });
+        return sendError(reply, "Nome da categoria já existe", 409);
       }
 
       if (message === "Apenas prestadores de serviços podem criar categorias") {
-        return reply.code(403).send({
-          statusCode: 403,
-          error: "Forbidden",
-          message: "Apenas prestadores de serviços podem criar categorias",
-        });
+        return sendError(reply, "Apenas prestadores de serviços podem criar categorias", 403);
       }
 
-      return reply.code(500).send({
-        statusCode: 500,
-        error: "Internal Server Error",
-        message: "Erro inesperado.",
-      });
+      return sendError(reply, "Erro inesperado", 500);
     }
   }
 }

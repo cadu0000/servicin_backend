@@ -8,6 +8,7 @@ import {
   cancelAppointmentSchema,
 } from "../../schemas/appointment.shema";
 import type { UserPayload } from "../../@types/fastify";
+import { sendSuccess, sendError } from "../../utils/response";
 
 type CreateAppointmentRequest = FastifyRequest<{
   Body: CreateAppointmentSchemaDTO;
@@ -47,26 +48,23 @@ export class AppointmentController {
         clientId,
       });
 
-      return res.status(201).send({
-        message:
-          "Solicitação de agendamento criada com sucesso. Aguardando aprovação do prestador.",
-        appointmentId: appointment.id,
-        status: appointment.status,
-      });
+      return sendSuccess(
+        res,
+        {
+          appointmentId: appointment.id,
+          status: appointment.status,
+        },
+        "Solicitação de agendamento criada com sucesso. Aguardando aprovação do prestador.",
+        201
+      );
     } catch (error) {
       if (error instanceof Error) {
         console.warn(`[API] Invalid Appointment Input: ${error.message}`);
-        return res.status(400).send({
-          message: error.message,
-          code: "INVALID_INPUT",
-        });
+        return sendError(res, error.message, 400);
       }
 
       console.error("[API] Internal Error during appointment creation:", error);
-      return res.status(500).send({
-        message: "Falha interna ao processar a solicitação de agendamento.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+      return sendError(res, "Falha interna ao processar a solicitação de agendamento.", 500);
     }
   }
 
@@ -84,7 +82,7 @@ export class AppointmentController {
           userId
         );
 
-      return res.status(200).send(updatedAppointment);
+      return sendSuccess(res, updatedAppointment, "Status do agendamento atualizado com sucesso");
     } catch (error) {
       console.error("Erro ao atualizar status do agendamento:", error);
 
@@ -93,10 +91,7 @@ export class AppointmentController {
           error.message.includes("não encontrado") ||
           error.message.includes("não existe")
         ) {
-          return res.status(404).send({
-            statusCode: 404,
-            message: error.message,
-          });
+          return sendError(res, error.message, 404);
         }
 
         if (
@@ -104,17 +99,11 @@ export class AppointmentController {
           error.message.includes("status atual") ||
           error.message.includes("obrigatório")
         ) {
-          return res.status(400).send({
-            statusCode: 400,
-            message: error.message,
-          });
+          return sendError(res, error.message, 400);
         }
       }
 
-      return res.status(500).send({
-        statusCode: 500,
-        message: "Erro interno do servidor ao processar a atualização.",
-      });
+      return sendError(res, "Erro interno do servidor ao processar a atualização.", 500);
     }
   }
 
@@ -132,7 +121,7 @@ export class AppointmentController {
           cancelDTO.reason
         );
 
-      return res.status(200).send(canceledAppointment);
+      return sendSuccess(res, canceledAppointment, "Agendamento cancelado com sucesso");
     } catch (error) {
       console.error("Erro ao cancelar agendamento:", error);
 
@@ -141,31 +130,19 @@ export class AppointmentController {
           error.message.includes("não encontrado") ||
           error.message.includes("não existe")
         ) {
-          return res.status(404).send({
-            statusCode: 404,
-            message: error.message,
-          });
+          return sendError(res, error.message, 404);
         }
 
         if (error.message.includes("permissão")) {
-          return res.status(403).send({
-            statusCode: 403,
-            message: error.message,
-          });
+          return sendError(res, error.message, 403);
         }
 
         if (error.message.includes("obrigatório")) {
-          return res.status(400).send({
-            statusCode: 400,
-            message: error.message,
-          });
+          return sendError(res, error.message, 400);
         }
       }
 
-      return res.status(500).send({
-        statusCode: 500,
-        message: "Erro interno do servidor ao processar o cancelamento.",
-      });
+      return sendError(res, "Erro interno do servidor ao processar o cancelamento.", 500);
     }
   }
 
@@ -177,7 +154,7 @@ export class AppointmentController {
       const completedAppointment =
         await this.appointmentService.completeService(appointmentId, userId);
 
-      return res.status(200).send(completedAppointment);
+      return sendSuccess(res, completedAppointment, "Serviço concluído com sucesso");
     } catch (error) {
       console.error("Erro ao completar serviço:", error);
 
@@ -186,35 +163,22 @@ export class AppointmentController {
           error.message.includes("não encontrado") ||
           error.message.includes("não existe")
         ) {
-          return res.status(404).send({
-            statusCode: 404,
-            message: error.message,
-          });
+          return sendError(res, error.message, 404);
         }
 
         if (error.message.includes("permissão")) {
-          return res.status(403).send({
-            statusCode: 403,
-            message: error.message,
-          });
+          return sendError(res, error.message, 403);
         }
 
         if (
           error.message.includes("já foi") ||
           error.message.includes("não é possível")
         ) {
-          return res.status(400).send({
-            statusCode: 400,
-            message: error.message,
-          });
+          return sendError(res, error.message, 400);
         }
       }
 
-      return res.status(500).send({
-        statusCode: 500,
-        message:
-          "Erro interno do servidor ao processar a finalização do serviço.",
-      });
+      return sendError(res, "Erro interno do servidor ao processar a finalização do serviço.", 500);
     }
   }
 
@@ -228,7 +192,7 @@ export class AppointmentController {
         userId
       );
 
-      return res.status(200).send(confirmedPayment);
+      return sendSuccess(res, confirmedPayment, "Pagamento confirmado com sucesso");
     } catch (error) {
       console.error("Erro ao confirmar pagamento:", error);
 
@@ -237,38 +201,25 @@ export class AppointmentController {
           error.message.includes("não encontrado") ||
           error.message.includes("não existe")
         ) {
-          return res.status(404).send({
-            statusCode: 404,
-            message: error.message,
-          });
+          return sendError(res, error.message, 404);
         }
 
         if (
           error.message.includes("permissão") ||
           error.message.includes("Apenas")
         ) {
-          return res.status(403).send({
-            statusCode: 403,
-            message: error.message,
-          });
+          return sendError(res, error.message, 403);
         }
 
         if (
           error.message.includes("já foi") ||
           error.message.includes("só pode ser confirmado")
         ) {
-          return res.status(400).send({
-            statusCode: 400,
-            message: error.message,
-          });
+          return sendError(res, error.message, 400);
         }
       }
 
-      return res.status(500).send({
-        statusCode: 500,
-        message:
-          "Erro interno do servidor ao processar a confirmação do pagamento.",
-      });
+      return sendError(res, "Erro interno do servidor ao processar a confirmação do pagamento.", 500);
     }
   }
 
@@ -280,16 +231,11 @@ export class AppointmentController {
         clientId
       );
 
-      return res.status(200).send({
-        appointments,
-      });
+      return sendSuccess(res, appointments);
     } catch (error) {
       console.error("Erro ao buscar agendamentos do cliente:", error);
 
-      return res.status(500).send({
-        statusCode: 500,
-        message: "Erro interno do servidor ao buscar agendamentos.",
-      });
+      return sendError(res, "Erro interno do servidor ao buscar agendamentos.", 500);
     }
   }
 
@@ -300,16 +246,11 @@ export class AppointmentController {
       const appointments =
         await this.appointmentService.getProviderAppointments(providerId);
 
-      return res.status(200).send({
-        appointments,
-      });
+      return sendSuccess(res, appointments);
     } catch (error) {
       console.error("Erro ao buscar agendamentos recebidos:", error);
 
-      return res.status(500).send({
-        statusCode: 500,
-        message: "Erro interno do servidor ao buscar agendamentos.",
-      });
+      return sendError(res, "Erro interno do servidor ao buscar agendamentos.", 500);
     }
   }
 }

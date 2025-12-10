@@ -12,6 +12,7 @@ import {
 } from "../../schemas/appointment.shema";
 import { z } from "zod";
 import { appointmentController } from "../../container/index";
+import { createApiResponseSchema, createErrorResponseSchema } from "../../utils/response";
 
 type CreateAppointmentRouteRequest = {
   Body: CreateAppointmentSchemaDTO;
@@ -50,11 +51,14 @@ export async function appointmentRoutes(server: FastifyInstance) {
         tags: ["Appointment"],
         body: createAppointmentSchema,
         response: {
-          201: z.object({
-            message: z.string(),
-            appointmentId: z.string().uuid(),
-            status: z.string(),
-          }),
+          201: createApiResponseSchema(
+            z.object({
+              appointmentId: z.string().uuid(),
+              status: z.string(),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -94,10 +98,15 @@ export async function appointmentRoutes(server: FastifyInstance) {
             }
           ),
         response: {
-          200: z.object({
-            id: updateAppointmentStatusRequestBaseSchema.shape.appointmentId,
-            status: updateAppointmentStatusRequestBaseSchema.shape.status,
-          }),
+          200: createApiResponseSchema(
+            z.object({
+              id: updateAppointmentStatusRequestBaseSchema.shape.appointmentId,
+              status: updateAppointmentStatusRequestBaseSchema.shape.status,
+            })
+          ),
+          400: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -118,10 +127,16 @@ export async function appointmentRoutes(server: FastifyInstance) {
         }),
         body: cancelAppointmentSchema,
         response: {
-          200: z.object({
-            id: z.string().uuid(),
-            status: z.nativeEnum(AppointmentStatus),
-          }),
+          200: createApiResponseSchema(
+            z.object({
+              id: z.string().uuid(),
+              status: z.nativeEnum(AppointmentStatus),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -141,10 +156,16 @@ export async function appointmentRoutes(server: FastifyInstance) {
           appointmentId: z.string().uuid(),
         }),
         response: {
-          200: z.object({
-            id: z.string().uuid(),
-            status: z.nativeEnum(AppointmentStatus),
-          }),
+          200: createApiResponseSchema(
+            z.object({
+              id: z.string().uuid(),
+              status: z.nativeEnum(AppointmentStatus),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -165,10 +186,16 @@ export async function appointmentRoutes(server: FastifyInstance) {
           appointmentId: z.string().uuid(),
         }),
         response: {
-          200: z.object({
-            id: z.string().uuid(),
-            status: z.nativeEnum(AppointmentStatus),
-          }),
+          200: createApiResponseSchema(
+            z.object({
+              id: z.string().uuid(),
+              status: z.nativeEnum(AppointmentStatus),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -186,9 +213,10 @@ export async function appointmentRoutes(server: FastifyInstance) {
           "Get all appointments made by the authenticated user as a client. Requires authentication.",
         tags: ["Appointment"],
         response: {
-          200: z.object({
-            appointments: z.array(appointmentResponseSchema),
-          }),
+          200: createApiResponseSchema(
+            z.array(appointmentResponseSchema)
+          ),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -206,9 +234,10 @@ export async function appointmentRoutes(server: FastifyInstance) {
           "Get all appointments received by the authenticated user as a service provider. Requires authentication.",
         tags: ["Appointment"],
         response: {
-          200: z.object({
-            appointments: z.array(appointmentWithClientResponseSchema),
-          }),
+          200: createApiResponseSchema(
+            z.array(appointmentWithClientResponseSchema)
+          ),
+          500: createErrorResponseSchema(),
         },
       },
     },

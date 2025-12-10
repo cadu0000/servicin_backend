@@ -2,6 +2,10 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { signupUserSchema, LoginUserDTO } from "../../schemas/auth.schema";
 import { authController } from "../../container";
+import {
+  createApiResponseSchema,
+  createErrorResponseSchema,
+} from "../../utils/response";
 
 export async function authRoutes(server: FastifyInstance) {
   server.post(
@@ -13,9 +17,13 @@ export async function authRoutes(server: FastifyInstance) {
         tags: ["Authentication"],
         body: signupUserSchema,
         response: {
-          201: z.object({
-            token: z.string().describe("JWT token for authentication"),
-          }),
+          201: createApiResponseSchema(
+            z.object({
+              token: z.string().describe("JWT token for authentication"),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -31,9 +39,13 @@ export async function authRoutes(server: FastifyInstance) {
         tags: ["Authentication"],
         body: LoginUserDTO,
         response: {
-          200: z.object({
-            token: z.string().describe("JWT token for authentication"),
-          }),
+          200: createApiResponseSchema(
+            z.object({
+              token: z.string().describe("JWT token for authentication"),
+            })
+          ),
+          401: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -50,9 +62,7 @@ export async function authRoutes(server: FastifyInstance) {
           "Endpoint to logout a user and clear the authentication cookie",
         tags: ["Authentication"],
         response: {
-          200: z.object({
-            message: z.string(),
-          }),
+          200: createApiResponseSchema(z.null()),
         },
       },
     },
@@ -68,53 +78,57 @@ export async function authRoutes(server: FastifyInstance) {
         description: "Endpoint to get the authenticated user's information",
         tags: ["Authentication"],
         response: {
-          200: z.object({
-            id: z.string().uuid(),
-            email: z.string().email(),
-            userType: z.enum(["INDIVIDUAL", "COMPANY"]),
-            photoUrl: z.string().nullable(),
-            createdAt: z.date(),
-            address: z.object({
+          200: createApiResponseSchema(
+            z.object({
               id: z.string().uuid(),
-              country: z.object({
-                name: z.string(),
-              }),
-              state: z.object({
-                name: z.string(),
-              }),
-              city: z.object({
-                name: z.string(),
-              }),
-              neighborhood: z.string(),
-              street: z.string(),
-              zipCode: z.string(),
-              number: z.string().nullable(),
-            }),
-            contacts: z.array(
-              z.object({
+              email: z.string().email(),
+              userType: z.enum(["INDIVIDUAL", "COMPANY"]),
+              photoUrl: z.string().nullable(),
+              createdAt: z.date(),
+              address: z.object({
                 id: z.string().uuid(),
-                type: z.enum(["EMAIL", "PHONE"]),
-                value: z.string(),
-              })
-            ),
-            individual: z
-              .object({
-                fullName: z.string(),
-                cpf: z.string(),
-                birthDate: z.date().nullable(),
-              })
-              .nullable(),
-            company: z
-              .object({
-                corporateName: z.string(),
-                cnpj: z.string(),
-                tradeName: z.string().nullable(),
-              })
-              .nullable(),
-            role: z
-              .enum(["PROVIDER", "CUSTOMER"])
-              .describe("The role of the user"),
-          }),
+                country: z.object({
+                  name: z.string(),
+                }),
+                state: z.object({
+                  name: z.string(),
+                }),
+                city: z.object({
+                  name: z.string(),
+                }),
+                neighborhood: z.string(),
+                street: z.string(),
+                zipCode: z.string(),
+                number: z.string().nullable(),
+              }),
+              contacts: z.array(
+                z.object({
+                  id: z.string().uuid(),
+                  type: z.enum(["EMAIL", "PHONE"]),
+                  value: z.string(),
+                })
+              ),
+              individual: z
+                .object({
+                  fullName: z.string(),
+                  cpf: z.string(),
+                  birthDate: z.date().nullable(),
+                })
+                .nullable(),
+              company: z
+                .object({
+                  corporateName: z.string(),
+                  cnpj: z.string(),
+                  tradeName: z.string().nullable(),
+                })
+                .nullable(),
+              role: z
+                .enum(["PROVIDER", "CUSTOMER"])
+                .describe("The role of the user"),
+            })
+          ),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -131,9 +145,9 @@ export async function authRoutes(server: FastifyInstance) {
           "Endpoint to delete the authenticated user's account. This performs a soft delete and cancels future appointments if the user is a service provider.",
         tags: ["Authentication"],
         response: {
-          200: z.object({
-            message: z.string(),
-          }),
+          200: createApiResponseSchema(z.null()),
+          400: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },

@@ -469,12 +469,6 @@ export class AppointmentService {
       }
     }
 
-    if (appointment.status !== AppointmentStatus.COMPLETED) {
-      throw new Error(
-        "O pagamento só pode ser confirmado após o serviço ser marcado como completo."
-      );
-    }
-
     try {
       const updatedAppointment =
         await this.appointmentRepository.confirmPayment(appointmentId);

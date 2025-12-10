@@ -5,6 +5,10 @@ import {
   createCategorySchema,
 } from "../../schemas/category.schema";
 import { categoryController } from "../../container";
+import {
+  createApiResponseSchema,
+  createErrorResponseSchema,
+} from "../../utils/response";
 
 export async function categoryRoutes(server: FastifyInstance) {
   server.get(
@@ -15,9 +19,8 @@ export async function categoryRoutes(server: FastifyInstance) {
         description: "Endpoint to fetch all available service categories",
         tags: ["Categories"],
         response: {
-          200: z
-            .array(categorySchema)
-            .describe("List of all registered categories"),
+          200: createApiResponseSchema(z.array(categorySchema)),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -38,10 +41,9 @@ export async function categoryRoutes(server: FastifyInstance) {
             .describe("Unique identifier for the category. Example: 1"),
         }),
         response: {
-          200: categorySchema,
-          404: z.object({
-            message: z.string().describe("Error message"),
-          }),
+          200: createApiResponseSchema(categorySchema),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -59,22 +61,10 @@ export async function categoryRoutes(server: FastifyInstance) {
         tags: ["Categories"],
         body: createCategorySchema,
         response: {
-          201: categorySchema,
-          403: z.object({
-            statusCode: z.number(),
-            error: z.string(),
-            message: z.string(),
-          }),
-          409: z.object({
-            statusCode: z.number(),
-            error: z.string(),
-            message: z.string(),
-          }),
-          500: z.object({
-            statusCode: z.number(),
-            error: z.string(),
-            message: z.string(),
-          }),
+          201: createApiResponseSchema(categorySchema),
+          403: createErrorResponseSchema(),
+          409: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
