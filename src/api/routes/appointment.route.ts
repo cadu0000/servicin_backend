@@ -9,6 +9,7 @@ import {
   CancelAppointmentDTO,
   appointmentResponseSchema,
   appointmentWithClientResponseSchema,
+  appointmentDetailResponseSchema,
 } from "../../schemas/appointment.shema";
 import { z } from "zod";
 import { appointmentController } from "../../container/index";
@@ -36,6 +37,10 @@ type CompleteServiceRouteRequest = {
 };
 
 type ConfirmPaymentRouteRequest = {
+  Params: { appointmentId: string };
+};
+
+type GetAppointmentDetailRequest = {
   Params: { appointmentId: string };
 };
 
@@ -201,6 +206,30 @@ export async function appointmentRoutes(server: FastifyInstance) {
     },
     async (request, reply) =>
       appointmentController.confirmPayment(request, reply)
+  );
+
+  server.get<GetAppointmentDetailRequest>(
+    "/:appointmentId",
+    {
+      preHandler: [server.authenticate],
+      schema: {
+        summary: "Find appointment by id",
+        description:
+          "Find appointment by id with detail. Requires authentication and ownership (client or provider).",
+        tags: ["Appointment"],
+        params: z.object({
+          appointmentId: z.string().uuid(),
+        }),
+        response: {
+          200: createApiResponseSchema(appointmentDetailResponseSchema),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
+        },
+      },
+    },
+    async (request, reply) =>
+      appointmentController.findById(request, reply)
   );
 
   server.get(

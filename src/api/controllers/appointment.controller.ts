@@ -34,6 +34,10 @@ type CompleteServiceRequest = FastifyRequest<{
 type ConfirmPaymentRequest = FastifyRequest<{
   Params: { appointmentId: string };
 }>;
+
+type GetAppointmentDetailRequest = FastifyRequest<{
+  Params: { appointmentId: string };
+}>;
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
 
@@ -64,7 +68,11 @@ export class AppointmentController {
       }
 
       console.error("[API] Internal Error during appointment creation:", error);
-      return sendError(res, "Falha interna ao processar a solicitação de agendamento.", 500);
+      return sendError(
+        res,
+        "Falha interna ao processar a solicitação de agendamento.",
+        500
+      );
     }
   }
 
@@ -82,7 +90,11 @@ export class AppointmentController {
           userId
         );
 
-      return sendSuccess(res, updatedAppointment, "Status do agendamento atualizado com sucesso");
+      return sendSuccess(
+        res,
+        updatedAppointment,
+        "Status do agendamento atualizado com sucesso"
+      );
     } catch (error) {
       console.error("Erro ao atualizar status do agendamento:", error);
 
@@ -103,7 +115,11 @@ export class AppointmentController {
         }
       }
 
-      return sendError(res, "Erro interno do servidor ao processar a atualização.", 500);
+      return sendError(
+        res,
+        "Erro interno do servidor ao processar a atualização.",
+        500
+      );
     }
   }
 
@@ -121,7 +137,11 @@ export class AppointmentController {
           cancelDTO.reason
         );
 
-      return sendSuccess(res, canceledAppointment, "Agendamento cancelado com sucesso");
+      return sendSuccess(
+        res,
+        canceledAppointment,
+        "Agendamento cancelado com sucesso"
+      );
     } catch (error) {
       console.error("Erro ao cancelar agendamento:", error);
 
@@ -142,7 +162,11 @@ export class AppointmentController {
         }
       }
 
-      return sendError(res, "Erro interno do servidor ao processar o cancelamento.", 500);
+      return sendError(
+        res,
+        "Erro interno do servidor ao processar o cancelamento.",
+        500
+      );
     }
   }
 
@@ -154,7 +178,11 @@ export class AppointmentController {
       const completedAppointment =
         await this.appointmentService.completeService(appointmentId, userId);
 
-      return sendSuccess(res, completedAppointment, "Serviço concluído com sucesso");
+      return sendSuccess(
+        res,
+        completedAppointment,
+        "Serviço concluído com sucesso"
+      );
     } catch (error) {
       console.error("Erro ao completar serviço:", error);
 
@@ -178,7 +206,11 @@ export class AppointmentController {
         }
       }
 
-      return sendError(res, "Erro interno do servidor ao processar a finalização do serviço.", 500);
+      return sendError(
+        res,
+        "Erro interno do servidor ao processar a finalização do serviço.",
+        500
+      );
     }
   }
 
@@ -192,7 +224,11 @@ export class AppointmentController {
         userId
       );
 
-      return sendSuccess(res, confirmedPayment, "Pagamento confirmado com sucesso");
+      return sendSuccess(
+        res,
+        confirmedPayment,
+        "Pagamento confirmado com sucesso"
+      );
     } catch (error) {
       console.error("Erro ao confirmar pagamento:", error);
 
@@ -219,7 +255,46 @@ export class AppointmentController {
         }
       }
 
-      return sendError(res, "Erro interno do servidor ao processar a confirmação do pagamento.", 500);
+      return sendError(
+        res,
+        "Erro interno do servidor ao processar a confirmação do pagamento.",
+        500
+      );
+    }
+  }
+
+  async findById(req: GetAppointmentDetailRequest, res: FastifyReply) {
+    const { appointmentId } = req.params;
+    const { sub: userId } = req.user as UserPayload;
+
+    try {
+      const appointment = await this.appointmentService.getAppointmentDetails(
+        appointmentId,
+        userId
+      );
+
+      return sendSuccess(res, appointment);
+    } catch (error) {
+      console.error("Erro ao buscar detalhes do agendamento:", error);
+
+      if (error instanceof Error) {
+        if (
+          error.message.includes("não encontrado") ||
+          error.message.includes("não existe")
+        ) {
+          return sendError(res, error.message, 404);
+        }
+
+        if (error.message.includes("permissão")) {
+          return sendError(res, error.message, 403);
+        }
+      }
+
+      return sendError(
+        res,
+        "Erro interno do servidor ao buscar detalhes do agendamento.",
+        500
+      );
     }
   }
 
@@ -235,7 +310,11 @@ export class AppointmentController {
     } catch (error) {
       console.error("Erro ao buscar agendamentos do cliente:", error);
 
-      return sendError(res, "Erro interno do servidor ao buscar agendamentos.", 500);
+      return sendError(
+        res,
+        "Erro interno do servidor ao buscar agendamentos.",
+        500
+      );
     }
   }
 
@@ -250,7 +329,11 @@ export class AppointmentController {
     } catch (error) {
       console.error("Erro ao buscar agendamentos recebidos:", error);
 
-      return sendError(res, "Erro interno do servidor ao buscar agendamentos.", 500);
+      return sendError(
+        res,
+        "Erro interno do servidor ao buscar agendamentos.",
+        500
+      );
     }
   }
 }

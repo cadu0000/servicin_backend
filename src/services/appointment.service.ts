@@ -498,6 +498,27 @@ export class AppointmentService {
     }
   }
 
+  async getAppointmentDetails(appointmentId: string, userId: string) {
+    const appointment = await this.appointmentRepository.findDetailById(
+      appointmentId
+    );
+
+    if (!appointment) {
+      throw new Error("Agendamento não encontrado.");
+    }
+
+    const isClient = appointment.clientId === userId;
+    const isProvider = appointment.service.provider.userId === userId;
+
+    if (!isClient && !isProvider) {
+      throw new Error("Você não tem permissão para acessar este agendamento.");
+    }
+
+    const { clientId, ...appointmentData } = appointment;
+
+    return appointmentData;
+  }
+
   async getClientAppointments(clientId: string) {
     return await this.appointmentRepository.findByClientId(clientId);
   }
