@@ -40,11 +40,9 @@ export class ReviewService {
       );
     }
 
-    const existingReview =
-      await this.reviewRepository.findReviewByAppointmentAndClient(
-        appointmentId,
-        clientId
-      );
+    const existingReview = await this.reviewRepository.findReviewByAppointment(
+      appointmentId
+    );
 
     if (existingReview) {
       throw new Error("Este agendamento já foi avaliado.");
@@ -58,6 +56,7 @@ export class ReviewService {
     }
 
     const review = await this.reviewRepository.create({
+      appointmentId,
       serviceId,
       clientId,
       rating,
@@ -71,6 +70,9 @@ export class ReviewService {
       service.id
     );
 
-    return review;
+    return {
+      ...review,
+      rating: Number(review.rating),
+    };
   }
 }

@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { NotificationService } from "../../services/notification.service";
 import { markAsReadSchema } from "../../schemas/notification.schema";
 import type { UserPayload } from "../../@types/fastify";
+import { sendSuccess, sendError } from "../../utils/response";
 
 type MarkAsReadRequest = FastifyRequest<{
   Params: {
@@ -18,23 +19,15 @@ export class NotificationController {
     try {
       const notifications = await this.notificationService.findByUserId(userId);
 
-      return res.status(200).send({
-        notifications,
-      });
+      return sendSuccess(res, notifications);
     } catch (error) {
       if (error instanceof Error) {
         console.error(`[API] Error fetching notifications: ${error.message}`);
-        return res.status(500).send({
-          message: "Falha ao buscar notificações.",
-          code: "INTERNAL_SERVER_ERROR",
-        });
+        return sendError(res, "Falha ao buscar notificações.", 500);
       }
 
       console.error("[API] Internal Error during notifications fetch:", error);
-      return res.status(500).send({
-        message: "Falha interna ao processar a requisição.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+      return sendError(res, "Falha interna ao processar a requisição.", 500);
     }
   }
 
@@ -46,28 +39,20 @@ export class NotificationController {
         userId
       );
 
-      return res.status(200).send({
-        notifications,
-      });
+      return sendSuccess(res, notifications);
     } catch (error) {
       if (error instanceof Error) {
         console.error(
           `[API] Error fetching unread notifications: ${error.message}`
         );
-        return res.status(500).send({
-          message: "Falha ao buscar notificações não lidas.",
-          code: "INTERNAL_SERVER_ERROR",
-        });
+        return sendError(res, "Falha ao buscar notificações não lidas.", 500);
       }
 
       console.error(
         "[API] Internal Error during unread notifications fetch:",
         error
       );
-      return res.status(500).send({
-        message: "Falha interna ao processar a requisição.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+      return sendError(res, "Falha interna ao processar a requisição.", 500);
     }
   }
 
@@ -81,36 +66,22 @@ export class NotificationController {
         userId
       );
 
-      return res.status(200).send({
-        notification,
-      });
+      return sendSuccess(res, notification);
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes("não encontrada")) {
-          return res.status(404).send({
-            message: error.message,
-            code: "NOT_FOUND",
-          });
+          return sendError(res, error.message, 404);
         }
 
         if (error.message.includes("permissão")) {
-          return res.status(403).send({
-            message: error.message,
-            code: "FORBIDDEN",
-          });
+          return sendError(res, error.message, 403);
         }
 
-        return res.status(400).send({
-          message: error.message,
-          code: "INVALID_INPUT",
-        });
+        return sendError(res, error.message, 400);
       }
 
       console.error("[API] Internal Error during notification fetch:", error);
-      return res.status(500).send({
-        message: "Falha interna ao processar a requisição.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+      return sendError(res, "Falha interna ao processar a requisição.", 500);
     }
   }
 
@@ -125,34 +96,22 @@ export class NotificationController {
         userId
       );
 
-      return res.status(200).send(result);
+      return sendSuccess(res, result, "Notificação marcada como lida");
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes("não encontrada")) {
-          return res.status(404).send({
-            message: error.message,
-            code: "NOT_FOUND",
-          });
+          return sendError(res, error.message, 404);
         }
 
         if (error.message.includes("permissão")) {
-          return res.status(403).send({
-            message: error.message,
-            code: "FORBIDDEN",
-          });
+          return sendError(res, error.message, 403);
         }
 
-        return res.status(400).send({
-          message: error.message,
-          code: "INVALID_INPUT",
-        });
+        return sendError(res, error.message, 400);
       }
 
       console.error("[API] Internal Error during mark as read:", error);
-      return res.status(500).send({
-        message: "Falha interna ao processar a requisição.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+      return sendError(res, "Falha interna ao processar a requisição.", 500);
     }
   }
 
@@ -162,21 +121,15 @@ export class NotificationController {
     try {
       const result = await this.notificationService.markAllAsRead(userId);
 
-      return res.status(200).send(result);
+      return sendSuccess(res, result, "Todas as notificações foram marcadas como lidas");
     } catch (error) {
       if (error instanceof Error) {
         console.error(`[API] Error marking all as read: ${error.message}`);
-        return res.status(500).send({
-          message: "Falha ao marcar todas as notificações como lidas.",
-          code: "INTERNAL_SERVER_ERROR",
-        });
+        return sendError(res, "Falha ao marcar todas as notificações como lidas.", 500);
       }
 
       console.error("[API] Internal Error during mark all as read:", error);
-      return res.status(500).send({
-        message: "Falha interna ao processar a requisição.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+      return sendError(res, "Falha interna ao processar a requisição.", 500);
     }
   }
 }

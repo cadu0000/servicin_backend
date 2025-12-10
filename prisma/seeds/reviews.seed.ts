@@ -125,6 +125,7 @@ export async function seedReviews() {
         data: {
           serviceId: appointment.serviceId,
           clientId: appointment.clientId,
+          appointmentId: appointment.id,
           rating: reviewData.rating,
           comment: reviewData.comment,
         },

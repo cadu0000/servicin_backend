@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { notificationController } from "../../container/index";
+import { createApiResponseSchema, createErrorResponseSchema } from "../../utils/response";
 
 const notificationSchema = z.object({
   id: z.string().uuid(),
@@ -49,9 +50,10 @@ export async function notificationRoutes(server: FastifyInstance) {
           "Get all notifications for the authenticated user. Requires authentication.",
         tags: ["Notification"],
         response: {
-          200: z.object({
-            notifications: z.array(notificationSchema),
-          }),
+          200: createApiResponseSchema(
+            z.array(notificationSchema)
+          ),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -68,9 +70,10 @@ export async function notificationRoutes(server: FastifyInstance) {
           "Get all unread notifications for the authenticated user. Requires authentication.",
         tags: ["Notification"],
         response: {
-          200: z.object({
-            notifications: z.array(notificationSchema),
-          }),
+          200: createApiResponseSchema(
+            z.array(notificationSchema)
+          ),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -90,9 +93,11 @@ export async function notificationRoutes(server: FastifyInstance) {
           id: z.string().uuid(),
         }),
         response: {
-          200: z.object({
-            notification: notificationSchema,
-          }),
+          200: createApiResponseSchema(notificationSchema),
+          400: createErrorResponseSchema(),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -113,9 +118,13 @@ export async function notificationRoutes(server: FastifyInstance) {
           id: z.string().uuid(),
         }),
         response: {
-          200: z.object({
+          200: createApiResponseSchema(z.object({
             message: z.string(),
-          }),
+          })),
+          400: createErrorResponseSchema(),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -133,9 +142,13 @@ export async function notificationRoutes(server: FastifyInstance) {
           "Mark all notifications as read for the authenticated user. Requires authentication.",
         tags: ["Notification"],
         response: {
-          200: z.object({
+          200: createApiResponseSchema(z.object({
             message: z.string(),
-          }),
+          })),
+          400: createErrorResponseSchema(),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },

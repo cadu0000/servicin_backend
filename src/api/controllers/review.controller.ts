@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { ReviewService } from "../../services/review.service";
 import { createReviewSchema } from "../../schemas/review.schema";
 import type { UserPayload } from "../../@types/fastify";
+import { sendSuccess, sendError } from "../../utils/response";
 
 type CreateReviewRequest = FastifyRequest<{
   Body: {
@@ -22,10 +23,7 @@ export class ReviewController {
       const reviewDTO = createReviewSchema.parse(body);
       const review = await this.reviewService.create(reviewDTO, clientId);
 
-      return res.status(201).send({
-        message: "Avaliação criada com sucesso.",
-        review,
-      });
+      return sendSuccess(res, review, "Avaliação criada com sucesso", 201);
     } catch (error) {
       if (error instanceof Error) {
         console.warn(`[API] Invalid Review Input: ${error.message}`);
@@ -34,43 +32,28 @@ export class ReviewController {
           error.message.includes("não encontrado") ||
           error.message.includes("não foi encontrado")
         ) {
-          return res.status(404).send({
-            message: error.message,
-            code: "NOT_FOUND",
-          });
+          return sendError(res, error.message, 404);
         }
 
         if (
           error.message.includes("permissão") ||
           error.message.includes("não tem permissão")
         ) {
-          return res.status(403).send({
-            message: error.message,
-            code: "FORBIDDEN",
-          });
+          return sendError(res, error.message, 403);
         }
 
         if (
           error.message.includes("já foi avaliado") ||
           error.message.includes("concluídos e pagos")
         ) {
-          return res.status(400).send({
-            message: error.message,
-            code: "INVALID_INPUT",
-          });
+          return sendError(res, error.message, 400);
         }
 
-        return res.status(400).send({
-          message: error.message,
-          code: "INVALID_INPUT",
-        });
+        return sendError(res, error.message, 400);
       }
 
       console.error("[API] Internal Error during review creation:", error);
-      return res.status(500).send({
-        message: "Falha interna ao processar a avaliação.",
-        code: "INTERNAL_SERVER_ERROR",
-      });
+      return sendError(res, "Falha interna ao processar a avaliação.", 500);
     }
   }
 }

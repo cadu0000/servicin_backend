@@ -1,36 +1,32 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { LocationService } from "../../services/location.service";
+import { sendSuccess, sendError } from "../../utils/response";
 
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
   async getStates(reply: FastifyReply) {
-    const states = await this.locationService.getStates();
-    return reply.code(200).send(states);
+    try {
+      const states = await this.locationService.getStates();
+      return sendSuccess(reply, states);
+    } catch (error) {
+      return sendError(reply, "Erro ao buscar estados", 500);
+    }
   }
 
   async getCitiesByState(request: FastifyRequest, reply: FastifyReply) {
-    const { stateId } = request.params as { stateId: string };
-
     try {
+      const { stateId } = request.params as { stateId: string };
       const cities = await this.locationService.getCitiesByState(stateId);
-      return reply.code(200).send(cities);
+      return sendSuccess(reply, cities);
     } catch (error) {
       const message = (error as Error).message;
 
       if (message === "404") {
-        return reply.code(404).send({
-          statusCode: 404,
-          error: "Not Found",
-          message: "Estado não encontrado",
-        });
+        return sendError(reply, "Estado não encontrado", 404);
       }
 
-      return reply.code(500).send({
-        statusCode: 500,
-        error: "Internal Server Error",
-        message: "Erro inesperado.",
-      });
+      return sendError(reply, "Erro inesperado", 500);
     }
   }
 }

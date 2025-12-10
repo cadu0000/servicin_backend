@@ -213,16 +213,18 @@ model ServicePhoto {
 }
 
 model Review {
-  id        String   @id @default(uuid()) @db.Uuid
-  serviceId String   @map("service_id") @db.Uuid
-  clientId  String   @map("client_id") @db.Uuid
-  rating    Decimal  @db.Decimal(2, 1)
-  comment   String?  @db.Text
-  createdAt DateTime @default(now()) @map("created_at")
+  id          String      @id @default(uuid()) @db.Uuid
+  serviceId   String      @map("service_id") @db.Uuid
+  clientId    String      @map("client_id") @db.Uuid
+  rating      Decimal     @db.Decimal(2, 1)
+  comment     String?     @db.Text
+  createdAt   DateTime    @default(now()) @map("created_at")
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
 
   service       Service        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   client        User           @relation("ClientReviews", fields: [clientId], references: [id], onDelete: Cascade)
   notifications Notification[]
+  appointmentId String         @db.Uuid
 
   @@map("review")
 }
@@ -258,6 +260,7 @@ model Appointment {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   notifications Notification[]
+  reviews       Review[]
 
   @@map("appointments")
 }

@@ -5,6 +5,10 @@ import {
   updateServiceProviderSchema,
 } from "../../schemas/service-provider.schema";
 import { serviceProviderController } from "../../container";
+import {
+  createApiResponseSchema,
+  createErrorResponseSchema,
+} from "../../utils/response";
 
 export async function serviceProviderRoutes(server: FastifyInstance) {
   server.get(
@@ -18,8 +22,8 @@ export async function serviceProviderRoutes(server: FastifyInstance) {
           id: z.string().uuid().describe("ID of the service provider user"),
         }),
         response: {
-          200: z
-            .object({
+          200: createApiResponseSchema(
+            z.object({
               userId: z
                 .string()
                 .uuid()
@@ -135,7 +139,10 @@ export async function serviceProviderRoutes(server: FastifyInstance) {
                 )
                 .describe("List of services provided"),
             })
-            .describe("Service provider details"),
+          ),
+          404: createErrorResponseSchema(),
+          400: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -151,7 +158,9 @@ export async function serviceProviderRoutes(server: FastifyInstance) {
         tags: ["Service Provider"],
         body: createServiceProviderSchema,
         response: {
-          201: z.null().describe("Service provider created successfully"),
+          201: createApiResponseSchema(z.null()),
+          400: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -174,7 +183,9 @@ export async function serviceProviderRoutes(server: FastifyInstance) {
           "Service provider update payload. All fields are optional."
         ),
         response: {
-          200: z.null().describe("Service provider updated successfully"),
+          200: createApiResponseSchema(z.null()),
+          400: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },

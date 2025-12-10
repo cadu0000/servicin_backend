@@ -9,9 +9,14 @@ import {
   CancelAppointmentDTO,
   appointmentResponseSchema,
   appointmentWithClientResponseSchema,
+  appointmentDetailResponseSchema,
 } from "../../schemas/appointment.shema";
 import { z } from "zod";
 import { appointmentController } from "../../container/index";
+import {
+  createApiResponseSchema,
+  createErrorResponseSchema,
+} from "../../utils/response";
 
 type CreateAppointmentRouteRequest = {
   Body: CreateAppointmentSchemaDTO;
@@ -38,6 +43,10 @@ type ConfirmPaymentRouteRequest = {
   Params: { appointmentId: string };
 };
 
+type GetAppointmentDetailRequest = {
+  Params: { appointmentId: string };
+};
+
 export async function appointmentRoutes(server: FastifyInstance) {
   server.post<CreateAppointmentRouteRequest>(
     "/",
@@ -50,11 +59,14 @@ export async function appointmentRoutes(server: FastifyInstance) {
         tags: ["Appointment"],
         body: createAppointmentSchema,
         response: {
-          201: z.object({
-            message: z.string(),
-            appointmentId: z.string().uuid(),
-            status: z.string(),
-          }),
+          201: createApiResponseSchema(
+            z.object({
+              appointmentId: z.string().uuid(),
+              status: z.string(),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -94,10 +106,15 @@ export async function appointmentRoutes(server: FastifyInstance) {
             }
           ),
         response: {
-          200: z.object({
-            id: updateAppointmentStatusRequestBaseSchema.shape.appointmentId,
-            status: updateAppointmentStatusRequestBaseSchema.shape.status,
-          }),
+          200: createApiResponseSchema(
+            z.object({
+              id: updateAppointmentStatusRequestBaseSchema.shape.appointmentId,
+              status: updateAppointmentStatusRequestBaseSchema.shape.status,
+            })
+          ),
+          400: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -118,10 +135,16 @@ export async function appointmentRoutes(server: FastifyInstance) {
         }),
         body: cancelAppointmentSchema,
         response: {
-          200: z.object({
-            id: z.string().uuid(),
-            status: z.nativeEnum(AppointmentStatus),
-          }),
+          200: createApiResponseSchema(
+            z.object({
+              id: z.string().uuid(),
+              status: z.nativeEnum(AppointmentStatus),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -141,10 +164,16 @@ export async function appointmentRoutes(server: FastifyInstance) {
           appointmentId: z.string().uuid(),
         }),
         response: {
-          200: z.object({
-            id: z.string().uuid(),
-            status: z.nativeEnum(AppointmentStatus),
-          }),
+          200: createApiResponseSchema(
+            z.object({
+              id: z.string().uuid(),
+              status: z.nativeEnum(AppointmentStatus),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -165,15 +194,44 @@ export async function appointmentRoutes(server: FastifyInstance) {
           appointmentId: z.string().uuid(),
         }),
         response: {
-          200: z.object({
-            id: z.string().uuid(),
-            status: z.nativeEnum(AppointmentStatus),
-          }),
+          200: createApiResponseSchema(
+            z.object({
+              id: z.string().uuid(),
+              status: z.nativeEnum(AppointmentStatus),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
     async (request, reply) =>
       appointmentController.confirmPayment(request, reply)
+  );
+
+  server.get<GetAppointmentDetailRequest>(
+    "/:appointmentId",
+    {
+      preHandler: [server.authenticate],
+      schema: {
+        summary: "Find appointment by id",
+        description:
+          "Find appointment by id with detail. Requires authentication and ownership (client or provider).",
+        tags: ["Appointment"],
+        params: z.object({
+          appointmentId: z.string().uuid(),
+        }),
+        response: {
+          200: createApiResponseSchema(appointmentDetailResponseSchema),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
+        },
+      },
+    },
+    async (request, reply) => appointmentController.findById(request, reply)
   );
 
   server.get(
@@ -186,9 +244,10 @@ export async function appointmentRoutes(server: FastifyInstance) {
           "Get all appointments made by the authenticated user as a client. Requires authentication.",
         tags: ["Appointment"],
         response: {
-          200: z.object({
-            appointments: z.array(appointmentResponseSchema),
-          }),
+          200: createApiResponseSchema(
+            z.array(appointmentDetailResponseSchema)
+          ),
+          500: createErrorResponseSchema(),
         },
       },
     },
@@ -206,9 +265,10 @@ export async function appointmentRoutes(server: FastifyInstance) {
           "Get all appointments received by the authenticated user as a service provider. Requires authentication.",
         tags: ["Appointment"],
         response: {
-          200: z.object({
-            appointments: z.array(appointmentWithClientResponseSchema),
-          }),
+          200: createApiResponseSchema(
+            z.array(appointmentDetailResponseSchema)
+          ),
+          500: createErrorResponseSchema(),
         },
       },
     },

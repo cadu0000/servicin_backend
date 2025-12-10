@@ -469,12 +469,6 @@ export class AppointmentService {
       }
     }
 
-    if (appointment.status !== AppointmentStatus.COMPLETED) {
-      throw new Error(
-        "O pagamento só pode ser confirmado após o serviço ser marcado como completo."
-      );
-    }
-
     try {
       const updatedAppointment =
         await this.appointmentRepository.confirmPayment(appointmentId);
@@ -502,6 +496,27 @@ export class AppointmentService {
 
       throw error;
     }
+  }
+
+  async getAppointmentDetails(appointmentId: string, userId: string) {
+    const appointment = await this.appointmentRepository.findDetailById(
+      appointmentId
+    );
+
+    if (!appointment) {
+      throw new Error("Agendamento não encontrado.");
+    }
+
+    const isClient = appointment.clientId === userId;
+    const isProvider = appointment.service.provider.userId === userId;
+
+    if (!isClient && !isProvider) {
+      throw new Error("Você não tem permissão para acessar este agendamento.");
+    }
+
+    const { clientId, ...appointmentData } = appointment;
+
+    return appointmentData;
   }
 
   async getClientAppointments(clientId: string) {

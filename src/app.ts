@@ -18,12 +18,14 @@ import { appointmentRoutes } from "./api/routes/appointment.route";
 import { locationRoutes } from "./api/routes/location.route";
 import { reviewRoutes } from "./api/routes/review.route";
 import { notificationRoutes } from "./api/routes/notification.route";
+import { errorHandler } from "./lib/error-handler";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const server = fastify();
 
   server.setValidatorCompiler(validatorCompiler);
   server.setSerializerCompiler(serializerCompiler);
+  server.setErrorHandler(errorHandler);
 
   server.register(fastifyCors, {
     origin: (origin, cb) => {

@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { createReviewSchema } from "../../schemas/review.schema";
 import { z } from "zod";
 import { reviewController } from "../../container/index";
+import { createApiResponseSchema, createErrorResponseSchema } from "../../utils/response";
 
 type CreateReviewRouteRequest = {
   Body: {
@@ -23,17 +24,21 @@ export async function reviewRoutes(server: FastifyInstance) {
         tags: ["Review"],
         body: createReviewSchema,
         response: {
-          201: z.object({
-            message: z.string(),
-            review: z.object({
+          201: createApiResponseSchema(
+            z.object({
               id: z.string().uuid(),
               serviceId: z.string().uuid(),
               clientId: z.string().uuid(),
-              rating: z.number(),
+              appointmentId: z.string().uuid(),
+              rating: z.coerce.number(),
               comment: z.string().nullable(),
-              createdAt: z.date(),
-            }),
-          }),
+              createdAt: z.coerce.date(),
+            })
+          ),
+          400: createErrorResponseSchema(),
+          403: createErrorResponseSchema(),
+          404: createErrorResponseSchema(),
+          500: createErrorResponseSchema(),
         },
       },
     },
