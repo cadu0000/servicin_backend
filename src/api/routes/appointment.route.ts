@@ -13,7 +13,10 @@ import {
 } from "../../schemas/appointment.shema";
 import { z } from "zod";
 import { appointmentController } from "../../container/index";
-import { createApiResponseSchema, createErrorResponseSchema } from "../../utils/response";
+import {
+  createApiResponseSchema,
+  createErrorResponseSchema,
+} from "../../utils/response";
 
 type CreateAppointmentRouteRequest = {
   Body: CreateAppointmentSchemaDTO;
@@ -228,8 +231,7 @@ export async function appointmentRoutes(server: FastifyInstance) {
         },
       },
     },
-    async (request, reply) =>
-      appointmentController.findById(request, reply)
+    async (request, reply) => appointmentController.findById(request, reply)
   );
 
   server.get(
@@ -243,7 +245,7 @@ export async function appointmentRoutes(server: FastifyInstance) {
         tags: ["Appointment"],
         response: {
           200: createApiResponseSchema(
-            z.array(appointmentResponseSchema)
+            z.array(appointmentDetailResponseSchema)
           ),
           500: createErrorResponseSchema(),
         },
@@ -264,7 +266,7 @@ export async function appointmentRoutes(server: FastifyInstance) {
         tags: ["Appointment"],
         response: {
           200: createApiResponseSchema(
-            z.array(appointmentWithClientResponseSchema)
+            z.array(appointmentDetailResponseSchema)
           ),
           500: createErrorResponseSchema(),
         },

@@ -322,6 +322,29 @@ export class AppointmentRepository {
         cancellationReason: true,
         createdAt: true,
         updatedAt: true,
+        client: {
+          select: {
+            id: true,
+            photoUrl: true,
+            individual: {
+              select: {
+                fullName: true,
+              },
+            },
+            company: {
+              select: {
+                tradeName: true,
+                corporateName: true,
+              },
+            },
+            contacts: {
+              select: {
+                type: true,
+                value: true,
+              },
+            },
+          },
+        },
         service: {
           select: {
             id: true,
@@ -440,6 +463,34 @@ export class AppointmentRepository {
               select: {
                 id: true,
                 photoUrl: true,
+              },
+            },
+            provider: {
+              select: {
+                userId: true,
+                averageRating: true,
+                user: {
+                  select: {
+                    photoUrl: true,
+                    individual: {
+                      select: {
+                        fullName: true,
+                      },
+                    },
+                    company: {
+                      select: {
+                        tradeName: true,
+                        corporateName: true,
+                      },
+                    },
+                    contacts: {
+                      select: {
+                        type: true,
+                        value: true,
+                      },
+                    },
+                  },
+                },
               },
             },
             category: {
