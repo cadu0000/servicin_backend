@@ -65,6 +65,15 @@ export const createServiceSchema = z.object({
     .min(0)
     .describe("Price of the service in BRL")
     .default(99.99),
+  photos: z
+    .array(
+      z.object({
+        photoUrl: z.string().url("URL da foto inválida"),
+      })
+    )
+    .max(5, "Máximo de 5 fotos permitidas")
+    .optional()
+    .describe("Array of photo objects for the service"),
   availability: z
     .array(
       z

@@ -349,6 +349,7 @@ export class ServiceRepository {
       categoryId,
       addressId,
       availability,
+      photos,
     } = createServiceSchemaDTO;
 
     const service = await prisma.service.create({
@@ -364,6 +365,18 @@ export class ServiceRepository {
             data: availability,
           },
         },
+        photos:
+          photos && photos.length > 0
+            ? {
+                createMany: {
+                  data: photos,
+                },
+              }
+            : undefined,
+      },
+      include: {
+        photos: true,
+        availabilities: true,
       },
     });
 
