@@ -97,7 +97,7 @@ export const createServiceSchema = z.object({
               /^([0-1]\d|2[0-3]):([0-5]\d)$/,
               "Formato de horário de início do intervalo inválido (HH:MM)"
             )
-            .nullable()
+            .nullish()
             .describe("Break start time in HH:MM format"),
           breakEnd: z
             .string()
@@ -105,7 +105,7 @@ export const createServiceSchema = z.object({
               /^([0-1]\d|2[0-3]):([0-5]\d)$/,
               "Formato de horário de término do intervalo inválido (HH:MM)"
             )
-            .nullable()
+            .nullish()
             .describe("Break end time in HH:MM format"),
           slotDuration: z
             .number()
