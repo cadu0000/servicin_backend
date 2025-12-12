@@ -232,7 +232,6 @@ export class AppointmentRepository {
       },
       data: {
         status: AppointmentStatus.COMPLETED,
-        paymentStatus: PaymentStatus.PENDING,
       },
       select: {
         id: true,
