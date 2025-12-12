@@ -119,6 +119,7 @@ export class ServiceProviderService {
         ? Number((serviceProvider as any).averageRating)
         : 0,
       showContactInfo: serviceProvider.showContactInfo,
+      autoAcceptAppointments: serviceProvider.autoAcceptAppointments,
       contacts: filteredContacts,
       services: servicesWithSlots,
     };
